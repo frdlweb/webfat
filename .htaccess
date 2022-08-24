@@ -1,0 +1,19 @@
+RewriteEngine On
+#RewriteBase /
+
+RedirectMatch 403 ^/?\.(?!well-known/acme-challenge/[\w-]{43}$)
+
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+RewriteRule ^public($|/) - [R=404]
+
+
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
+
+RewriteCond ./public/$1 !-f [OR]
+RewriteCond ./public/$1 !-d [OR]
+RewriteCond ./public/$1 !-l
+RewriteRule (?!^public/)^(.*)$ /public/$1 [L,NC]
+
+RewriteRule ^(.*)$ public/index.php [NC,L,QSA]

@@ -2593,30 +2593,47 @@ Content-Type: application/x-httpd-php
 
 use Webfan\Webfat\Console;
 
-
-   $defaultConfig = [	 	    
-          // 'app_path' => [
-          //     __DIR__ . '/app/Command',
-          //    '@minicli/command-help'
-          // ],   
-		'debug' => true 
-	];
-	
+ 
  try{
    $f = 	 $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
    if($f)$config = $this->_run_php_1($f);	
   if(!is_array($config) ){
-	$config=$defaultConfig;  
+	$config=[];  
   }else{	
-	  $config =(isset($config['FRDL_CLI'])) ? $config['FRDL_CLI'] : $defaultConfig;  
+        $config =(isset($config['FRDL_CLI'])) ? $config['FRDL_CLI'] : [];  
   }
  }catch(\Exception $e){
 		$config=$defaultConfig;  
- }	
+ }
 
+$config=[
+    array_merge($config,
+	'FRDL_CLI' => [
+              'PHP_BIN_PATH'=>(new \Webfan\Helper\PhpBinFinder())->find(),
+              // 'app_path' => [
+              //     __DIR__ . '/app/Command',
+              //   '@minicli/command-help'
+              // ],
+            'debug' => true,         
+    ]),
+  ];
+  
+  
+         $configfile =  __DIR__.\DIRECTORY_SEPARATOR
+				                     . '..'
+				                     .\DIRECTORY_SEPARATOR
+			                         .'runtime'.\DIRECTORY_SEPARATOR
+			                         .'config'.\DIRECTORY_SEPARATOR
+			                         .'console.php';
+									 
+	if(file_exists($configfile)){
+	   $config['FRDL_CLI'] =array_merge($config['FRDL_CLI'], require $configfile);
+	}			
 
- $Console = new Console($config);
- $Console($_SERVER['argv']);
+   $consoleConfig =$config['FRDL_CLI']; 
+   unset($consoleConfig['PHP_BIN_PATH']);
+   $Console = new Console($consoleConfig);
+   $Console($_SERVER['argv']);
   
 
 --3333EVGuDPPT--

@@ -2213,7 +2213,7 @@ Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.ph
 
 
 
-set_time_limit(min(180, intval(ini_get('max_execution_time')) + 180));
+set_time_limit(min(60, intval(ini_get('max_execution_time')) + 60));
 
 
 spl_autoload_register(array($this,'Autoload'), true, true);
@@ -2405,7 +2405,7 @@ Content-Length: 696
 	   ],
 	  'frontmatter' => [
 		'assets-url' => '/assets', 
-		'favicon-url' => '/favicon.ico', 
+		'favicon-url' => '/favicon.ico',  //ToDo: userland assets
 		'theme' => 'webfantized-standard-theme',
 	  ],
   ],
@@ -2453,8 +2453,6 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 \Webfan\Patches\Start\Timezone::defaults( );
 
-
- 
 	 
   require_once __DIR__.\DIRECTORY_SEPARATOR.'..'
 	  .\DIRECTORY_SEPARATOR.'core'
@@ -2465,7 +2463,13 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 	
  // require_once __DIR__.\DIRECTORY_SEPARATOR.'CMS.php';
 
-	
+if (\php_sapi_name() === 'cli') {
+	$cliFile =  $this->get_file($this->document, '$__FILE__/console.php', 'console.php');
+	 return  $this->_run_php_1( $cliFile  );
+}
+
+
+
 	
  if(is_dir(rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'])){
 	 
@@ -2581,5 +2585,39 @@ Content-Type: application/x-httpd-php
   'time' => 0,
   'version' => '0.0.0',
 ); ?>
+--3333EVGuDPPT
+Content-Disposition: "php" ; filename="$__FILE__/console.php" ; name="console.php"
+Content-Type: application/x-httpd-php
+
+<?php 
+
+use Webfan\Webfat\Console;
+
+
+   $defaultConfig = [	 	    
+          // 'app_path' => [
+          //     __DIR__ . '/app/Command',
+          //    '@minicli/command-help'
+          // ],   
+		'debug' => true 
+	];
+	
+ try{
+   $f = 	 $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
+   if($f)$config = $this->_run_php_1($f);	
+  if(!is_array($config) ){
+	$config=$defaultConfig;  
+  }else{	
+	  $config =(isset($config['FRDL_CLI'])) ? $config['FRDL_CLI'] : $defaultConfig;  
+  }
+ }catch(\Exception $e){
+		$config=$defaultConfig;  
+ }	
+
+
+ $Console = new Console($config);
+ $Console($_SERVER['argv']);
+  
+
 --3333EVGuDPPT--
 --hoHoBundary12344dh--

@@ -22,7 +22,7 @@ use Minicli\Output\Adapter\DefaultPrinterAdapter;
         'FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'=>	24 * 60 * 60, 	
    ],
   'FRDL_CLI' => [
-              'PHP_BIN_PATH'=>(new \Webfan\Helper\PhpBinFinder())->find(),
+             // 'PHP_BIN_PATH'=>(new \Webfan\Helper\PhpBinFinder())->find(),
               // 'app_path' => [
               //     __DIR__ . '/app/Command',
               //   '@minicli/command-help'
@@ -57,17 +57,19 @@ use Minicli\Output\Adapter\DefaultPrinterAdapter;
 	}
 	
   
-   if(\PHP_SAPI === 'cli'){   
-   
+   if(\PHP_SAPI === 'cli'){     
    
          autoload($config['FRDL_REMOTE_PSR4']);
 		 $args = $_SERVER['argv'];
          array_shift($args);
 		 
       $cliConfig = $config['FRDL_CLI'];
+	  if(!isset($cliConfig['PHP_BIN_PATH'])){
+	    $cliConfig['PHP_BIN_PATH'] = (new \Webfan\Helper\PhpBinFinder())->find();
+	  }
       $phpBinPath = $cliConfig['PHP_BIN_PATH'];
       unset($cliConfig['PHP_BIN_PATH']);
-		  $app = new App( $cliConfig );
+       $app = new App( $cliConfig );
 		    
           $scriptFile = __DIR__.\DIRECTORY_SEPARATOR.'webfat.php';
           $output = shell_exec(sprintf('%s %s %s',  

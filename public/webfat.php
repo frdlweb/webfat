@@ -2768,8 +2768,8 @@ use Webfan\Webfat\Console;
 		$config=$defaultConfig;  
  }
 
-$config=[
-    array_merge($config,
+$config=
+    array_merge($config,[
 	'FRDL_CLI' => [
               'PHP_BIN_PATH'=>(new \Webfan\Helper\PhpBinFinder())->find(),
               // 'app_path' => [
@@ -2777,8 +2777,8 @@ $config=[
               //   '@minicli/command-help'
               // ],
             'debug' => true,         
-    ]),
-  ];
+    ],
+  ]);
   
   
          $configfile =  __DIR__.\DIRECTORY_SEPARATOR

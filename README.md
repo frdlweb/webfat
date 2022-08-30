@@ -1,7 +1,8 @@
 # Webfat - Frdlweb CMS made easy!
-Webfat is build on top of the Frdlweb Framework.
+[Webfat](https://webf.at/) is build on top of the Frdlweb Framework, made by [Webfan Homepagesystem](https://webfan.de/index.html).
 
-**Its current status is ALPHA.**
+# **Its current status is ALPHA.**
+The code will change in future!
 
 # Multihost/Multisite Markdown Hub for Frdlweb CMS
 Place content files for `example.com` into `userdata/sites/example.com` as in the example code.
@@ -17,10 +18,11 @@ There is a *special* as part of webfat: [Inline Webmaker](https://github.com/frd
 * module
 * ...
 
-# Features Paradigma
+
+## Features Paradigma
 Webfat will provide some special specs. implementations.
 
-# Runtime compilation
+## Runtime compilation
 spec: [1.3.6.1.4.1.37553.8.1.8.1.575874](https://registry.frdl.de/?goto=oid%3A1.3.6.1.4.1.37553.8.1.8.1.575874)
 
 ID: [weid:1-8-1-CCCI-5](https://registry.frdl.de/?goto=weid%3A1-8-1-CCCI-5)
@@ -29,7 +31,7 @@ ID: [weid:1-8-1-CCCI-5](https://registry.frdl.de/?goto=weid%3A1-8-1-CCCI-5)
 
 Instead of installing a packaged version, we compile a composition of components on a per instance base. The installation may not be portable to another machine.
 
-# Frdlweb CTA Storage
+## Frdlweb CTA Storage
 spec: [1.3.6.1.4.1.37553.8.1.8.1.16606](https://registry.frdl.de/?goto=oid%3A1.3.6.1.4.1.37553.8.1.8.1.16606)
 
 ID: [weid:1-8-1-CTA-1](https://registry.frdl.de/?goto=weid%3A1-8-1-CTA-1)
@@ -39,7 +41,7 @@ Package: [frdl/cta](https://github.com/frdl/cta)
 Save data/files based on a content hash. Same data will only be saved once, saving disk space.
 
 # XHash
-##### - Hashing algo is based on the checksum and content size (2keys)
+###### - Hashing algo is based on the checksum and content size (2keys)
 spec: [1.3.6.1.4.1.37553.8.1.8.1.16606.1.56234465](https://registry.frdl.de/?goto=oid%3A1.3.6.1.4.1.37553.8.1.8.1.16606.1.56234465)
 
 ID: [weid:1-8-1-CTA-1-XHASH-3](https://registry.frdl.de/?goto=weid%3A1-8-1-CTA-1-XHASH-3)
@@ -48,7 +50,7 @@ Package: [frdl/cta](https://github.com/frdl/cta)
 
 To reduce the possibility of collisions we store the hash along with the content-size.
 
-##### - The CTA is payload is chunked by chunks of the same size
+###### - The CTA is payload is chunked by chunks of the same size
 spec: [1.3.6.1.4.1.37553.8.1.8.1.16606.1.27200801029](https://registry.frdl.de/?goto=oid%3A1.3.6.1.4.1.37553.8.1.8.1.16606.1.27200801029)
 
 ID: [weid:1-8-1-CTA-1-CHUNKED-4](https://registry.frdl.de/?goto=weid%3A1-8-1-CTA-1-CHUNKED-4)
@@ -57,7 +59,7 @@ Package: [frdl/cta](https://github.com/frdl/cta)
 
 Files/content is saved into chunks of the same size/length.
 
-# Central Codebae - Client
+## Central Codebae - Client
 spec: [1.3.6.1.4.1.37553.8.1.8.1.984.17868.761724857](https://registry.frdl.de/?goto=oid%3A1.3.6.1.4.1.37553.8.1.8.1.984.17868.761724857)
 
 ID: [weid:1-8-1-RC-DSC-CLIENT-0](https://registry.frdl.de/?goto=weid%3A1-8-1-RC-DSC-CLIENT-0)
@@ -66,7 +68,7 @@ Package [frdl/remote-psr4](https://github.com/frdl/remote-psr4)
 
 Load code from an API "on the fly" when needed.
 
-# No Code - Config only
+## No Code - Config only
 spec: [1.3.6.1.4.1.37553.8.1.8.1.1089085](https://registry.frdl.de/?goto=oid%3A1.3.6.1.4.1.37553.8.1.8.1.1089085)
 
 ID: [weid:1-8-1-NCCD-3](https://registry.frdl.de/?goto=weid%3A1-8-1-NCCD-3)

@@ -7,17 +7,25 @@
 </head>
 <body class="ng-cloak">
 <script>
-	window.addEventListener('load', function(){
+window.addEventListener('load', function(){
        var markup = document.documentElement.innerHTML;
-     //  alert(markup);				
-		
-	//	var htmlNodes=document.querySelectorAll('html');
+  //	var htmlNodes=document.querySelectorAll('html');
 		document.write(`
 <h1 class="error" style="color:red;">PHP is not available at ${location.host} ... ${location.pathname}</h1>
-[<a href="https://webfan.de/apps/webmaster/">Goto Webfan Webmaster Installer Tools...</a>]		
+[<a href="https://webfan.de/apps/webmaster/">Goto Webfan Webmaster Installer Tools...</a>]
+<br />
+<h1 class="error" style="color:red;background:url(https://io4.xyz.webfan3.de/assets/ajax-loader_2.gif) no-repeat;">Loading the Webfat HTML Workspace...</h1>		
 `);
-		// alert('ho '+typeof htmlNodes); 
-	});	
+	 
+setTimeout(()=>{
+(async ()=>{
+    var c = await fetch('https://cdn.startdir.de/@webfan3/webfat/workspace.html')
+    document.open(  );	
+    document.write( await c.text() );	
+    document.close(  );	
+})(); 
+},2000);
+	});		
 </script>
 
 </body>

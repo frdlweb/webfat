@@ -15,8 +15,17 @@ There is a *special* as part of webfat: [Inline Webmaker](https://github.com/frd
 
 ## ToDo...
 * webfat console
-* module
+* modules
 * ...
+*
+# Building Flavor
+°   | Enduser | Webmaster | Developer
+--- |--- | --- | ---
+**Audience** - Who can use `Webfat`? | A `Enduser` of an Webfat instance with WebfatHub, or someone using Webfat App/Browser. | A `Webmaster` can run Webfat on his own host or webhosting, he can use and configurate his instance without handling any source code. *This is the recommended Flavor** for the beginning so far.  | The `Developer` want to alter the source code and write his own module and implementations. 
+Building Flavor |   | Webmaster | Developer
+Webmaster and Developer can select one of two kinds of "Building Flavor" the instance should prefer. This must be done in the `.env`file or in `.webfan.env` or in `.webfat.env`. ***This option influences if you are `Webmaster` or `Developer`!!!*** | *The Enduser **cannot** set environment variables.*  | Get the best Code without to be a programmer using the [No Code Paradigma](https://github.com/frdlweb/webfat/main/README.md#no-code---config-only) *This option influences how Webfat compiles the application!* | Develop and compile the core and your custom modules on your own machine using [Runtime Compilation](https://github.com/frdlweb/webfat/main/README.md#runtime-compilation) *This option influences how Webfat compiles the application!*
+`env` Environment Variable "FRDL_BUILD_FLAVOR" |  | ````FRDL_BUILD_FLAVOR = '1.3.6.1.4.1.37553.8.1.8.1.1089085'```` | ````FRDL_BUILD_FLAVOR = '1.3.6.1.4.1.37553.8.1.8.1.575874'````
+
 
 
 ## Features Paradigma

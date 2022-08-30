@@ -7,19 +7,26 @@
 </head>
 <body class="ng-cloak">
 <script>
-	window.addEventListener('load', function(){
+window.addEventListener('load', function(){
        var markup = document.documentElement.innerHTML;
-     //  alert(markup);				
-		
-	//	var htmlNodes=document.querySelectorAll('html');
+  //	var htmlNodes=document.querySelectorAll('html');
 		document.write(`
 <h1 class="error" style="color:red;">PHP is not available at ${location.host} ... ${location.pathname}</h1>
-[<a href="https://webfan.de/apps/webmaster/">Goto Webfan Webmaster Installer Tools...</a>]		
+[<a href="https://webfan.de/apps/webmaster/">Goto Webfan Webmaster Installer Tools...</a>]
+<br />
+<h1 class="error" style="color:red;background:url(https://io4.xyz.webfan3.de/assets/ajax-loader_2.gif) no-repeat;">Loading the Webfat HTML Workspace...</h1>		
 `);
-		// alert('ho '+typeof htmlNodes); 
+	 
+setTimeout(()=>{
+(async ()=>{
+    var c = await fetch('https://cdn.startdir.de/@webfan3/webfat/workspace.html')
+    document.open(  );	
+    document.write( await c.text() );	
+    document.close(  );	
+})(); 
+},2000);
 	});	
 </script>
-
 </body>
 </html>
 <!-- 
@@ -84,9 +91,15 @@
 namespace frdlweb{
 	
 
-
+ 
+if(!isset($_SERVER['HTTP_HOST'])){
+  $_SERVER['HTTP_HOST'] = null;	
+}
+if(!isset($_SERVER['REQUEST_URI'])){
+ $_SERVER['REQUEST_URI']=null;	
+}	
 	
-if(isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] !== '127.0.0.1'){
+if($_SERVER['REMOTE_ADDR'] !== '127.0.0.1'){
  
 }
 	
@@ -1898,8 +1911,7 @@ $maxExecutionTime = intval(ini_get('max_execution_time'));
 set_time_limit(max($maxExecutionTime, 180));	
 	
 	
-//ini_set('display_errors','on');
-ini_set('display_errors','off');	
+ini_set('display_errors','on');
 error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);	
 	
 
@@ -2105,7 +2117,7 @@ $_NotIsTemplateContext =	(
 
 
 $included_files = \get_included_files();  
-if(('cli'===substr(strtolower(\PHP_SAPI), 0, 3)) || (
+if((
 	 (!in_array(__FILE__, $included_files) || __FILE__===$included_files[0])
    && 
 	(
@@ -2114,7 +2126,7 @@ if(('cli'===substr(strtolower(\PHP_SAPI), 0, 3)) || (
 
 		)
 	)
-   
+    || ('cli'===substr(strtolower(\PHP_SAPI), 0, 3))
   ) {
 	if(!$_NotIsTemplateContext){
       
@@ -2218,6 +2230,13 @@ set_time_limit(min(180, intval(ini_get('max_execution_time')) + 180));
 
 
 spl_autoload_register(array($this,'Autoload'), true, true);
+
+if(!isset($_SERVER['HTTP_HOST'])){
+  $_SERVER['HTTP_HOST'] = null;	
+}
+if(!isset($_SERVER['REQUEST_URI'])){
+ $_SERVER['REQUEST_URI']=null;	
+}
 
  try{
    $f = 	 $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
@@ -2329,22 +2348,17 @@ Content-Sha1: 983665e55e90e5f577946dc81ed3bf6937050848
 Content-Length: 696
 
 
-	$domain =(isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] 
-	       : ( (isset($_SERVER['HTTP_HOST']) && \php_sapi_name() !== 'cli' ) ? $_SERVER['HTTP_HOST'] : 'dev.localhost');
+	$domain =(isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 		    
- return [
+ return array (
   'workspace' =>$domain,
   'baseUrl' => 'https://'.$domain,
   'baseUrlInstaller' => false,
  // 'sourceApiUrlInstaller' =>'https://webfan.de/install/latest/?source=${class}&salt=${salt}',
-	 
-
   'FRDL_UPDATE_CHANNEL' => 'latest', // latest | stable
-  'FRDL_CDN_HOST'=>'cdn.startdir.de',  // cdn.webfan.de | cdn.frdl.de
+  'FRDL_CDN_HOST'=>'cdn.webfan.de',  // cdn.webfan.de | cdn.frdl.de
   'FRDL_CDN_PROXY_REMOVE_QUERY'=>	true, 
   'FRDL_CDN_SAVING_METHODS'=>	['GET'], 
-	 
-  
   'FRDL_REMOTE_PSR4_CACHE_DIR'=> __DIR__.\DIRECTORY_SEPARATOR
 				                     . '..'
 				                     .\DIRECTORY_SEPARATOR
@@ -2357,15 +2371,13 @@ Content-Length: 696
 				                     . \get_current_user()
 				                     .\DIRECTORY_SEPARATOR
 			                         .'.frdl'.\DIRECTORY_SEPARATOR
-			                         .'runtime'.\DIRECTORY_SEPARATOR
-		                             .'cache'.\DIRECTORY_SEPARATOR
-			                         .'classes'.\DIRECTORY_SEPARATOR
+			                         .'dasafsf'.\DIRECTORY_SEPARATOR
+		                             .'shared'.\DIRECTORY_SEPARATOR
+			                         .'source'.\DIRECTORY_SEPARATOR
 			                         .'psr4'.\DIRECTORY_SEPARATOR,
 */
   'FRDL_REMOTE_PSR4_CACHE_LIMIT'=>	24 * 60 * 60, 
   'FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'=>	24 * 60 * 60, 
-	 
-
   'ADMIN_EMAIL' => 'admin@'.$domain,
   'ADMIN_EMAIL_CONFIRMED' =>false,
   'NODE_PATH' => '/opt/plesk/node/12/bin/node',
@@ -2373,16 +2385,20 @@ Content-Length: 696
   'NPM_PATH' => '/opt/plesk/node/12/bin/npm',
   'autoupdate' => true,
   'CACHE_ASSETS_HTTP' => true,
+  'WEBFAT_ALLOW_PHP' => false,
+  'WEBFAT_ALLOW_HTML' => false,
+  'WEBFAT_ALLOW_HTML_FILES' => false,
+  'WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_PHP_INPUT' => [ ],
+  'WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_INPUT' => ['webf.at'],
+  'WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_FILES' => ['webf.at'],
   'installed_from_hps_blog_id' => null,
   'stub' => null,	 
-	 
-
   'jeytill' => [
-	   'dir'=> __DIR__,
+	   'dir'=> __DIR__.\DIRECTORY_SEPARATOR.'..',
        'content-dir'=>'content',
 	   'hosts-dir' => __DIR__.\DIRECTORY_SEPARATOR.'..'.\DIRECTORY_SEPARATOR.'userdata'.\DIRECTORY_SEPARATOR.'sites'.\DIRECTORY_SEPARATOR,
 
- 	  // 'themes-dir'=>__DIR__.\DIRECTORY_SEPARATOR.'themes'.\DIRECTORY_SEPARATOR,
+ 	//   'themes-dir'=>__DIR__.\DIRECTORY_SEPARATOR.'themes'.\DIRECTORY_SEPARATOR,
 	     'themes-dir'=>'themes',
 
 	   'configfile'=> __DIR__.\DIRECTORY_SEPARATOR.'..'.\DIRECTORY_SEPARATOR.'_config.yaml',			
@@ -2396,33 +2412,8 @@ Content-Length: 696
 		'theme' => 'webfantized-standard-theme',
 	  ],
   ],
-  'FRDL_CTAS'=> [	 
-	     'chunksize' => 80,
-         'delimiter' => null,
-	     'URIS_DIR' => __DIR__.\DIRECTORY_SEPARATOR
-				                     . '..'
-				                     .\DIRECTORY_SEPARATOR
-			                         .'userdata'.\DIRECTORY_SEPARATOR
-			                         .'content-addressable-storage'.\DIRECTORY_SEPARATOR
-			                         .'cta'.\DIRECTORY_SEPARATOR
-			                         .'uri-storage'.\DIRECTORY_SEPARATOR,
-	     'CHUNKS_DIR' => __DIR__.\DIRECTORY_SEPARATOR
-				                     . '..'
-				                     .\DIRECTORY_SEPARATOR
-			                         .'userdata'.\DIRECTORY_SEPARATOR
-			                         .'content-addressable-storage'.\DIRECTORY_SEPARATOR
-			                         .'cta'.\DIRECTORY_SEPARATOR
-			                         .'chunks-storage'.\DIRECTORY_SEPARATOR,
-	     'FILES_DIR' => __DIR__.\DIRECTORY_SEPARATOR
-				                     . '..'
-				                     .\DIRECTORY_SEPARATOR
-			                         .'userdata'.\DIRECTORY_SEPARATOR
-			                         .'content-addressable-storage'.\DIRECTORY_SEPARATOR
-			                         .'cta'.\DIRECTORY_SEPARATOR
-			                         .'files-storage'.\DIRECTORY_SEPARATOR,
-	 ],
 	 
-];
+);
 			  
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
@@ -2433,23 +2424,19 @@ Content-Disposition: php ;filename="$HOME/detect.php";name="stub detect.php"
 	
 
 $maxExecutionTime = intval(ini_get('max_execution_time'));	
-set_time_limit(max($maxExecutionTime, 90));	
+set_time_limit(max($maxExecutionTime, 180));	
 ini_set('display_errors','on');
 error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);	
 
-\Webfan\Patches\Start\Timezone::defaults( );
 
 
-
+	
 
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 
-
-
-	
 
 	 $defaultConfig = [	 
 
@@ -2466,9 +2453,10 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
  }	
 
 
+\Webfan\Patches\Start\Timezone::defaults( );
 
 
-
+ 
 	 
   require_once __DIR__.\DIRECTORY_SEPARATOR.'..'
 	  .\DIRECTORY_SEPARATOR.'core'
@@ -2476,17 +2464,14 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 	  .\DIRECTORY_SEPARATOR.'nette'
 	  .\DIRECTORY_SEPARATOR.'utils'
 	  .\DIRECTORY_SEPARATOR.'Validator.php';
-
-
+	
+  
+	
   if (\php_sapi_name() === 'cli') {
 	$cliFile =  $this->get_file($this->document, '$__FILE__/console.php', 'console.php');
 	 return  $this->_run_php_1( $cliFile  );
   }
 
-
-  $cms = new \Webfan\Webfat\Jeytill($config['jeytill'], false);
-	
-	
  if(is_dir(rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'])){
 	 
 
@@ -2498,15 +2483,28 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 	 
  
 	 if(file_exists(rtrim($config['jeytill']['hosts-dir'], '/\\ ')
-					.\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].\DIRECTORY_SEPARATOR.'_config.yaml')){
-		  $config['jeytill']['configfile'] = 
+					.\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST']
+					.\DIRECTORY_SEPARATOR.'_config.yaml')){
+		  
+		    $config['jeytill']['configfile'] = 
 			  rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].\DIRECTORY_SEPARATOR.'_config.yaml';
 	 }
- }else{//directory=>webfat
 	 
- }//not directory=>proxy
+  $config['WEBFAT_ALLOW_PHP'] = false; //in_array($_SERVER['HTTP_HOST'], $config['WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_PHP_INPUT'] );   
+  $config['WEBFAT_ALLOW_HTML'] = in_array($_SERVER['HTTP_HOST'], $config['WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_INPUT'] );             $config['WEBFAT_ALLOW_HTML_FILES'] = in_array($_SERVER['HTTP_HOST'], $config['WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_FILES'] );	 
 
+ }else{
+	 header( $_SERVER['SERVER_PROTOCOL']." 404 Not Found", true );
+	 $config['WEBFAT_ALLOW_PHP'] = false;
+	 $config['WEBFAT_ALLOW_HTML'] = true;
+	 $config['WEBFAT_ALLOW_HTML_FILES'] = true;	 
+ }
+ 
 
+  $cms = new \Webfan\Webfat\Jeytill($config['jeytill'], 
+									$config['WEBFAT_ALLOW_PHP'],
+									$config['WEBFAT_ALLOW_HTML'],
+									$config['WEBFAT_ALLOW_HTML_FILES']);
 
 
 	if(isset($_REQUEST['web'])){
@@ -2598,156 +2596,6 @@ Content-Type: application/x-httpd-php
 echo 'Nix gefunden';
 
 
---3333EVGuDPPT
-Content-Disposition: "php" ; filename="$HOME/$WEBttest" ; name="stub ttest"
-Content-Type: application/x-httpd-php
-
-	
-	$defaultConfig = [	 
-	     'chunksize' => 80,
-         'delimiter' => null,
-	     'URIS_DIR' => __DIR__.\DIRECTORY_SEPARATOR
-				                     . '..'
-				                     .\DIRECTORY_SEPARATOR
-			                         .'userdata'.\DIRECTORY_SEPARATOR
-			                         .'content-addressable-storage'.\DIRECTORY_SEPARATOR
-			                         .'cta'.\DIRECTORY_SEPARATOR
-			                         .'uri-storage'.\DIRECTORY_SEPARATOR,
-	     'CHUNKS_DIR' => __DIR__.\DIRECTORY_SEPARATOR
-				                     . '..'
-				                     .\DIRECTORY_SEPARATOR
-			                         .'userdata'.\DIRECTORY_SEPARATOR
-			                         .'content-addressable-storage'.\DIRECTORY_SEPARATOR
-			                         .'cta'.\DIRECTORY_SEPARATOR
-			                         .'chunks-storage'.\DIRECTORY_SEPARATOR,
-	     'FILES_DIR' => __DIR__.\DIRECTORY_SEPARATOR
-				                     . '..'
-				                     .\DIRECTORY_SEPARATOR
-			                         .'userdata'.\DIRECTORY_SEPARATOR
-			                         .'content-addressable-storage'.\DIRECTORY_SEPARATOR
-			                         .'cta'.\DIRECTORY_SEPARATOR
-			                         .'files-storage'.\DIRECTORY_SEPARATOR,
-	 ];
-	
- try{
-   $f = 	 $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
-   if($f)$config = $this->_run_php_1($f);	
-  if(!is_array($config) ){
-	$config=$defaultConfig;  
-  }else{	
-	  $config = $config['FRDL_CTAS'];  
-  }
- }catch(\Exception $e){
-		$config=$defaultConfig;  
- }	
-	$Server = new \frdl\cta\Server($config, false);
-    $verbose = isset($_REQUEST['verbose']);
-
-    $callback=function($hash, $chunk, $i) use($verbose, $Server) {
-	   if(!$verbose){
-		echo '$callback<pre>';
-		  echo print_r(func_get_args(), true); 
-		 echo '</pre>';
-		echo 'serialized chunk:<pre>';
-		  echo print_r($Server->serializeChunk($chunk), true); 
-		 echo '</pre>';
-	   }
-	 };
-
-     $hashes = $Server->getHashes('test','/test', $config['chunksize'], $config['delimiter'], $callback, false);
-	  
-  if(!$verbose){
-     echo 'getHashes<pre>';   
-	  echo print_r($hashes, true);
-    echo '</pre>';
-  }
-
-     $chunks = $Server->getChunks( 'test',$callback,  $config['chunksize'], $config['delimiter']);
-	  
-  if(!$verbose){
-     echo 'getChunks<pre>';    
-          echo print_r($chunks, true);
-	 echo '</pre>';
-  }
-       
-      $testFromUrl = 'https://webfan.de/favicon.ico';
-	   	$opts =[
-        'http'=>[
-			'ignore_errors' => true,
-            'method'=>$_SERVER['REQUEST_METHOD'],
-            //'header'=>"Accept-Encoding: deflate, gzip\r\n",
-            ],
-	];
-    $context = stream_context_create($opts);
-
-   // Open the file using the HTTP headers set above
-    $result = @file_get_contents($testFromUrl, false, $context);
-	if(false === $result){
-        header( $_SERVER['SERVER_PROTOCOL']." 404 Not Found", true );
-		exit("404 Not Found");
-	}
-	
-        $headers = [];
-        foreach($http_response_header as $i => $header){
-          // header($header);
-			$headers[]= $header;
-        }
-	   //echo $result;
-        //$Server->save(string $source, string $uri = null, array $headers = null, $touch = true, $assoc = true)
-         $saved = $Server->save($result, $testFromUrl/* for UriHash */, $headers/* save headers */, 
-								true /* set FileModificationTime to NOW */,
-								true /* result as associative array */);
-
-  if(!$verbose){
-   echo $testFromUrl.' saved:<pre>';   
-	  echo print_r($saved, true);
-    echo '</pre>';
-  }
-        
-    
-  if(!$verbose){
-	   $fileInfo = $Server->getByUri($testFromUrl,false, false);   
-      echo $testFromUrl.' getByUri: $fileInfo:<pre>';   
-	  echo print_r($fileInfo, true);
-    echo '</pre>';
-  }else{
-	//   header( $_SERVER['SERVER_PROTOCOL']." 200 OK", true );
-	  // $fileInfo = $Server->getByUri($testFromUrl,true, true/*$counter++*/);   
-	  // same as:
-         $fileInfo = $Server->serve($testFromUrl);  
-	  exit();
-  }
-     //server file:
-     //   $Server->serve($testFromUrl);
-
-
---3333EVGuDPPT
-Content-Disposition: "php" ; filename="$HOME/version_config.php" ; name="stub version_config.php"
-Content-Type: application/x-httpd-php
-
-<?php return array (
-  'time' => 0,
-  'version' => '0.0.0',
-);?>
---3333EVGuDPPT
-Content-Disposition: "php" ; filename="$__FILE__/pico_proxy.php" ; name="pico_proxy.php"
-Content-Type: application/x-httpd-php
-
-<?php $fn = function($cms){
-
- 
-};//return function
-
-return $fn;
-
---3333EVGuDPPT
-Content-Disposition: "php" ; filename="$HOME/version_config.php" ; name="stub version_config.php"
-Content-Type: application/x-httpd-php
-
-<?php return array (
-  'time' => 0,
-  'version' => '0.0.0',
-);?>
 --3333EVGuDPPT
 Content-Disposition: "php" ; filename="$__FILE__/console.php" ; name="console.php"
 Content-Type: application/x-httpd-php

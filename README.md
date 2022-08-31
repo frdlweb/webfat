@@ -85,3 +85,36 @@ ID: [weid:1-8-1-NCCD-3](https://registry.frdl.de/?goto=weid%3A1-8-1-NCCD-3)
 Compliant to User Data Manifesto 2.0 and considering security issues, we store ONLY DATA on the userlevel (e.g. html, xml, json, md, ...) NOT bound to any implementation code.
 Compliant to Config-Only-API (?) and compliant to User Data Manifesto 2.0 and considering security issues, we  allow/request/expect any modification on the instance level (e.g. theme, sitesettings, plugins and modules) ONLY BY API/INTERFACE.
 The instance level is meant to be any "installation" or instance of the NCCD Software (CMS, API, ...), this is where  we do NOT DO HAVE ANY CODE ISSUES: This is deligated to the scope of the SaaS-Codebase-Provider and could be done via local shares or remote shares of source code.
+
+## Twelve Factor Application
+
+spec: [1.3.6.1.4.1.37553.8.1.8.1.83642115915](https://registry.frdl.de/?goto=oid%3A1.3.6.1.4.1.37553.8.1.8.1.83642115915)
+
+ID: [weid:1-8-1-12FACTOR-7](https://registry.frdl.de/?goto=weid%3Aweid:1-8-1-12FACTOR-7)
+
+If however possible, Webfat follows the [Twelve Factor Application Development Paradigma](https://12factor.net/).
+
+* I. Codebase
+One codebase tracked in revision control, many deploys
+* II. Dependencies
+Explicitly declare and isolate dependencies
+* III. Config
+Store config in the environment
+* IV. Backing services
+Treat backing services as attached resources
+* V. Build, release, run
+Strictly separate build and run stages
+* VI. Processes
+Execute the app as one or more stateless processes
+* VII. Port binding
+Export services via port binding
+* VIII. Concurrency
+Scale out via the process model
+* IX. Disposability
+Maximize robustness with fast startup and graceful shutdown
+* X. Dev/prod parity
+Keep development, staging, and production as similar as possible
+* XI. Logs
+Treat logs as event streams
+* XII. Admin processes
+Run admin/management tasks as one-off processes

@@ -4,21 +4,13 @@
 # **Its current status is ALPHA.**
 The code will change in future!
 
-# Multihost/Multisite Markdown Hub for Frdlweb CMS
-Place content files for `example.com` into `userdata/sites/example.com` as in the example code.
-
-# Special!
-There is a *special* as part of webfat: [Inline Webmaker](https://github.com/frdlweb/webfat/blob/main/public/content/pages/webfat-specials/inline-webmaker.md)
-
-## Installation
+# Installation
 * Set your webserver/webhost www-directory to the `public` directory
 
-## ToDo...
-* webfat console
-* modules
-* ...
-*
-# Building Flavor
+## Multihost/Multisite Markdown Hub for Frdlweb CMS
+Place content files for `example.com` into `userdata/sites/example.com` as in the example code.
+
+## Building Flavors and Configurations
 °   | Enduser | Webmaster | Developer
 --- |--- | --- | ---
 **Audience** - Who can use `Webfat`? | A `Enduser` of an Webfat instance with WebfatHub, or someone using Webfat App/Browser. | A `Webmaster` can run Webfat on his own host or webhosting, he can use and configurate his instance without handling any source code. *This is the recommended Flavor** for the beginning so far.  | The `Developer` want to alter the source code and write his own module and implementations. 
@@ -27,8 +19,11 @@ Webmaster and Developer can select one of two kinds of "Building Flavor" the ins
 `env` Environment Variable "FRDL_BUILD_FLAVOR" |  | ````FRDL_BUILD_FLAVOR = '1.3.6.1.4.1.37553.8.1.8.1.1089085'```` | ````FRDL_BUILD_FLAVOR = '1.3.6.1.4.1.37553.8.1.8.1.575874'````
 
 
+## Special!
+There is a *special* as part of webfat: [Inline Webmaker](https://github.com/frdlweb/webfat/blob/main/public/content/pages/webfat-specials/inline-webmaker.md)
 
-## Features Paradigma
+
+# Features Paradigma
 Webfat will provide some special specs. implementations.
 
 ## Runtime compilation
@@ -68,7 +63,7 @@ Package: [frdl/cta](https://github.com/frdl/cta)
 
 Files/content is saved into chunks of the same size/length.
 
-## Central Codebae - Client
+## Central Codebase - Client
 spec: [1.3.6.1.4.1.37553.8.1.8.1.984.17868.761724857](https://registry.frdl.de/?goto=oid%3A1.3.6.1.4.1.37553.8.1.8.1.984.17868.761724857)
 
 ID: [weid:1-8-1-RC-DSC-CLIENT-0](https://registry.frdl.de/?goto=weid%3A1-8-1-RC-DSC-CLIENT-0)

@@ -22,11 +22,6 @@ use Minicli\Output\Adapter\DefaultPrinterAdapter;
         'FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'=>	24 * 60 * 60, 	
    ],
   'FRDL_CLI' => [
-             // 'PHP_BIN_PATH'=>(new \Webfan\Helper\PhpBinFinder())->find(),
-              // 'app_path' => [
-              //     __DIR__ . '/app/Command',
-              //   '@minicli/command-help'
-              // ],
             'debug' => true,         
     ],
   ];
@@ -70,8 +65,17 @@ use Minicli\Output\Adapter\DefaultPrinterAdapter;
       $phpBinPath = $cliConfig['PHP_BIN_PATH'];
       unset($cliConfig['PHP_BIN_PATH']);
        $app = new App( $cliConfig );
-		    
+		  
+		  /*
+		  # @TPL SCRIPTFILE
+		  */
           $scriptFile = __DIR__.\DIRECTORY_SEPARATOR.'webfat.php';
+		  if(!file_exists($scriptFile)){
+		    if(!file_put_contents($scriptFile, file_get_contents('https://raw.githubusercontent.com/frdlweb/webfat/main/public/webfat.php'))){
+			   $app->getPrinter()->rawOutput('Cannot write "webfat.php"!');
+			   return false;
+			}
+		  }
           $output = shell_exec(sprintf('%s %s %s',  
 		                        $phpBinPath,
 								$scriptFile,

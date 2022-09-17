@@ -2453,18 +2453,45 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
  }	
 
 
-\Webfan\Patches\Start\Timezone::defaults( );
+	 
 
 
-//  if(isset($_GET['test'])){
+	if(isset($_REQUEST['web'])){
+	  $_SERVER['REQUEST_URI'] = ltrim(strip_tags($_REQUEST['web']), '/ ');
+    }
+
+$p = explode('?', $_SERVER['REQUEST_URI']);
+$path = $p[0];
+
+
+$webfile= $this->get_file($this->document, '$HOME/$WEB'.$path, 'stub '.$path) ;
+if(false !==$webfile){
+	$p2 = explode('.', $path);
+	$p2 = array_reverse($p2);	
+	$p3 = explode(';', $webfile->getHeader('Content-Type'));
+	
+	if('php' === strtolower($p2[0]) || 'application/x-httpd-php'===$p3[0] ){	
+		call_user_func_array([$this, '_run_php_1'], [$webfile]);
+	}else{
+	   ob_end_clean();
+	   header('Content-Type: '.$webfile->getMimeType());		
+	   echo $webfile->getBody();
+	}
+	
+
+	
+	exit;
+}else{	
+
+
+ 
    $App = \Webfan\Webfat\App\Kernel::getInstance('auto',  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'..');
-	// $App = new \Webfan\Webfat\App\Kernel('auto',  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'..');
-	 
-   //$response = 
-	  $App->handle();
-//  }
-	 
-  require_once __DIR__.\DIRECTORY_SEPARATOR.'..'
+   if($App->handle()){
+	 return;   
+   }
+
+
+   require_once __DIR__.\DIRECTORY_SEPARATOR.'..'
 	  .\DIRECTORY_SEPARATOR.'core'
 	  .\DIRECTORY_SEPARATOR.'3p'
 	  .\DIRECTORY_SEPARATOR.'nette'
@@ -2511,36 +2538,7 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 									$config['WEBFAT_ALLOW_PHP'],
 									$config['WEBFAT_ALLOW_HTML'],
 									$config['WEBFAT_ALLOW_HTML_FILES']);
-
-
-	if(isset($_REQUEST['web'])){
-	  $_SERVER['REQUEST_URI'] = ltrim(strip_tags($_REQUEST['web']), '/ ');
-    }
-
-$p = explode('?', $_SERVER['REQUEST_URI']);
-$path = $p[0];
-
-
-$webfile= $this->get_file($this->document, '$HOME/$WEB'.$path, 'stub '.$path) ;
-if(false !==$webfile){
-	$p2 = explode('.', $path);
-	$p2 = array_reverse($p2);	
-	$p3 = explode(';', $webfile->getHeader('Content-Type'));
 	
-	if('php' === strtolower($p2[0]) || 'application/x-httpd-php'===$p3[0] ){	
-		call_user_func_array([$this, '_run_php_1'], [$webfile]);
-	}else{
-	   ob_end_clean();
-	   header('Content-Type: '.$webfile->getMimeType());		
-	   echo $webfile->getBody();
-	}
-	
-
-	
-	exit;
-}else{	
-
-
   $u = explode('?', $_SERVER['REQUEST_URI']);
 
   $page = ltrim(array_shift($u), '/ ');

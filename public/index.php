@@ -2491,78 +2491,12 @@ if(false !==$webfile){
    }
 
 
-   require_once __DIR__.\DIRECTORY_SEPARATOR.'..'
-	  .\DIRECTORY_SEPARATOR.'core'
-	  .\DIRECTORY_SEPARATOR.'3p'
-	  .\DIRECTORY_SEPARATOR.'nette'
-	  .\DIRECTORY_SEPARATOR.'utils'
-	  .\DIRECTORY_SEPARATOR.'Validator.php';
-	
-  
-	
-  if (\php_sapi_name() === 'cli') {
-	$cliFile =  $this->get_file($this->document, '$__FILE__/console.php', 'console.php');
-	 return  $this->_run_php_1( $cliFile  );
-  }
-
- if(is_dir(rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'])){
-	 
-
-  $config['jeytill']['pages-dir'] = rtrim($config['jeytill']['hosts-dir'], '/\\ ')
-	  .\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].\DIRECTORY_SEPARATOR.'pages';
-	 
-  $config['jeytill']['blocks-dir'] = rtrim($config['jeytill']['hosts-dir'], '/\\ ')
-	  .\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].\DIRECTORY_SEPARATOR.'blocks';		
-	 
- 
-	 if(file_exists(rtrim($config['jeytill']['hosts-dir'], '/\\ ')
-					.\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST']
-					.\DIRECTORY_SEPARATOR.'_config.yaml')){
-		  
-		    $config['jeytill']['configfile'] = 
-			  rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].\DIRECTORY_SEPARATOR.'_config.yaml';
-	 }
-	 
-  $config['WEBFAT_ALLOW_PHP'] = false; //in_array($_SERVER['HTTP_HOST'], $config['WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_PHP_INPUT'] );   
-  $config['WEBFAT_ALLOW_HTML'] = in_array($_SERVER['HTTP_HOST'], $config['WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_INPUT'] );             $config['WEBFAT_ALLOW_HTML_FILES'] = in_array($_SERVER['HTTP_HOST'], $config['WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_FILES'] );	 
-
- }else{
-	 header( $_SERVER['SERVER_PROTOCOL']." 404 Not Found", true );
-	 $config['WEBFAT_ALLOW_PHP'] = false;
-	 $config['WEBFAT_ALLOW_HTML'] = true;
-	 $config['WEBFAT_ALLOW_HTML_FILES'] = true;	 
- }
- 
-
-  $cms = new \Webfan\Webfat\Jeytill($config['jeytill'], 
-									$config['WEBFAT_ALLOW_PHP'],
-									$config['WEBFAT_ALLOW_HTML'],
-									$config['WEBFAT_ALLOW_HTML_FILES']);
-	
-  $u = explode('?', $_SERVER['REQUEST_URI']);
-
-  $page = ltrim(array_shift($u), '/ ');
-  if ($page === '') {
-    $page = 'index';
-  }
-
-  if (is_dir('pages/' . $page)) {
-    $page .= '/index';
-  }
-
-
-
-
-  $result = $cms('pages', $page, '');
-  if ($result === FALSE) {   
-     header("HTTP/1.0 404 Not Found");
-     $result =  $cms('pages', '404', '');
-  } 
-    
-	//echo $result;
-	
-	exit($result);
-}
+       throw new \Webfan\Webfat\App\ResolvableException(
+            'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.3=Could not resolve the request'
+	    .'|circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.4.1=Default route/app missing - Thrown by MIMEStub'
+	    .'|circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.4.3=Please setup at least one module!'
+	    .'@No default route/app installed'
+       );
 
 
 

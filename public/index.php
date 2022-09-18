@@ -2471,7 +2471,7 @@ if(false !==$webfile){
 	return;  
   }else{
       $response = new \GuzzleHttp\Psr7\Response(404);
-	  $response = $response->withBody('Not found');
+	  $response = $response->withBody(\GuzzleHttp\Psr7\Utils::streamFor('Not found'));
 	  return (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response); 
   }
 	 

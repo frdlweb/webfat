@@ -2224,6 +2224,13 @@ set_time_limit(min(180, intval(ini_get('max_execution_time')) + 180));
 
 spl_autoload_register(array($this,'Autoload'), true, true);
 
+if(!isset($_SERVER['HTTP_HOST'])){
+  $_SERVER['HTTP_HOST'] = null;	
+}
+if(!isset($_SERVER['REQUEST_URI'])){
+ $_SERVER['REQUEST_URI']=null;	
+}
+
  try{
    $f = 	 $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
    if($f)$config = $this->_run_php_1($f);	
@@ -2270,21 +2277,8 @@ try{
 	$loader = \call_user_func(function( $s, $cacheDir, $l, $ccl, $cl){	
 	
 	
- $af = (is_string($cacheDir) && is_dir($cacheDir))
-	 ? rtrim($cacheDir, '\\/ ')
-	 .	 
-	 \DIRECTORY_SEPARATOR.str_replace('\\', \DIRECTORY_SEPARATOR, \frdl\implementation\psr4\RemoteAutoloaderApiClient::class).'.php'
-	 : \sys_get_temp_dir().\DIRECTORY_SEPARATOR
-				                     . \get_current_user()
-				                     .\DIRECTORY_SEPARATOR
-			                         .'.frdl'.\DIRECTORY_SEPARATOR
-			                         .'_g'.\DIRECTORY_SEPARATOR
-		                             .'shared'.\DIRECTORY_SEPARATOR
-			                         .'lib'.\DIRECTORY_SEPARATOR
-			                         .'php'.\DIRECTORY_SEPARATOR
-			                         .'src'.\DIRECTORY_SEPARATOR
-			                         .'psr4'.\DIRECTORY_SEPARATOR
-		                              .str_replace('\\', \DIRECTORY_SEPARATOR, \frdl\implementation\psr4\RemoteAutoloaderApiClient::class).'.php';
+ $af = rtrim($cacheDir, '\\/ ') .	 
+	 \DIRECTORY_SEPARATOR.str_replace('\\', \DIRECTORY_SEPARATOR, \frdl\implementation\psr4\RemoteAutoloaderApiClient::class).'.php';
 	
 
  if(!is_dir(dirname($af))){
@@ -2310,11 +2304,11 @@ try{
 																	 $cl);	
    return $loader;
 }, 																				 
- $config['sourceApiUrlInstaller'],
- 4,			   
+ 'https://webfan.de/install/'. $config['FRDL_UPDATE_CHANNEL'].'/?source=${class}&salt=${salt}&source-encoding=b64',
+ $config['FRDL_REMOTE_PSR4_CACHE_DIR'],			   
  'https://raw.githubusercontent.com/frdl/remote-psr4/master/src/implementations/autoloading/RemoteAutoloaderApiClient.php',
- 24 * 60 * 60,
- 24 * 60 * 60
+ $config['FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'],
+ $config['FRDL_REMOTE_PSR4_CACHE_LIMIT']
 );
 }catch(\Exception $e){
 
@@ -2334,9 +2328,9 @@ if(!is_object($loader) || true !== $loader instanceof \frdl\implementation\psr4\
  call_user_func(function($version,$workspace){
    if(!class_exists(\frdl\implementation\psr4\RemoteAutoloaderApiClient::class))return;
    $loader = \frdl\implementation\psr4\RemoteAutoloaderApiClient::class::getInstance($workspace, true, $version, false, false);
- }, 'latest', $config['sourceApiUrlInstaller']);
+ }, 'latest','https://webfan.de/install/'. $config['FRDL_UPDATE_CHANNEL'].'/?source=${class}&salt=${salt}&source-encoding=b64');
 
-}	 
+}	  
 	 
 	 
 --4444EVGuDPPT
@@ -2353,9 +2347,30 @@ Content-Length: 696
   'workspace' =>$domain,
   'baseUrl' => 'https://'.$domain,
   'baseUrlInstaller' => false,
-  'sourceApiUrlInstaller' =>
-	//'03.webfan.de',
-	'https://webfan.de/install/latest/?source=${class}&salt=${salt}',
+ // 'sourceApiUrlInstaller' =>'https://webfan.de/install/latest/?source=${class}&salt=${salt}',
+  'FRDL_UPDATE_CHANNEL' => 'latest', // latest | stable
+  'FRDL_CDN_HOST'=>'cdn.webfan.de',  // cdn.webfan.de | cdn.frdl.de
+  'FRDL_CDN_PROXY_REMOVE_QUERY'=>	true, 
+  'FRDL_CDN_SAVING_METHODS'=>	['GET'], 
+  'FRDL_REMOTE_PSR4_CACHE_DIR'=> __DIR__.\DIRECTORY_SEPARATOR
+				                     . '..'
+				                     .\DIRECTORY_SEPARATOR
+			                         .'runtime'.\DIRECTORY_SEPARATOR
+			                         .'cache'.\DIRECTORY_SEPARATOR
+			                         .'classes'.\DIRECTORY_SEPARATOR
+			                         .'psr4'.\DIRECTORY_SEPARATOR,	 
+/*
+  'FRDL_REMOTE_PSR4_CACHE_DIR'=> \sys_get_temp_dir().\DIRECTORY_SEPARATOR
+				                     . \get_current_user()
+				                     .\DIRECTORY_SEPARATOR
+			                         .'.frdl'.\DIRECTORY_SEPARATOR
+			                         .'dasafsf'.\DIRECTORY_SEPARATOR
+		                             .'shared'.\DIRECTORY_SEPARATOR
+			                         .'source'.\DIRECTORY_SEPARATOR
+			                         .'psr4'.\DIRECTORY_SEPARATOR,
+*/
+  'FRDL_REMOTE_PSR4_CACHE_LIMIT'=>	24 * 60 * 60, 
+  'FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'=>	24 * 60 * 60, 
   'ADMIN_EMAIL' => 'admin@'.$domain,
   'ADMIN_EMAIL_CONFIRMED' =>false,
   'NODE_PATH' => '/opt/plesk/node/12/bin/node',
@@ -2363,8 +2378,34 @@ Content-Length: 696
   'NPM_PATH' => '/opt/plesk/node/12/bin/npm',
   'autoupdate' => true,
   'CACHE_ASSETS_HTTP' => true,
+  'WEBFAT_ALLOW_PHP' => false,
+  'WEBFAT_ALLOW_HTML' => false,
+  'WEBFAT_ALLOW_HTML_FILES' => false,
+  'WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_PHP_INPUT' => [ ],
+  'WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_INPUT' => ['webf.at'],
+  'WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_FILES' => ['webf.at'],
   'installed_from_hps_blog_id' => null,
-  'stub' => null,
+  'stub' => null,	 
+  'jeytill' => [
+	   'dir'=> __DIR__.\DIRECTORY_SEPARATOR.'..',
+       'content-dir'=>'content',
+	   'hosts-dir' => __DIR__.\DIRECTORY_SEPARATOR.'..'.\DIRECTORY_SEPARATOR.'userdata'.\DIRECTORY_SEPARATOR.'sites'.\DIRECTORY_SEPARATOR,
+
+ 	//   'themes-dir'=>__DIR__.\DIRECTORY_SEPARATOR.'themes'.\DIRECTORY_SEPARATOR,
+	     'themes-dir'=>'themes',
+
+	   'configfile'=> __DIR__.\DIRECTORY_SEPARATOR.'..'.\DIRECTORY_SEPARATOR.'_config.yaml',			
+	   'parser' => [		   
+				//'html_input' => 'strip',           
+				'allow_unsafe_links' => false,					
+	   ],
+	  'frontmatter' => [
+		'assets-url' => '/assets', 
+		'favicon-url' => '/favicon.ico', 
+		'theme' => 'webfantized-standard-theme',
+	  ],
+  ],
+	 
 );
 			  
 --4444EVGuDPPT

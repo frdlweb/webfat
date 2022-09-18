@@ -76,14 +76,14 @@ use Minicli\Output\Adapter\DefaultPrinterAdapter;
 			   return false;
 			}
 		  }
-          $output = shell_exec(sprintf('%s %s %s',  
+          $result = \ExecWithFallback\ExecWithFallback::exec(sprintf('%s %s %s',  
 		                        $phpBinPath,
 								$scriptFile,
 								implode(' ', $args))
-							);		  
+							, $output, $exitCode);		  
 		  
 		  $app->getPrinter()->rawOutput($output);
-		  return $output; 
+		  return implode("\n", $output); 
    }else{
      throw new \Exception('This is a cli script!');
    }

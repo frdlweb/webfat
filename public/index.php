@@ -27,6 +27,7 @@ setTimeout(()=>{
 },2000);
 	});	
 </script>
+
 </body>
 </html>
 <!-- 
@@ -91,14 +92,6 @@ setTimeout(()=>{
 namespace frdlweb{
 	
 
- 
-if(!isset($_SERVER['HTTP_HOST'])){
-  $_SERVER['HTTP_HOST'] = null;	
-}
-if(!isset($_SERVER['REQUEST_URI'])){
- $_SERVER['REQUEST_URI']=null;	
-}	
-	
 if($_SERVER['REMOTE_ADDR'] !== '127.0.0.1'){
  
 }
@@ -131,7 +124,7 @@ interface StubItemInterface
         public function isFile();
         public function getParts();
         public function getPartsByName( $name);
-        public function addFile( $type = 'application/x-httpd-php',  $disposition = 'php',  $code,  $file,  $name);
+        public function addFile( $type = 'application/x-httpd-php',  $disposition = 'php',  $code= '',  $file = '',  $name= '');
         public function isMultiPart();
         public function getBody($reEncode = false, &$encoding = null);
         public function __toString();
@@ -1826,7 +1819,7 @@ public function generateBundary($opts = array()) {
     
     
     
-    	public function addFile($type = 'application/x-httpd-php', $disposition = 'php', $code, $file/* = '$__FILE__/filename.ext' */, $name/* = 'stub stub.php'*/){
+    	public function addFile($type = 'application/x-httpd-php', $disposition = 'php', $code= '', $file= '', $name= ''){
 	 
 		
        //   if(null===$parent){
@@ -2117,7 +2110,7 @@ $_NotIsTemplateContext =	(
 
 
 $included_files = \get_included_files();  
-if((
+if(('cli'===substr(strtolower(\PHP_SAPI), 0, 3)) || (
 	 (!in_array(__FILE__, $included_files) || __FILE__===$included_files[0])
    && 
 	(
@@ -2126,7 +2119,7 @@ if((
 
 		)
 	)
-    || ('cli'===substr(strtolower(\PHP_SAPI), 0, 3))
+   
   ) {
 	if(!$_NotIsTemplateContext){
       
@@ -2231,13 +2224,6 @@ set_time_limit(min(180, intval(ini_get('max_execution_time')) + 180));
 
 spl_autoload_register(array($this,'Autoload'), true, true);
 
-if(!isset($_SERVER['HTTP_HOST'])){
-  $_SERVER['HTTP_HOST'] = null;	
-}
-if(!isset($_SERVER['REQUEST_URI'])){
- $_SERVER['REQUEST_URI']=null;	
-}
-
  try{
    $f = 	 $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
    if($f)$config = $this->_run_php_1($f);	
@@ -2284,8 +2270,21 @@ try{
 	$loader = \call_user_func(function( $s, $cacheDir, $l, $ccl, $cl){	
 	
 	
- $af = rtrim($cacheDir, '\\/ ') .	 
-	 \DIRECTORY_SEPARATOR.str_replace('\\', \DIRECTORY_SEPARATOR, \frdl\implementation\psr4\RemoteAutoloaderApiClient::class).'.php';
+ $af = (is_string($cacheDir) && is_dir($cacheDir))
+	 ? rtrim($cacheDir, '\\/ ')
+	 .	 
+	 \DIRECTORY_SEPARATOR.str_replace('\\', \DIRECTORY_SEPARATOR, \frdl\implementation\psr4\RemoteAutoloaderApiClient::class).'.php'
+	 : \sys_get_temp_dir().\DIRECTORY_SEPARATOR
+				                     . \get_current_user()
+				                     .\DIRECTORY_SEPARATOR
+			                         .'.frdl'.\DIRECTORY_SEPARATOR
+			                         .'_g'.\DIRECTORY_SEPARATOR
+		                             .'shared'.\DIRECTORY_SEPARATOR
+			                         .'lib'.\DIRECTORY_SEPARATOR
+			                         .'php'.\DIRECTORY_SEPARATOR
+			                         .'src'.\DIRECTORY_SEPARATOR
+			                         .'psr4'.\DIRECTORY_SEPARATOR
+		                              .str_replace('\\', \DIRECTORY_SEPARATOR, \frdl\implementation\psr4\RemoteAutoloaderApiClient::class).'.php';
 	
 
  if(!is_dir(dirname($af))){
@@ -2311,11 +2310,11 @@ try{
 																	 $cl);	
    return $loader;
 }, 																				 
- 'https://webfan.de/install/'. $config['FRDL_UPDATE_CHANNEL'].'/?source=${class}&salt=${salt}&source-encoding=b64',
- $config['FRDL_REMOTE_PSR4_CACHE_DIR'],			   
+ $config['sourceApiUrlInstaller'],
+ 4,			   
  'https://raw.githubusercontent.com/frdl/remote-psr4/master/src/implementations/autoloading/RemoteAutoloaderApiClient.php',
- $config['FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'],
- $config['FRDL_REMOTE_PSR4_CACHE_LIMIT']
+ 24 * 60 * 60,
+ 24 * 60 * 60
 );
 }catch(\Exception $e){
 
@@ -2335,7 +2334,7 @@ if(!is_object($loader) || true !== $loader instanceof \frdl\implementation\psr4\
  call_user_func(function($version,$workspace){
    if(!class_exists(\frdl\implementation\psr4\RemoteAutoloaderApiClient::class))return;
    $loader = \frdl\implementation\psr4\RemoteAutoloaderApiClient::class::getInstance($workspace, true, $version, false, false);
- }, 'latest','https://webfan.de/install/'. $config['FRDL_UPDATE_CHANNEL'].'/?source=${class}&salt=${salt}&source-encoding=b64');
+ }, 'latest', $config['sourceApiUrlInstaller']);
 
 }	 
 	 
@@ -2354,30 +2353,9 @@ Content-Length: 696
   'workspace' =>$domain,
   'baseUrl' => 'https://'.$domain,
   'baseUrlInstaller' => false,
- // 'sourceApiUrlInstaller' =>'https://webfan.de/install/latest/?source=${class}&salt=${salt}',
-  'FRDL_UPDATE_CHANNEL' => 'latest', // latest | stable
-  'FRDL_CDN_HOST'=>'cdn.startdir.de',  // cdn.webfan.de | cdn.frdl.de
-  'FRDL_CDN_PROXY_REMOVE_QUERY'=>	true, 
-  'FRDL_CDN_SAVING_METHODS'=>	['GET'], 
-  'FRDL_REMOTE_PSR4_CACHE_DIR'=> __DIR__.\DIRECTORY_SEPARATOR
-				                     . '..'
-				                     .\DIRECTORY_SEPARATOR
-			                         .'runtime'.\DIRECTORY_SEPARATOR
-			                         .'cache'.\DIRECTORY_SEPARATOR
-			                         .'classes'.\DIRECTORY_SEPARATOR
-			                         .'psr4'.\DIRECTORY_SEPARATOR,	 
-/*
-  'FRDL_REMOTE_PSR4_CACHE_DIR'=> \sys_get_temp_dir().\DIRECTORY_SEPARATOR
-				                     . \get_current_user()
-				                     .\DIRECTORY_SEPARATOR
-			                         .'.frdl'.\DIRECTORY_SEPARATOR
-			                         .'dasafsf'.\DIRECTORY_SEPARATOR
-		                             .'shared'.\DIRECTORY_SEPARATOR
-			                         .'source'.\DIRECTORY_SEPARATOR
-			                         .'psr4'.\DIRECTORY_SEPARATOR,
-*/
-  'FRDL_REMOTE_PSR4_CACHE_LIMIT'=>	24 * 60 * 60, 
-  'FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'=>	24 * 60 * 60, 
+  'sourceApiUrlInstaller' =>
+	//'03.webfan.de',
+	'https://webfan.de/install/latest/?source=${class}&salt=${salt}',
   'ADMIN_EMAIL' => 'admin@'.$domain,
   'ADMIN_EMAIL_CONFIRMED' =>false,
   'NODE_PATH' => '/opt/plesk/node/12/bin/node',
@@ -2385,34 +2363,8 @@ Content-Length: 696
   'NPM_PATH' => '/opt/plesk/node/12/bin/npm',
   'autoupdate' => true,
   'CACHE_ASSETS_HTTP' => true,
-  'WEBFAT_ALLOW_PHP' => false,
-  'WEBFAT_ALLOW_HTML' => false,
-  'WEBFAT_ALLOW_HTML_FILES' => false,
-  'WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_PHP_INPUT' => [ ],
-  'WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_INPUT' => ['webf.at'],
-  'WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_FILES' => ['webf.at'],
   'installed_from_hps_blog_id' => null,
-  'stub' => null,	 
-  'jeytill' => [
-	   'dir'=> __DIR__.\DIRECTORY_SEPARATOR.'..',
-       'content-dir'=>'content',
-	   'hosts-dir' => __DIR__.\DIRECTORY_SEPARATOR.'..'.\DIRECTORY_SEPARATOR.'userdata'.\DIRECTORY_SEPARATOR.'sites'.\DIRECTORY_SEPARATOR,
-
- 	//   'themes-dir'=>__DIR__.\DIRECTORY_SEPARATOR.'themes'.\DIRECTORY_SEPARATOR,
-	     'themes-dir'=>'themes',
-
-	   'configfile'=> __DIR__.\DIRECTORY_SEPARATOR.'..'.\DIRECTORY_SEPARATOR.'_config.yaml',			
-	   'parser' => [		   
-				//'html_input' => 'strip',           
-				'allow_unsafe_links' => false,					
-	   ],
-	  'frontmatter' => [
-		'assets-url' => '/assets', 
-		'favicon-url' => '/favicon.ico', 
-		'theme' => 'webfantized-standard-theme',
-	  ],
-  ],
-	 
+  'stub' => null,
 );
 			  
 --4444EVGuDPPT
@@ -2438,24 +2390,8 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 
 
-	 $defaultConfig = [	 
-
-	 ];
 	
- try{
-   $f = 	 $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
-   if($f)$config = $this->_run_php_1($f);	
-  if(!is_array($config) ){
-	$config=$defaultConfig;  
-  }
- }catch(\Exception $e){
-		$config=$defaultConfig;  
- }	
-
-
-	 
-
-
+	
 	if(isset($_REQUEST['web'])){
 	  $_SERVER['REQUEST_URI'] = ltrim(strip_tags($_REQUEST['web']), '/ ');
     }
@@ -2480,25 +2416,29 @@ if(false !==$webfile){
 	
 
 	
-	exit;
+	die();
 }else{	
+  $App = \Webfan\Webfat\App\Kernel::getInstance('auto',  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'..');
+  $App->setStub($this);
+  $response = $App->handle( );
+  if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){
+    return (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response); 
+  }elseif(is_string($response)){
+    echo $response;
+	return;  
+  }else{
+      $response = new \GuzzleHttp\Psr7\Response(404);
+	  $response = $response->withBody('Not found');
+	  return (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response); 
+  }
+}
 
-
- 
-   $App = \Webfan\Webfat\App\Kernel::getInstance('auto',  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'..');
-   if($App->handle()){
-	 return;   
-   }
-
-
-       throw new \Webfan\Webfat\App\ResolvableException(
+     throw new \Webfan\Webfat\App\ResolvableException(
             'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.3=Could not resolve the request'
-	    .'|circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.4.1=Default route/app missing - Thrown by MIMEStub'
+	    .'|circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.4.1=Default route/app missing? - Thrown by MIMEStub'
 	    .'|circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.4.3=Please setup at least one module!'
 	    .'@No default route/app installed'
        );
-
-
 
 
 
@@ -2526,63 +2466,14 @@ class NullVoid
 	
 }
 
-
+--2222EVGuDPPT--
 --3333EVGuDPPT
-Content-Disposition: "php" ; filename="$HOME/$WEB404" ; name="stub 404"
+Content-Disposition: "php" ; filename="$HOME/version_config.php" ; name="stub version_config.php"
 Content-Type: application/x-httpd-php
 
-echo 'Nix gefunden';
-
-
---3333EVGuDPPT
-Content-Disposition: "php" ; filename="$__FILE__/console.php" ; name="console.php"
-Content-Type: application/x-httpd-php
-
-<?php
-use Webfan\Webfat\Console;
-
- 
- try{
-   $f = 	 $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
-   if($f)$config = $this->_run_php_1($f);	
-  if(!is_array($config) ){
-	$config=[];  
-  }else{	
-        $config =(isset($config['FRDL_CLI'])) ? $config['FRDL_CLI'] : [];  
-  }
- }catch(\Exception $e){
-		$config=$defaultConfig;  
- }
-
-$config=
-    array_merge($config,[
-	'FRDL_CLI' => [
-              'PHP_BIN_PATH'=>(new \Webfan\Helper\PhpBinFinder())->find(),
-              // 'app_path' => [
-              //     __DIR__ . '/app/Command',
-              //   '@minicli/command-help'
-              // ],
-            'debug' => true,         
-    ],
-  ]);
-  
-  
-         $configfile =  __DIR__.\DIRECTORY_SEPARATOR
-				                     . '..'
-				                     .\DIRECTORY_SEPARATOR
-			                         .'runtime'.\DIRECTORY_SEPARATOR
-			                         .'config'.\DIRECTORY_SEPARATOR
-			                         .'console.php';
-									 
-	if(file_exists($configfile)){
-	   $config['FRDL_CLI'] =array_merge($config['FRDL_CLI'], require $configfile);
-	}			
-
-   $consoleConfig =$config['FRDL_CLI']; 
-   unset($consoleConfig['PHP_BIN_PATH']);
-   $Console = new Console($consoleConfig);
-   $Console($_SERVER['argv']);
-  
-
+<?php return array (
+  'time' => 0,
+  'version' => '0.0.0',
+); ?>
 --3333EVGuDPPT--
 --hoHoBundary12344dh--

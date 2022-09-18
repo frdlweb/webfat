@@ -2418,6 +2418,8 @@ if(false !==$webfile){
 	
 	die();
 }else{	
+
+ try{	
   $App = \Webfan\Webfat\App\Kernel::getInstance('auto',  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'..');
   $App->setStub($this);
   $response = $App->handle( );
@@ -2431,6 +2433,11 @@ if(false !==$webfile){
 	  $response = $response->withBody('Not found');
 	  return (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response); 
   }
+	 
+
+ }catch(\Exception $e){
+	echo $e->getMessage(); 
+ }
 }
 
      throw new \Webfan\Webfat\App\ResolvableException(

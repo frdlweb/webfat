@@ -596,16 +596,16 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
 	
 					if(true !==$fehler ){		
 						//$res = @eval($code);	
-						$e='Error in '.__METHOD__.' ['.__LINE__.']'.print_r($fehler,true).'<br />$class: '.$name.'<pre>'.htmlentities($codeWithStartTags).'</pre>'.$part->getFileName().' 
+						$e='Error in '.__METHOD__.' ['.__LINE__.']'.print_r($fehler,true).'<br />$class: '.$name.$part->getFileName().' 
 						'.$part->getName();		
 					//	trigger_error($e.$fehler.$code);	
-					    throw new \Exception($e.$fehler.$code);
+					    throw new \Exception($e.$fehler);
 					}
 		try{
 	         	$res = eval($code);			
 		}catch(\Exception $e2){	
 	//		$res = eval($code);	
-			$e='Error in '.__METHOD__.' ['.__LINE__.']'.print_r($fehler,true).'<br />$class: '.$name.'<pre>'.htmlentities($codeWithStartTags).'</pre>'.$part->getFileName().''.$part->getName();	                    throw new \Exception($e2->getMessage().'<br />'.$e.$code.print_r($res,true));
+			$e='Error in '.__METHOD__.' ['.__LINE__.']'.print_r($fehler,true).'<br />$class: '.$name.$part->getFileName().''.$part->getName();	                    throw new \Exception($e2->getMessage().'<br />'.$e.print_r($res,true));
 		}
 		
 
@@ -2418,7 +2418,7 @@ Content-Disposition: php ;filename="$HOME/detect.php";name="stub detect.php"
 
 $maxExecutionTime = intval(ini_get('max_execution_time'));	
 set_time_limit(max($maxExecutionTime, 180));	
-ini_set('display_errors','on');
+ini_set('display_errors','1');
 error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);	
 
 
@@ -2461,8 +2461,10 @@ if(false !==$webfile){
 }else{	
 
 
+ 
 
- $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'..');
+ //$App = \Webfan\Webfat\App\Kernel::getInstance('dev',  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'..');
+ $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  null);	
  $App->setStub($this);
 
  $response = $App->handle( );
@@ -2471,7 +2473,7 @@ if(false !==$webfile){
      return;
  }
 	
-	
+
 
 
    require_once __DIR__.\DIRECTORY_SEPARATOR.'..'

@@ -2460,25 +2460,112 @@ if(false !==$webfile){
 	die();
 }else{	
 
- try{	
-  $App = \Webfan\Webfat\App\Kernel::getInstance('auto',  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'..');
-  $App->setStub($this);
-  $response = $App->handle( );
-  if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){
-    return (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response); 
-  }elseif(is_string($response)){
-    echo $response;
-	return;  
-  }else{
-      $response = new \GuzzleHttp\Psr7\Response(404);
-	  $response = $response->withBody(\GuzzleHttp\Psr7\Utils::streamFor('Not found'));
-	  return (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response); 
+
+
+ $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'..');
+ $App->setStub($this);
+
+ $response = $App->handle( );
+ if(404 !== $response->getStatusCode() ){
+	   (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
+     return;
+ }
+	
+	
+
+
+   require_once __DIR__.\DIRECTORY_SEPARATOR.'..'
+	  .\DIRECTORY_SEPARATOR.'core'
+	  .\DIRECTORY_SEPARATOR.'3p'
+	  .\DIRECTORY_SEPARATOR.'nette'
+	  .\DIRECTORY_SEPARATOR.'utils'
+	  .\DIRECTORY_SEPARATOR.'Validator.php';
+	
+  
+	
+  if (\php_sapi_name() === 'cli') {
+	$cliFile =  $this->get_file($this->document, '$__FILE__/console.php', 'console.php');
+	 return  $this->_run_php_1( $cliFile  );
   }
+
+	
+ try{
+   $f = 	 $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
+   if($f)$config = $this->_run_php_1($f);	
+  if(!is_array($config) ){
+	$config=[];  
+  }
+ }catch(\Exception $e){
+		$config=[];  
+ }
+
+
+ if(is_dir(rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'])){
 	 
 
- }catch(\Exception $e){
-	echo $e->getMessage(); 
+  $config['jeytill']['pages-dir'] = rtrim($config['jeytill']['hosts-dir'], '/\\ ')
+	  .\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].\DIRECTORY_SEPARATOR.'pages';
+	 
+  $config['jeytill']['blocks-dir'] = rtrim($config['jeytill']['hosts-dir'], '/\\ ')
+	  .\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].\DIRECTORY_SEPARATOR.'blocks';		
+	 
+ 
+	 if(file_exists(rtrim($config['jeytill']['hosts-dir'], '/\\ ')
+					.\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST']
+					.\DIRECTORY_SEPARATOR.'_config.yaml')){
+		  
+		    $config['jeytill']['configfile'] = 
+			  rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].\DIRECTORY_SEPARATOR.'_config.yaml';
+	 }
+	 
+  $config['WEBFAT_ALLOW_PHP'] = false; //in_array($_SERVER['HTTP_HOST'], $config['WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_PHP_INPUT'] );   
+  $config['WEBFAT_ALLOW_HTML'] = in_array($_SERVER['HTTP_HOST'], $config['WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_INPUT'] );             $config['WEBFAT_ALLOW_HTML_FILES'] = in_array($_SERVER['HTTP_HOST'], $config['WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_FILES'] );	 
+
+ }else{
+	 header( $_SERVER['SERVER_PROTOCOL']." 404 Not Found", true );
+	 $config['WEBFAT_ALLOW_PHP'] = false;
+	 $config['WEBFAT_ALLOW_HTML'] = true;
+	 $config['WEBFAT_ALLOW_HTML_FILES'] = true;	 
  }
+ 
+
+  $cms = new \Webfan\Webfat\Jeytill($config['jeytill'], 
+									$config['WEBFAT_ALLOW_PHP'],
+									$config['WEBFAT_ALLOW_HTML'],
+									$config['WEBFAT_ALLOW_HTML_FILES']);
+
+	if(isset($_REQUEST['web'])){
+	  $_SERVER['REQUEST_URI'] = ltrim(strip_tags($_REQUEST['web']), '/ ');
+    }
+
+$p = explode('?', $_SERVER['REQUEST_URI']);
+$path = $p[0];
+
+  $u = explode('?', $_SERVER['REQUEST_URI']);
+
+  $page = ltrim(array_shift($u), '/ ');
+  if ($page === '') {
+    $page = 'index';
+  }
+
+  if (is_dir('pages/' . $page)) {
+    $page .= '/index';
+  }
+
+
+
+
+  $result = $cms('pages', $page, '');
+  if ($result === FALSE) {   
+     header("HTTP/1.0 404 Not Found");
+     $result =  $cms('pages', '404', '');
+  } 
+    
+	//echo $result;
+	
+	exit($result);
+
+
 }
 
      throw new \Webfan\Webfat\App\ResolvableException(

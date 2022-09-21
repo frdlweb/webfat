@@ -2460,7 +2460,46 @@ if(false !==$webfile){
 	die();
 }else{	
 
+ if(isset($_GET['test'])){
+    echo \get_current_user();
+		$dir = getenv('FRDL_WORKSPACE');
+	 
 
+		$pathFinderStageOneApp = \Phpactor\PathFinder\PathFinder::fromAbsoluteDestinations(getcwd(), [
+                         'source' =>'<module>/<section>',
+                        'dev' =>  $_SERVER['DOCUMENT_ROOT'].'/../<module>/<section>/../..',
+                         'blue' =>  $_SERVER['DOCUMENT_ROOT'].'/../blue-deploy/<module>/<section>',
+                         'green' => $_SERVER['DOCUMENT_ROOT'].'/../green-deploy/<module>/<section>',
+          ]);
+
+        $pathFinderStageOneApp = $pathFinderStageOneApp->destinationsFor('deploy/app');
+
+
+		$pathFinder = \Phpactor\PathFinder\PathFinder::fromAbsoluteDestinations(getcwd(), [
+                         'source' => 'config/<module>/<section>.php',
+                         'dir' =>  $dir.'/config/<module>',
+                         'file' => $dir.'/config/<module>/<section>.php',
+          ]);
+
+        $targetsAdmin = $pathFinder->destinationsFor('config/superadmin/superadmin.php');
+		
+
+		$pathFinderWebrootDir = \Phpactor\PathFinder\PathFinder::fromAbsoluteDestinations(getcwd(), [
+                         'source' => '<module>/<section>.php',
+                         'dir' =>  $dir.'/<module>',
+                         'file' => $dir.'/<module>/<section>.php',
+          ]);
+
+        $targetsWebrootDir = $pathFinderWebrootDir->destinationsFor(sha1($_SERVER['DOCUMENT_ROOT']).'/app.php');
+	 
+
+	 
+	 	 
+	 print_r($pathFinderStageOneApp);
+	 print_r($targetsAdmin);
+	 print_r($targetsWebrootDir);
+		die();
+  }
  
 
  //$App = \Webfan\Webfat\App\Kernel::getInstance('dev',  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'..');

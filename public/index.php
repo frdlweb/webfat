@@ -2342,13 +2342,18 @@ Content-Length: 696
 
 
 	$domain =(isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-	
-  $webrootConfigFile = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.sha1(str_replace(getenv('HOME'), '', $_SERVER['DOCUMENT_ROOT'])).\DIRECTORY_SEPARATOR.'app.php';
+
+   $webrootConfigFile = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR
+	  .sha1(str_replace(getenv('HOME'), '', $_SERVER['DOCUMENT_ROOT'])).\DIRECTORY_SEPARATOR.'app.php';
 
 
   if(file_exists($webrootConfigFile)){
 	  $webrootConfig = require $webrootConfigFile;
-      $dirRemotePsr4 =$webrootConfig['stages'][$webrootConfig['stage']];	  
+      $dirRemotePsr4 =$webrootConfig['stages'][$webrootConfig['stage']]
+			                         .'runtime'.\DIRECTORY_SEPARATOR
+			                         .'cache'.\DIRECTORY_SEPARATOR
+			                         .'classes'.\DIRECTORY_SEPARATOR
+			                         .'psr4'.\DIRECTORY_SEPARATOR;	  
   }else{
 
 $dirRemotePsr4 = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR
@@ -2356,7 +2361,11 @@ $dirRemotePsr4 = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY
 	 .\DIRECTORY_SEPARATOR.'deployments'
 	 .\DIRECTORY_SEPARATOR.'blue'
 	 .\DIRECTORY_SEPARATOR.'deploy'
-	 .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
+	 .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR
+			                         .'runtime'.\DIRECTORY_SEPARATOR
+			                         .'cache'.\DIRECTORY_SEPARATOR
+			                         .'classes'.\DIRECTORY_SEPARATOR
+			                         .'psr4'.\DIRECTORY_SEPARATOR;
  
  if(!is_dir($dirRemotePsr4) && !mkdir($dirRemotePsr4, 0755, true)){
    $dirRemotePsr4 =  __DIR__.\DIRECTORY_SEPARATOR
@@ -2369,7 +2378,6 @@ $dirRemotePsr4 = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY
  }
 
   }
-
 
  return array (
   'workspace' =>$domain,

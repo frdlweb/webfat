@@ -2343,7 +2343,7 @@ Content-Length: 696
 
 	$domain =(isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 	
-  $webrootConfigFile = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.sha1($_SERVER['DOCUMENT_ROOT']).\DIRECTORY_SEPARATOR.'app.php';
+  $webrootConfigFile = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.sha1(str_replace(getenv('HOME'), '', $_SERVER['DOCUMENT_ROOT'])).\DIRECTORY_SEPARATOR.'app.php';
 
 
   if(file_exists($webrootConfigFile)){

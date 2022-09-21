@@ -6,6 +6,7 @@ The code will change in future!
 
 # Installation
 * Set your webserver/webhost www-directory to the `public` directory
+* You can go with the step by step guidance as this project grows by just [downloading ONE file](https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php).
 
 ## Multihost/Multisite Markdown Hub for Frdlweb CMS
 Place content files for `example.com` into `userdata/sites/example.com` as in the example code.

@@ -2342,7 +2342,35 @@ Content-Length: 696
 
 
 	$domain =(isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-		    
+	
+  $webrootConfigFile = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.sha1($_SERVER['DOCUMENT_ROOT']).\DIRECTORY_SEPARATOR.'app.php';
+
+
+  if(file_exists($webrootConfigFile)){
+	  $webrootConfig = require $webrootConfigFile;
+      $dirRemotePsr4 =$webrootConfig['stages'][$webrootConfig['stage']];	  
+  }else{
+
+$dirRemotePsr4 = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR
+	 .'1.3.6.1.4.1.37553.8.1.8.8.1958965301'
+	 .\DIRECTORY_SEPARATOR.'deployments'
+	 .\DIRECTORY_SEPARATOR.'blue'
+	 .\DIRECTORY_SEPARATOR.'deploy'
+	 .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
+ 
+ if(!is_dir($dirRemotePsr4) && !mkdir($dirRemotePsr4, 0755, true)){
+   $dirRemotePsr4 =  __DIR__.\DIRECTORY_SEPARATOR
+				                     . '..'
+				                     .\DIRECTORY_SEPARATOR
+			                         .'runtime'.\DIRECTORY_SEPARATOR
+			                         .'cache'.\DIRECTORY_SEPARATOR
+			                         .'classes'.\DIRECTORY_SEPARATOR
+			                         .'psr4'.\DIRECTORY_SEPARATOR;
+ }
+
+  }
+
+
  return array (
   'workspace' =>$domain,
   'baseUrl' => 'https://'.$domain,
@@ -2352,13 +2380,7 @@ Content-Length: 696
   'FRDL_CDN_HOST'=>'cdn.webfan.de',  // cdn.webfan.de | cdn.frdl.de
   'FRDL_CDN_PROXY_REMOVE_QUERY'=>	true, 
   'FRDL_CDN_SAVING_METHODS'=>	['GET'], 
-  'FRDL_REMOTE_PSR4_CACHE_DIR'=> __DIR__.\DIRECTORY_SEPARATOR
-				                     . '..'
-				                     .\DIRECTORY_SEPARATOR
-			                         .'runtime'.\DIRECTORY_SEPARATOR
-			                         .'cache'.\DIRECTORY_SEPARATOR
-			                         .'classes'.\DIRECTORY_SEPARATOR
-			                         .'psr4'.\DIRECTORY_SEPARATOR,	 
+  'FRDL_REMOTE_PSR4_CACHE_DIR'=>$dirRemotePsr4,
 /*
   'FRDL_REMOTE_PSR4_CACHE_DIR'=> \sys_get_temp_dir().\DIRECTORY_SEPARATOR
 				                     . \get_current_user()
@@ -2459,48 +2481,6 @@ if(false !==$webfile){
 	
 	die();
 }else{	
-
- if(isset($_GET['test'])){
-    echo \get_current_user();
-		$dir = getenv('FRDL_WORKSPACE');
-	 
-
-		$pathFinderStageOneApp = \Phpactor\PathFinder\PathFinder::fromAbsoluteDestinations(getcwd(), [
-                         'source' =>'<module>/<section>',
-                        'dev' =>  $_SERVER['DOCUMENT_ROOT'].'/../<module>/<section>/../..',
-                         'blue' =>  $_SERVER['DOCUMENT_ROOT'].'/../blue-deploy/<module>/<section>',
-                         'green' => $_SERVER['DOCUMENT_ROOT'].'/../green-deploy/<module>/<section>',
-          ]);
-
-        $pathFinderStageOneApp = $pathFinderStageOneApp->destinationsFor('deploy/app');
-
-
-		$pathFinder = \Phpactor\PathFinder\PathFinder::fromAbsoluteDestinations(getcwd(), [
-                         'source' => 'config/<module>/<section>.php',
-                         'dir' =>  $dir.'/config/<module>',
-                         'file' => $dir.'/config/<module>/<section>.php',
-          ]);
-
-        $targetsAdmin = $pathFinder->destinationsFor('config/superadmin/superadmin.php');
-		
-
-		$pathFinderWebrootDir = \Phpactor\PathFinder\PathFinder::fromAbsoluteDestinations(getcwd(), [
-                         'source' => '<module>/<section>.php',
-                         'dir' =>  $dir.'/<module>',
-                         'file' => $dir.'/<module>/<section>.php',
-          ]);
-
-        $targetsWebrootDir = $pathFinderWebrootDir->destinationsFor(sha1($_SERVER['DOCUMENT_ROOT']).'/app.php');
-	 
-
-	 
-	 	 
-	 print_r($pathFinderStageOneApp);
-	 print_r($targetsAdmin);
-	 print_r($targetsWebrootDir);
-		die();
-  }
- 
 
  //$App = \Webfan\Webfat\App\Kernel::getInstance('dev',  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'..');
  $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  null);	

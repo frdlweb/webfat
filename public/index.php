@@ -2350,6 +2350,7 @@ Content-Length: 696
   if(file_exists($webrootConfigFile)){
 	  $webrootConfig = require $webrootConfigFile;
       $dirRemotePsr4 =$webrootConfig['stages'][$webrootConfig['stage']]
+	                                         .\DIRECTORY_SEPARATOR
 			                         .'runtime'.\DIRECTORY_SEPARATOR
 			                         .'cache'.\DIRECTORY_SEPARATOR
 			                         .'classes'.\DIRECTORY_SEPARATOR

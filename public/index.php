@@ -2281,6 +2281,15 @@ $version = 'latest';
        $expires = 0;
 	 }
 	
+	 		
+	                if(!is_dir(dirname($expFile))){
+			   mkdir(dirname($expFile), 0755, true);	
+			}
+			
+			if(!is_dir(dirname($pubKeyFile))){
+			   mkdir(dirname($pubKeyFile), 0755, true);	
+			}
+	 
 	   if($expires > 0 && ($expires === time() || ($expires > time() - 3 && $expires < time() + 3))){
 		   sleep(3);
 	   }

@@ -86,7 +86,7 @@ The instance level is meant to be any "installation" or instance of the NCCD Sof
 
 spec: [1.3.6.1.4.1.37553.8.1.8.1.83642115915](https://registry.frdl.de/?goto=oid%3A1.3.6.1.4.1.37553.8.1.8.1.83642115915)
 
-ID: [weid:1-8-1-12FACTOR-7](https://registry.frdl.de/?goto=weid%3Aweid:1-8-1-12FACTOR-7)
+ID: [weid:1-8-1-12FACTOR-7](https://registry.frdl.de/?goto=weid%3A1-8-1-12FACTOR-7)
 
 If however possible, Webfat follows the [Twelve Factor Application Development Paradigma](https://12factor.net/).
 

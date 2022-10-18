@@ -2507,12 +2507,6 @@ if(false !==$webfile){
  $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  null);	
  $App->setStub($this);
  $App->setAppId('1.3.6.1.4.1.37553.8.1.8.8.1958965301');
-	
-  if(isset($_GET['test'])){
-	  print_r('<pre>');
-	  print_r($App->getSources());
-	  die();
-  }
 
  $response = $App->handle( );
  if(404 !== $response->getStatusCode() 	

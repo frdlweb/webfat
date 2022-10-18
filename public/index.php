@@ -117,9 +117,9 @@ if (!\interface_exists(StubHelperInterface::class, false)) {
 	
 if (!\interface_exists(StubItemInterface::class, false)) { 	
 interface StubItemInterface
-{	   
-	public function getMimeType();	  
-	public function getName() ;
+{
+	    public function getMimeType();
+	    public function getName() ;
         public function getFileName();
         public function isFile();
         public function getParts();
@@ -321,7 +321,7 @@ class Php
 
 
 
-namespace App\compiled\Instance\MimeStub5\MimeStubEntity{
+namespace App\compiled\Instance\MimeStub5\MimeStubEntity386448718{
 use frdl;
 use frdlweb\StubItemInterface as StubItemInterface;	 
 use frdlweb\StubHelperInterface as StubHelperInterface;
@@ -538,6 +538,8 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
 	 
 	public function _run_php_1(MimeStub5 $part, $class = null, ?bool $lint = null){
 	
+	
+	//	set_time_limit(min(900, ini_get('max_execution_time') + 300));
 			if(!isset($_ENV['FRDL_HPS_CACHE_DIR'])){
 			  $_ENV['FRDL_HPS_CACHE_DIR'] = getenv('FRDL_HPS_CACHE_DIR');	
 			}
@@ -571,6 +573,7 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
   $code = rtrim($code, '<?php> ');
   $codeWithStartTags = "<?php "."\n".$code."\n".'?>';	
 		
+	//	$codeWithStartTags ='<?php'."\n".$code;
 		$res = false;
 				  
 		$name = $class;
@@ -591,9 +594,9 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
 			    ? (new \frdl\Lint\Php($cacheDirLint) ) ->lintString($codeWithStartTags)
 			    : true;
 	
-					if(true !==$fehler ){			
-					   $e='Error in '.__METHOD__.'#'.__LINE__.': '.print_r($fehler,true).'<br />$class: '.$name.$part->getFileName().' 
-						'.$part->getName();	
+					if(true !==$fehler ){		
+						$e='Error in '.__METHOD__.' ['.__LINE__.']'.print_r($fehler,true).'<br />$class: '.$name.$part->getFileName().' 
+						'.$part->getName();		
 					    throw new \Exception($e.$fehler);
 					}
 		try{
@@ -601,7 +604,8 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
 		}catch(\Webfan\Webfat\App\ResolvableException $e3){	
 			throw $e3;
 		}catch(\Exception $e2){	
-			$e='Error in '.__METHOD__.'#'.__LINE__.': '.print_r($fehler,true).'<br />$class: '.$name.$part->getFileName().''.$part->getName();	
+			$e='Error in '.__METHOD__.' ['.__LINE__.']'.print_r($fehler,true).'<br />$class: '.$name.$part->getFileName().''
+				.$part->getName();	                
 			throw new \Exception($e2->getMessage().'<br />'.$e.print_r($res,true));
 		}
 		
@@ -695,7 +699,8 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
 			  }
 	 		 
 	 		 
-	 	$php = str_replace('define(\'\\___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___\', true);', '', $php);
+	 		 // $php = str_replace('define(\'___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___\', true);', 'define(\'___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___\', false);', $php);
+    		$php = str_replace('define(\'\\___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___\', true);', '', $php);
     		$php = str_replace('define(\'___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___\', true);', '', $php);
       		
 	        
@@ -704,7 +709,27 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
 	     $newNamespace = "App\compiled\Instance\MimeStub5\MimeStubEntity".mt_rand(1000000,999999999);
 	   
 	 
+	   /*
+    	    $php = preg_replace("/(".preg_quote('namespace App\compiled\Instance\MimeStub\MimeStubEntity218187677;').")/", 
+								'namespace '.\webfan\hps\Module::MODULE_NAMESPACE_FROM.';',
+								  $php);
+	   
+	//  $__FILE__ = 	   'web+fan://mime.stub.frdl/'.$newNamespace;	
+	
+	 
+	 
+	  $Compiler = new \webfan\hps\Compile\ModulePhpFile(0, 0, $php );
+	
 
+	   
+ // $Compiler->setConstant('__FILE__', '__FILE__', '__FILE__');		                                                       
+ // $Compiler->setConstant('__DIR__','__DIR__', '__DIR__');
+
+
+  $Compiler->setReplaceNamespace(\webfan\hps\Module::MODULE_NAMESPACE_FROM,$newNamespace);							  
+  $Compiler->code($php);
+  $php = $Compiler->compile();
+	  */
     	    $php = preg_replace("/(".preg_quote('namespace '.__NAMESPACE__.'{').")/", 
 								'namespace '.$newNamespace.'{',
 								  $php);	   
@@ -2440,8 +2465,7 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
  }catch(\Exception $e){
      $config=[];  
  }	
-	
-	
+
      $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
      $ShutdownTasks(function($config, $url, $file){
 		 if(true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'] ){	  
@@ -2451,6 +2475,7 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 			 }		 
 		 }																 
      }, $config, 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time(), __FILE__);    
+
 
    if(isset($_REQUEST['web'])){
 	  $_SERVER['REQUEST_URI'] = ltrim(strip_tags($_REQUEST['web']), '/ ');
@@ -2483,6 +2508,12 @@ if(false !==$webfile){
  $App->setStub($this);
  $App->setAppId('1.3.6.1.4.1.37553.8.1.8.8.1958965301');
 	
+  if(isset($_GET['test'])){
+	  print_r('<pre>');
+	  print_r($App->getSources());
+	  die();
+  }
+
  $response = $App->handle( );
  if(404 !== $response->getStatusCode() 	
 	|| !is_dir(rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST']) ){
@@ -2491,7 +2522,7 @@ if(false !==$webfile){
      return;
  }
 	
-	
+
 	
 	
  $patchValidatorFile =  $App->getDir('app')

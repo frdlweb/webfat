@@ -2466,15 +2466,15 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
  }	
 	
 	
-if(true === $config['autoupdate'] && filemtime(__FILE__) < time() - $config['AUTOUPDATE_INTERVAL'] ){
      $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
-     $ShutdownTasks(function($url, $file){
-	 $thisCode = file_get_contents($url);	
-	 if(false!==$thisCode){
-	   file_put_contents($file, trim($thisCode));
-	 }
-     }, 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time(), __FILE__);    
-}
+     $ShutdownTasks(function($config, $url, $file){
+		 if(true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'] ){	  
+			 $thisCode = file_get_contents($url);		  
+			 if(false!==$thisCode){	   
+				 file_put_contents($file, trim($thisCode));	  
+			 }		 
+		 }																 
+     }, $config, 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time(), __FILE__);    
 
    if(isset($_REQUEST['web'])){
 	  $_SERVER['REQUEST_URI'] = ltrim(strip_tags($_REQUEST['web']), '/ ');

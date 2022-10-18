@@ -2219,7 +2219,7 @@ Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.ph
 
 
 
-set_time_limit(min(180, intval(ini_get('max_execution_time')) + 90));
+
 
 
 spl_autoload_register(array($this,'Autoload'), true, true);
@@ -2399,6 +2399,7 @@ $dirRemotePsr4 = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY
   'wsdir' => dirname(__DIR__).'/.frdl/',
   'NPM_PATH' => '/opt/plesk/node/12/bin/npm',
   'autoupdate' => true,
+  'AUTOUPDATE_INTERVAL' => 24 * 60 * 60, 
   'CACHE_ASSETS_HTTP' => true,
   'WEBFAT_ALLOW_PHP' => false,
   'WEBFAT_ALLOW_HTML' => false,
@@ -2436,13 +2437,13 @@ Content-Disposition: php ;filename="$HOME/detect.php";name="stub detect.php"
 
 
 
-	
 
 $maxExecutionTime = intval(ini_get('max_execution_time'));	
-set_time_limit(max($maxExecutionTime, 180));	
-ini_set('display_errors','1');
+ if (strtolower(\php_sapi_name()) !== 'cli') {	 
+    set_time_limit(min(45, $maxExecutionTime));
+ }
+@ini_set('display_errors','1');
 error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);	
-
 
 
 	
@@ -2454,8 +2455,28 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 
 	
+ try{
+   $f = $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
+   if($f)$config = $this->_run_php_1($f);	
+  if(!is_array($config) ){
+	$config=[];  
+  }
+ }catch(\Exception $e){
+     $config=[];  
+ }	
 	
-	if(isset($_REQUEST['web'])){
+	
+if(true === $config['autoupdate'] && filemtime(__FILE__) < time() - $config['AUTOUPDATE_INTERVAL'] ){
+     $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
+     $ShutdownTasks(function($url, $file){
+	 $thisCode = file_get_contents($url);	
+	 if(false!==$thisCode){
+	   file_put_contents($file, trim($thisCode));
+	 }
+     }, 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time(), __FILE__);    
+}
+
+   if(isset($_REQUEST['web'])){
 	  $_SERVER['REQUEST_URI'] = ltrim(strip_tags($_REQUEST['web']), '/ ');
     }
 
@@ -2482,22 +2503,10 @@ if(false !==$webfile){
 	die();
 }else{	
 
-	 try{
-   $f = 	 $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
-   if($f)$config = $this->_run_php_1($f);	
-  if(!is_array($config) ){
-	$config=[];  
-  }
- }catch(\Exception $e){
-		$config=[];  
- }
-
-
-
- //$App = \Webfan\Webfat\App\Kernel::getInstance('dev',  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'..');
  $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  null);	
  $App->setStub($this);
-
+ $App->setAppId('1.3.6.1.4.1.37553.8.1.8.8.1958965301');
+	
  $response = $App->handle( );
  if(404 !== $response->getStatusCode() 	
 	|| !is_dir(rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST']) ){
@@ -2507,6 +2516,13 @@ if(false !==$webfile){
  }
 	
 
+
+
+
+	
+	
+	
+	
  $patchValidatorFile =  $App->getDir('app')
 	  .\DIRECTORY_SEPARATOR.'core'
 	  .\DIRECTORY_SEPARATOR.'3p'
@@ -2526,7 +2542,7 @@ if(false !==$webfile){
 	
   
 	
-  if (\php_sapi_name() === 'cli') {
+  if (strtolower(\php_sapi_name()) === 'cli') {
 	$cliFile =  $this->get_file($this->document, '$__FILE__/console.php', 'console.php');
 	 return  $this->_run_php_1( $cliFile  );
   }

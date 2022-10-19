@@ -2512,8 +2512,7 @@ if(false !==$webfile){
  if(404 !== $response->getStatusCode() 	
 	|| !is_dir(rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST']) ){
 	   (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
-	 exit;
-     return;
+	die();
  }
 	
 
@@ -2606,10 +2605,10 @@ $path = $p[0];
      $result =  $cms('pages', '404', '');
   } 
     
-	//echo $result;
+	echo $result;
 	
-	exit($result);
-
+	//exit($result);
+        die();
 
 }
 

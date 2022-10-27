@@ -88,13 +88,26 @@ setTimeout(()=>{
 *  OTHER DEALINGS IN THE SOFTWARE.
 * 
 *  - edited by webfan.de
-*/
-namespace frdlweb{
+*/ 
+namespace frdl\booting{
+ $maxExecutionTime = intval(ini_get('max_execution_time'));	
+ if (strtolower(\php_sapi_name()) !== 'cli') {	 
+    set_time_limit(min(45, max($maxExecutionTime, 45)));
+ }
+ @ini_set('display_errors','1');
+ error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);		
 	
-
-if($_SERVER['REMOTE_ADDR'] !== '127.0.0.1'){
- 
+		
+	if(!isset($_SERVER['HTTP_HOST'])){ 		
+		$_SERVER['HTTP_HOST'] = null;			
+	}	
+	if(!isset($_SERVER['REQUEST_URI'])){		
+		$_SERVER['REQUEST_URI']=null;			
+	}
 }
+
+
+namespace frdlweb{
 	
 
 if (!\interface_exists(StubHelperInterface::class, false)) {	
@@ -143,6 +156,9 @@ interface StubRunnerInterface
 	public function getInvoker();	
 	public function getShield();	
 	public function autoloading() : void;
+	public function config(?array $config = null, $trys = 0) : array;
+	public function configVersion(?array $config = null, $trys = 0) : array;		
+	public function getCodebase() :?\Frdlweb\Contract\Autoload\CodebaseInterface;
 }	
 }		
 	
@@ -150,6 +166,186 @@ interface StubRunnerInterface
 
 
 
+namespace Frdlweb\Contract\Autoload{
+	
+
+if (!\interface_exists(CodebaseInterface::class, false)) {	
+ interface CodebaseInterface
+ { 
+   const CHANNEL_LATEST = 'latest';
+   const CHANNEL_STABLE = 'stable';
+   const CHANNEL_FALLBACK = 'fallback';
+   const CHANNELS =[
+        self::CHANNEL_LATEST => self::CHANNEL_LATEST,
+        self::CHANNEL_STABLE => self::CHANNEL_STABLE,
+        self::CHANNEL_FALLBACK => self::CHANNEL_FALLBACK,
+	];
+	 
+   public function setUpdateChannel(string $channel); 
+   public function getUpdateChannel() : string; 
+   public function getRemotePsr4UrlTemplate() : string; 
+   public function getRemoteModulesBaseUrl() : string;
+   public function loadUpdateChannel(mixed $StubRunner = null) : string;
+ }
+} 
+}
+
+
+namespace frdl{
+
+if (!\class_exists(Codebase::class, false)) {		
+ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
+ {
+   protected $channels = null;
+   protected $channel = null;
+	
+   abstract public function loadUpdateChannel(mixed $StubRunner = null) : string; 
+	 
+   public function __construct(string $channel = null){
+	   $this->channels = [];
+	   
+	   $this->channels[self::CHANNEL_LATEST] = [
+		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
+		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/latest',
+		   
+	   ];
+		   
+	   $this->channels[self::CHANNEL_STABLE] = [
+		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
+		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/stable',
+		   
+	   ];	   
+	   
+	   $this->channels[self::CHANNEL_FALLBACK] = [
+		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
+		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/modules',		   
+	   ];   
+	   
+	   if(null !== $channel && isset(static::CHANNELS[$channel])){
+		   $this->setUpdateChannel(static::CHANNELS[$channel]);
+	   }else{
+		   $this->setUpdateChannel(static::CHANNELS[self::CHANNEL_LATEST]);
+	   }
+   }
+
+	 
+   public function setUpdateChannel(string $channel){
+	   $this->channel = $channel;
+	  return $this;
+   }
+	 
+   public function getUpdateChannel() : string{
+	   return $this->channel;
+   }
+	  
+   public function getRemotePsr4UrlTemplate() : string{
+	    return $this->channels[$this->getUpdateChannel()]['RemotePsr4UrlTemplate'];
+   }
+	  
+   public function getRemoteModulesBaseUrl() : string{
+	    return $this->channels[$this->getUpdateChannel()]['RemoteModulesBaseUrl'];
+   }
+	  	 
+ }
+}
+}
+
+
+namespace Webfan\Webfat{
+/**
+ * Base class for creating dynamic objects
+ *
+ * @author Petr Trofimov <petrofimov@yandex.ru>
+ * @see https://github.com/ptrofimov/jslikeobject
+ */
+
+if (!\class_exists(Codebase::class, false)) {	
+
+class Codebase extends \frdl\Codebase
+{
+	public function loadUpdateChannel(mixed $StubRunner = null) : string {
+		$configVersion = $StubRunner->configVersion();
+		$config = $StubRunner->config();
+		$save = false;
+		
+		if(!isset($configVersion['appId'])){
+			$configVersion['appId'] = '1.3.6.1.4.1.37553.8.1.8.8.1958965301'; 
+			$save = true;
+		}
+		
+		if(!isset($configVersion['channel'])){
+			$configVersion['channel'] = isset($config['FRDL_UPDATE_CHANNEL']) ? $config['FRDL_UPDATE_CHANNEL'] : 'latest'; 
+			$save = true;
+		}		
+		
+		if(true === $save){
+			$StubRunner->configVersion($configVersion);
+		}
+		
+		$this->setUpdateChannel($configVersion['channel']);
+		
+		return $this->getUpdateChannel();
+	}
+}
+}
+}
+
+
+
+namespace Psr\Http\Message{
+	
+	
+if (!\interface_exists(MessageInterface::class, false)) {		
+interface MessageInterface
+{
+    public function getProtocolVersion();
+    public function withProtocolVersion($version);
+    public function getHeaders();
+    public function hasHeader($name);
+    public function getHeader($name);
+    public function getHeaderLine($name);
+    public function withHeader($name, $value);
+    public function withAddedHeader($name, $value);
+    public function withoutHeader($name);
+    public function getBody();
+    public function withBody(StreamInterface $body);
+}
+}	
+	
+	
+if (!\interface_exists(RequestInterface::class, false)) {		
+interface RequestInterface extends MessageInterface
+{
+    public function getRequestTarget();
+    public function withRequestTarget($requestTarget);
+    public function getMethod();
+    public function withMethod($method);
+    public function getUri();
+    public function withUri(UriInterface $uri, $preserveHost = false);
+}
+}	
+	
+	
+if (!\interface_exists(ServerRequestInterface::class, false)) {	
+
+interface ServerRequestInterface extends RequestInterface
+{
+    public function getServerParams();
+    public function getCookieParams();
+    public function withCookieParams(array $cookies);
+    public function getQueryParams();
+    public function withQueryParams(array $query);
+    public function getUploadedFiles();
+    public function withUploadedFiles(array $uploadedFiles);
+    public function getParsedBody();
+    public function withParsedBody($data);
+    public function getAttributes();
+    public function getAttribute($name, $default = null);
+    public function withAttribute($name, $value);
+    public function withoutAttribute($name);
+}
+}
+}
 
 
 namespace frdl\Lint{
@@ -172,7 +368,7 @@ class Php
     public function getCacheDir()
     {
         if((null!==$this->cacheDir && !empty($this->cacheDir)) && is_dir($this->cacheDir)){
-        return $this->cacheDir;
+           return $this->cacheDir;
          }
 
            if(!isset($_ENV['FRDL_HPS_CACHE_DIR']))$_ENV['FRDL_HPS_CACHE_DIR']=getenv('FRDL_HPS_CACHE_DIR');
@@ -185,7 +381,7 @@ class Php
          $this->cacheDir = rtrim($this->cacheDir, '\\/'). \DIRECTORY_SEPARATOR.'lint';
 
          if(!is_dir($this->cacheDir)){
-        mkdir($this->cacheDir, 0755, true);
+           mkdir($this->cacheDir, 0775, true);
          }
 
 
@@ -321,7 +517,7 @@ class Php
 
 
 
-namespace App\compiled\Instance\MimeStub5\MimeStubEntity386448718{
+namespace App\compiled\Instance\MimeStub5\MimeStubEntity{
 use frdl;
 use frdlweb\StubItemInterface as StubItemInterface;	 
 use frdlweb\StubHelperInterface as StubHelperInterface;
@@ -330,24 +526,11 @@ use frdlweb\StubRunnerInterface as StubRunnerInterface;
 
 
 
-if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
-
-}
-
-
-
-
-
-
  class MimeVM implements StubHelperInterface
  {
- 	
- 	
+  	
  	public $e_level = E_USER_ERROR;
- 	
- //	protected $Request = false;
-  //	protected $Response = false;	
- 	
+
  	protected $raw = false;
  	protected $MIME = false;
  	
@@ -555,7 +738,7 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
 		
 	
 		if(!is_dir($cacheDirLint)){	
-			mkdir($cacheDirLint, 0755, true); 	
+			mkdir($cacheDirLint, 0775, true); 	
 		}
 		
 		
@@ -626,34 +809,13 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
 		}
 
         $this->initial_offset = $this->offset;
-		
-		
-		//$this->php = array(
-		//     '<?' => array(
-		//     
-		//     ),
-		//     '#!' => array(
-		//     
-		 //    ),
-		//     '#' => array(
-		//     
-		 //    ),
-		//);
-		
-	//	MimeStubApp::God()->addStreamWrapper( 'frdl', 'mime', $this,  true  ) ;
  	}
  	
  	
  	
  	
  	final public function __destruct(){
-			
-	//	try{
-			 if(is_resource($this->IO))fclose($this->IO);
-
-	//	}catch(\Exception $e){
-	//		trigger_error($e->getMessage(). ' in '.__METHOD__,  $this->e_level);
-	//	}
+	  if(is_resource($this->IO))fclose($this->IO);
 	}
 	
 	
@@ -675,7 +837,7 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
             'Undefined property via __set(): ' . $name .
             ' in ' . $trace[0]['file'] .
             ' on line ' . $trace[0]['line'],
-            E_USER_NOTICE);
+            \E_USER_NOTICE);
             
             
          return null;
@@ -698,8 +860,7 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
 			  	 $php = substr($code, 0, $this->initial_offset);
 			  }
 	 		 
-	 		 
-	 		 // $php = str_replace('define(\'___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___\', true);', 'define(\'___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___\', false);', $php);
+	
     		$php = str_replace('define(\'\\___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___\', true);', '', $php);
     		$php = str_replace('define(\'___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___\', true);', '', $php);
       		
@@ -709,27 +870,7 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
 	     $newNamespace = "App\compiled\Instance\MimeStub5\MimeStubEntity".mt_rand(1000000,999999999);
 	   
 	 
-	   /*
-    	    $php = preg_replace("/(".preg_quote('namespace App\compiled\Instance\MimeStub\MimeStubEntity218187677;').")/", 
-								'namespace '.\webfan\hps\Module::MODULE_NAMESPACE_FROM.';',
-								  $php);
-	   
-	//  $__FILE__ = 	   'web+fan://mime.stub.frdl/'.$newNamespace;	
-	
-	 
-	 
-	  $Compiler = new \webfan\hps\Compile\ModulePhpFile(0, 0, $php );
-	
 
-	   
- // $Compiler->setConstant('__FILE__', '__FILE__', '__FILE__');		                                                       
- // $Compiler->setConstant('__DIR__','__DIR__', '__DIR__');
-
-
-  $Compiler->setReplaceNamespace(\webfan\hps\Module::MODULE_NAMESPACE_FROM,$newNamespace);							  
-  $Compiler->code($php);
-  $php = $Compiler->compile();
-	  */
     	    $php = preg_replace("/(".preg_quote('namespace '.__NAMESPACE__.'{').")/", 
 								'namespace '.$newNamespace.'{',
 								  $php);	   
@@ -762,19 +903,6 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
 	 		return $this->MIME;
 	 	break;
 	 	
-	 	
-	 //	case 'request':	 
-	// 		return $this->Request;
-	// 	break;
-	 /*		
-	 	case 'context':	 
-	 		return $this->Context;
-	 	break;
-	 		
-	 	case 'response':	 
-	 		return $this->Response;
-	 	break;
-	 */	
 	 	default:
          return null;	 	
 	 	break;
@@ -785,7 +913,7 @@ if(!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){
             'Undefined property via __get(): ' . $name .
             ' in ' . $trace[0]['file'] .
             ' on line ' . $trace[0]['line'],
-            E_USER_NOTICE);
+            \E_USER_NOTICE);
             
             
          return null;
@@ -1028,7 +1156,7 @@ public function generateBundary($opts = array()) {
             'Undefined property via __set(): ' . $name .
             ' in ' . $trace[0]['file'] .
             ' on line ' . $trace[0]['line'],
-            E_USER_NOTICE);
+            \E_USER_NOTICE);
             
             
          return null;
@@ -1087,7 +1215,7 @@ public function generateBundary($opts = array()) {
             'Undefined property via __get(): ' . $name .
             ' in ' . $trace[0]['file'] .
             ' on line ' . $trace[0]['line'],
-            E_USER_NOTICE);
+            \E_USER_NOTICE);
             
             
          return null;
@@ -1182,7 +1310,7 @@ public function generateBundary($opts = array()) {
             'Undefined property via __call(): ' . $name .
             ' in ' . $trace[0]['file'] .
             ' on line ' . $trace[0]['line'],
-            E_USER_NOTICE);
+            \E_USER_NOTICE);
             
             
          return null;
@@ -1222,7 +1350,7 @@ public function generateBundary($opts = array()) {
             'Undefined property via __callStatic(): ' . $name .
             ' in ' . $trace[0]['file'] .
             ' on line ' . $trace[0]['line'],
-            E_USER_NOTICE);
+            \E_USER_NOTICE);
             
             
          return null;
@@ -1901,12 +2029,7 @@ $codeWrap.= "\r\n"."\r\n". trim($code);
 }
 
 	
-$maxExecutionTime = intval(ini_get('max_execution_time'));	
-set_time_limit(max($maxExecutionTime, 180));	
-	
-	
-ini_set('display_errors','on');
-error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);	
+
 	
 
 class MimeStubIndex extends MimeStub5 {
@@ -2090,7 +2213,7 @@ chdir($_cwd);
 
  	$MimeVM = new MimeVM($args[0]);
  	if($doRun){
-		set_time_limit(min(900, ini_get('max_execution_time') + 300));
+	//	set_time_limit(min(900, ini_get('max_execution_time') + 300));
  
 	//	if (!headers_sent()){ 	  
 //			header_remove(); 	
@@ -2126,9 +2249,12 @@ if(('cli'===substr(strtolower(\PHP_SAPI), 0, 3)) || (
       
 /* die('Warning: Suspecious context! Solution: Just download this the right way from https://frdl.webfan.de/install/ or comment out line '.__LINE__.' of '.basename(__FILE__));  */
 	}
-    $MimeVM = $run(__FILE__, true);
+  //  $MimeVM = $run(__FILE__, true);
+	$MimeVM = $run(__FILE__, false);
+	$runStubOnInclude = true;
 }else{
 	 $MimeVM = $run(__FILE__, false);
+	$runStubOnInclude = false;
 }
 
 	
@@ -2136,17 +2262,16 @@ if(('cli'===substr(strtolower(\PHP_SAPI), 0, 3)) || (
 class StubRunner implements StubRunnerInterface
 {
 	protected $MimeVM = null;
+	protected $Codebase = null;
 	public function __construct(?StubHelperInterface $MimeVM){
 		$THAT = &$this;
 		$this->MimeVM=$MimeVM;
-		
-
 	}
  	public function loginRootUser($username = null, $password = null) : bool{
-		return \Webfan\App\Shield::getInstance($this->getStub(), \frdl\i::c(), false)->isAdmin(null,true, $username, $password);
+		throw new \Exception('Not implemented yet or deprectaed: '.__METHOD__);
 	}
 	public function isRootUser() : bool{
-		return \Webfan\App\Shield::getInstance($this->getStub(), \frdl\i::c(), false)->isAdmin(null,false);
+		throw new \Exception('Not implemented yet or deprectaed: '.__METHOD__);
 	}
 	public function getStubVM() : StubHelperInterface{
 		return $this->MimeVM;
@@ -2154,13 +2279,13 @@ class StubRunner implements StubRunnerInterface
 	public function getStub() : StubItemInterface{
 		return $this->MimeVM->document;
 	}
-	public function __invoke() :?StubHelperInterface{
-		// $vm = $this->MimeVM; 
-      //   return $vm('run');
-		
-		 	//$MimeVM = new MimeVM(__FILE__);
-		   // $MimeVM('run');	 
- 	//  return $MimeVM;
+	public function __invoke() :?StubHelperInterface{	
+
+		if(defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){ 
+			throw new \Exception('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___ is defined in '.__FILE__.' '.__LINE__);
+		}
+
+		$this->autoloading();	
 		$this->MimeVM->runStubs();
 		return $this->MimeVM;
 	}
@@ -2168,21 +2293,199 @@ class StubRunner implements StubRunnerInterface
 		return [$this, '__invoke']; 
 	}
 	public function autoloading() : void{
-		// $file_1 = $this->getStubVM()->get_file($this->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php');
-		//print_r($file_1);
+		\spl_autoload_register([$this->getStubVM(),'Autoload'], true, true);
+		 $this->autoloadRemoteCodebase();
 		 $this->getStubVM()->_run_php_1( $this->getStubVM()->get_file($this->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
 		 $this->getStubVM()->_run_php_1( $this->getStubVM()->get_file($this->getStub(), '$HOME/detect.php', 'stub detect.php')); 
-		
-	//	$AppShield = \Webfan\App\Shield::getInstance($this->getStubVM(), \frdl\i::c());
-
 	}
 	
 	public function getShield(){
-		return \Webfan\App\Shield::getInstance($this->getStub(), \frdl\i::c(), false);
+		throw new \Exception('Not implemented yet or deprectaed: '.__METHOD__);
 	}
+	
+    public function config(?array $config = null, $trys = 0) : array{
+		  $trys++;
+		
+          try{  
+			  $f =  $this->getStubVM()->get_file($this->getStub(), '$HOME/apc_config.php', 'stub apc_config.php'); 
+			  if($f)$conf = $this->getStubVM()->_run_php_1($f);	 
+			  if(!is_array($conf) ){
+				  $conf=[];  
+			  } 
+		  }catch(\Exception $e){  
+			  $conf=[];   
+		  }
+		
+		    if(null === $config){
+			  return $conf;	
+			}
+		
+               $export = array_merge($conf, $config);
+		       $varExports = var_export($export, true);
+		
+      		  $this->getStubVM()->get_file($this->getStub(), '$HOME/apc_config.php', 'stub apc_config.php')
+			  ->  setBody('
+			    if(file_exists("'.$this->getStubVM()->location.'.apc_config.php")){
+				  return require("'.$this->getStubVM()->location.'.apc_config.php");
+				}
+			    return '.$varExports.';
+			  ')
+			  ;
+		
+		       file_put_contents($this->getStubVM()->location.'.apc_config.php', '<?php
+			        return '.$varExports.';
+               ');
+
+		$fp = fopen($this->getStubVM()->location, 'w+');
+		if (flock($fp, \LOCK_EX | \LOCK_NB)) {  
+			register_shutdown_function(function($fp){
+				if(is_resource($fp))@flock($fp, \LOCK_UN);
+				if(is_resource($fp))fclose($fp);
+			}, $fp);
+			fwrite($fp, $this->getStubVM()->__toString());   
+			flock($fp, \LOCK_UN);
+		} else {  
+			//echo 'can\'t lock';
+			fclose($fp);
+			if($trys < 999999){
+				set_time_limit(min(45, max(intval(ini_get('max_execution_time')), 45)));
+				usleep(100);
+				return $this->config($config, $trys);
+			}
+			throw new \Exception('Cannot log stub in '.__METHOD__);
+		}
+		fclose($fp);
+	   return $export;
+	}
+	
+	public function configVersion(?array $config = null, $trys = 0) : array{
+		  $trys++;
+		
+          try{  
+			  $f =  $this->getStubVM()->get_file($this->getStub(), '$HOME/version_config.php', 'stub version_config.php'); 
+			  if($f)$conf = $this->getStubVM()->_run_php_1($f);	 
+			  if(!is_array($conf) ){
+				  $conf=[];  
+			  } 
+		  }catch(\Exception $e){  
+			  $conf=[];   
+		  }
+		
+		    if(null === $config){
+			  return $conf;	
+			}
+		
+               $export = array_merge($conf, $config);		       
+		       $varExports = var_export($export, true);
+		
+      		  $this->getStubVM()->get_file($this->getStub(), '$HOME/version_config.php', 'stub version_config.php')
+			  ->  setBody('
+			    if(file_exists("'.$this->getStubVM()->location.'.version_config.php")){
+				  return require("'.$this->getStubVM()->location.'.version_config.php");
+				}
+			    return '.$varExports.';
+			  ')
+			  ;
+		
+		      		       
+		       file_put_contents($this->getStubVM()->location.'.version_config.php', '<?php
+			        return '.$varExports.';
+               ');
+
+		$fp = fopen($this->getStubVM()->location, 'w+');
+		if (flock($fp, \LOCK_EX | \LOCK_NB)) {  
+			register_shutdown_function(function($fp){
+				if(is_resource($fp))@flock($fp, \LOCK_UN);
+				if(is_resource($fp))fclose($fp);
+			}, $fp);
+			fwrite($fp, $this->getStubVM()->__toString());   
+			flock($fp, \LOCK_UN);
+		} else {  
+			//echo 'can\'t lock';
+			fclose($fp);
+			if($trys < 999999){
+				set_time_limit(min(45, max(intval(ini_get('max_execution_time')), 45)));
+				usleep(100);
+				return $this->config($config, $trys);
+			}
+			throw new \Exception('Cannot log stub in '.__METHOD__);
+		}
+		fclose($fp);
+	   return $export;		
+	}
+				
+	public function getCodebase() :?\Frdlweb\Contract\Autoload\CodebaseInterface{
+		if(null === $this->Codebase){
+			$this->Codebase = new \Webfan\Webfat\Codebase();
+			$this->Codebase->loadUpdateChannel($this);
+		}
+		return $this->Codebase;
+	}
+	
+	protected function autoloadRemoteCodebase(){
+		$configVersion = $this->configVersion();
+		$config = $this->config();
+		$codebase = $this->getCodebase(); 
+		
+		$loader = false;
+		
+		try{
+	
+			$loader = \call_user_func(function($version, $s, $cacheDir, $l, $ccl, $cl) {	 
+				$af = rtrim($cacheDir, '\\/ ') 
+					.\DIRECTORY_SEPARATOR
+					.str_replace('\\', \DIRECTORY_SEPARATOR, \frdl\implementation\psr4\RemoteAutoloaderApiClient::class).'.php';
+	
+				if(!is_dir(dirname($af))){	
+					mkdir( dirname($af) , 0775 , true); 
+				}
+             	
+ 
+				if(!file_exists($af) || filemtime($af) < time() - $ccl){ 
+					file_put_contents($af, file_get_contents($l));	
+				}
+      
+				if(!\class_exists(\frdl\implementation\psr4\RemoteAutoloaderApiClient::class)){   					
+					require $af;         
+				}	
+		
+		
+                 $loader = \frdl\implementation\psr4\RemoteAutoloaderApiClient::getInstance($s,
+																	 false, 
+																	 $version,
+																	 false,
+																	 false, 
+																	 null/*[]*/,
+																	 $cacheDir/*null*/, 
+																	 $cl);	
+		
+     		
+		          $loader->withWebfanWebfatDefaultSettings($cacheDir);  
+		          $loader->register(false);	
+		
+                 return $loader;
+      }, 																				 
+         $codebase->getUpdateChannel(),
+		 $codebase->getRemotePsr4UrlTemplate(),				
+		 $config['FRDL_REMOTE_PSR4_CACHE_DIR'],			    
+		'https://raw.githubusercontent.com/frdl/remote-psr4/master/src/implementations/autoloading/RemoteAutoloaderApiClient.php', 			 
+									  $config['FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'],
+									  $config['FRDL_REMOTE_PSR4_CACHE_LIMIT']
+									 );
+
+		}catch(\Exception $e){ 
+			$loader = false; 
+			throw $e;
+		}	
+		return $loader;
+	}				
 }
+	
+				
 	$StubRunner = new StubRunner($MimeVM);
-    $StubRunner();
+    if(true===$runStubOnInclude){
+		$StubRunner();
+	}
 	return $StubRunner;
 }//namespace
 
@@ -2222,107 +2525,6 @@ Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.ph
 
 
 
-
-spl_autoload_register(array($this,'Autoload'), true, true);
-
-if(!isset($_SERVER['HTTP_HOST'])){
-  $_SERVER['HTTP_HOST'] = null;	
-}
-if(!isset($_SERVER['REQUEST_URI'])){
- $_SERVER['REQUEST_URI']=null;	
-}
-
- try{
-   $f = 	 $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
-   if($f)$config = $this->_run_php_1($f);	
-  if(!is_array($config) ){
-	$config=[];  
-  }
- }catch(\Exception $e){
-		$config=[];  
- }
-
-
- $configChanged = false;
-
-  if(!isset($config['$HOME']) ){
-	  $config['$HOME'] = getenv('FRDL_HOME');
-      $configChanged = true;
-  }
-  
-  if(!isset($config['workspace']) ){
-	$config['workspace'] = 'frdl.webfan.de';  
-      $configChanged = true;
-  }
-
-
-
-$workspace = $config['workspace'];   
-$version = 'latest'; 
-
- try{
-  $f = $this->get_file($this->document, '$HOME/version_config.php', 'stub version_config.php');	
-  if($f)$version = $this->_run_php_1($f);	
-  if(is_array($version) && isset($version['version']) ){
-	$version=$version['version'];  
-  }
- }catch(\Exception $e){
-	$version = 'latest'; 
- }
-
-
-
- $loader = false;
-
-try{
-	$loader = \call_user_func(function( $s, $cacheDir, $l, $ccl, $cl) {	
-	
-	
- $af = rtrim($cacheDir, '\\/ ') .	 
-	 \DIRECTORY_SEPARATOR.str_replace('\\', \DIRECTORY_SEPARATOR, \frdl\implementation\psr4\RemoteAutoloaderApiClient::class).'.php';
-	
-
- if(!is_dir(dirname($af))){
-	mkdir( dirname($af) , 0777 , true);
- }
-             	
-	
- if(!file_exists($af) || filemtime($af) < time() - $ccl){
-   file_put_contents($af, file_get_contents($l));	
- }
-         if(!\class_exists(\frdl\implementation\psr4\RemoteAutoloaderApiClient::class)){
-                 require $af;
-         }	
-		
-		
-   $loader = \frdl\implementation\psr4\RemoteAutoloaderApiClient::getInstance($s,
-																	 false, 
-																	 '202220dd426-4ss56',
-																	 false,
-																	 false, 
-																	 null/*[]*/,
-																	 $cacheDir/*null*/, 
-																	 $cl);	
-		
-     		
-		$loader->withWebfanWebfatDefaultSettings($cacheDir);  
-		$loader->register(false);	
-		
-   return $loader;
-}, 																				 
- 'https://webfan.de/install/'. $config['FRDL_UPDATE_CHANNEL'].'/?source=${class}&salt=${salt}&source-encoding=b64',
- $config['FRDL_REMOTE_PSR4_CACHE_DIR'],			   
- 'https://raw.githubusercontent.com/frdl/remote-psr4/master/src/implementations/autoloading/RemoteAutoloaderApiClient.php',
- $config['FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'],
- $config['FRDL_REMOTE_PSR4_CACHE_LIMIT']
-);
-}catch(\Exception $e){
-
-  $loader = false;
-  throw $e;
-}
-
- 
 	 
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
@@ -2331,6 +2533,12 @@ Content-Md5: 4c9416d7e0993fcd4e3f6d24daa18a89
 Content-Sha1: 983665e55e90e5f577946dc81ed3bf6937050848
 Content-Length: 696
 
+
+	
+	 			  
+	if(file_exists($this->location.'.apc_config.php')){
+	     return require $this->location.'.apc_config.php';				
+	}
 
 	$domain =(isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 	
@@ -2348,7 +2556,7 @@ Content-Length: 696
 			                         .'psr4'.\DIRECTORY_SEPARATOR;	  
   }else{
 
-$dirRemotePsr4 = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR
+	  $dirRemotePsr4 = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR
 	 .'1.3.6.1.4.1.37553.8.1.8.8.1958965301'
 	 .\DIRECTORY_SEPARATOR.'deployments'
 	 .\DIRECTORY_SEPARATOR.'blue'
@@ -2358,8 +2566,23 @@ $dirRemotePsr4 = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY
 			                         .'cache'.\DIRECTORY_SEPARATOR
 			                         .'classes'.\DIRECTORY_SEPARATOR
 			                         .'psr4'.\DIRECTORY_SEPARATOR;
- 
- if(!is_dir($dirRemotePsr4) && !mkdir($dirRemotePsr4, 0755, true)){
+
+
+ if(!is_dir($dirRemotePsr4) && !mkdir($dirRemotePsr4, 0775, true)){
+
+   $dirRemotePsr4 = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR	   
+	 .'global'
+	 .\DIRECTORY_SEPARATOR.'deployments'
+	 .\DIRECTORY_SEPARATOR.'blue'
+	 .\DIRECTORY_SEPARATOR.'deploy'
+	 .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR
+			                         .'runtime'.\DIRECTORY_SEPARATOR
+			                         .'cache'.\DIRECTORY_SEPARATOR
+			                         .'classes'.\DIRECTORY_SEPARATOR
+			                         .'psr4'.\DIRECTORY_SEPARATOR;
+ }
+
+ if(!is_dir($dirRemotePsr4) && !mkdir($dirRemotePsr4, 0775, true)){
    $dirRemotePsr4 =  __DIR__.\DIRECTORY_SEPARATOR
 				                     . '..'
 				                     .\DIRECTORY_SEPARATOR
@@ -2378,7 +2601,7 @@ $dirRemotePsr4 = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY
   'baseUrlInstaller' => false,
  // 'sourceApiUrlInstaller' =>'https://webfan.de/install/latest/?source=${class}&salt=${salt}',
   'FRDL_UPDATE_CHANNEL' => 'latest', // latest | stable
-  'FRDL_CDN_HOST'=>'cdn.webfan.de',  // cdn.webfan.de | cdn.frdl.de
+  'FRDL_CDN_HOST'=>'cdn.startdir.de',  // cdn.webfan.de | cdn.frdl.de
   'FRDL_CDN_PROXY_REMOVE_QUERY'=>	true, 
   'FRDL_CDN_SAVING_METHODS'=>	['GET'], 
   'FRDL_REMOTE_PSR4_CACHE_DIR'=>$dirRemotePsr4,
@@ -2477,6 +2700,32 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
      }, $config, 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time(), __FILE__);    
 
 
+
+																	   
+ $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  null);	
+ $App->setStub($this);
+ $App->setAppId('1.3.6.1.4.1.37553.8.1.8.8.1958965301');
+
+ $response = $App->handle( );
+	
+  if(isset($_GET['test'])){
+     $require = $App->getContainer()->get('require');
+      $test = $require('test');
+      print_r($test);
+    die();
+  }
+
+ if(404 !== $response->getStatusCode() 	
+	|| !is_dir(rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST']) ){
+	   (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
+	die();
+ }
+	
+																	   
+																	   
+																	   
+																	   
+																	   
    if(isset($_REQUEST['web'])){
 	  $_SERVER['REQUEST_URI'] = ltrim(strip_tags($_REQUEST['web']), '/ ');
     }
@@ -2504,17 +2753,6 @@ if(false !==$webfile){
 	die();
 }else{	
 
- $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  null);	
- $App->setStub($this);
- $App->setAppId('1.3.6.1.4.1.37553.8.1.8.8.1958965301');
-
- $response = $App->handle( );
- if(404 !== $response->getStatusCode() 	
-	|| !is_dir(rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST']) ){
-	   (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
-	die();
- }
-	
 
 	
 	
@@ -2527,7 +2765,7 @@ if(false !==$webfile){
 
 	if(!file_exists($patchValidatorFile)){
 		if(!is_dir(dirname($patchValidatorFile))){
-          mkdir(dirname($patchValidatorFile), 0755, true);
+          mkdir(dirname($patchValidatorFile), 0775, true);
 		}
        file_put_contents($patchValidatorFile, 
 						 file_get_contents('https://raw.githubusercontent.com/frdlweb/webfat/main/core/3p/nette/utils/Validator.php'));
@@ -2605,10 +2843,10 @@ $path = $p[0];
      $result =  $cms('pages', '404', '');
   } 
     
-	echo $result;
+	//echo $result;
 	
-	//exit($result);
-        die();
+	exit($result);
+
 
 }
 
@@ -2650,7 +2888,15 @@ class NullVoid
 Content-Disposition: "php" ; filename="$HOME/version_config.php" ; name="stub version_config.php"
 Content-Type: application/x-httpd-php
 
-<?php return array (
+<?php
+	
+	
+	if(file_exists($this->location.'.version_config.php')){
+	     return require $this->location.'.version_config.php';				
+	}
+
+	return array (
+  //'appId' => '1.3.6.1.4.1.37553.8.1.8.8.1958965301',
   'time' => 0,
   'version' => '0.0.0',
 ); ?>

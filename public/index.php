@@ -2693,7 +2693,7 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
      $ShutdownTasks(function($config, $url, $file){
 		 if(true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'] ){	  
 			 $thisCode = file_get_contents($url);		  
-			 if(false!==$thisCode){	   
+			 if(false!==$thisCode && true === (new \frdl\Lint\Php($cacheDirLint) )->lintString($thisCode) ){	   
 				 file_put_contents($file, trim($thisCode));	  
 			 }		 
 		 }																 

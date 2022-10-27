@@ -92,7 +92,7 @@ setTimeout(()=>{
 namespace frdl\booting{
  $maxExecutionTime = intval(ini_get('max_execution_time'));	
  if (strtolower(\php_sapi_name()) !== 'cli') {	 
-    set_time_limit(min(45, max($maxExecutionTime, 45)));
+    @set_time_limit(min(45, max($maxExecutionTime, 45)));
  }
  @ini_set('display_errors','1');
  error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);		
@@ -122,7 +122,8 @@ if (!\interface_exists(StubHelperInterface::class, false)) {
   public function __toString();	
   public function __invoke(); 	
   public function __call($name, $arguments);
-  public function getFileAttachment($file = null, $offset = null);	   
+  public function getFileAttachment($file = null, $offset = null);	
+  public function hugRunner(mixed $runner);
  }
 } 
  
@@ -152,13 +153,16 @@ interface StubRunnerInterface
 	public function isRootUser() : bool;
 	public function getStubVM() : StubHelperInterface;	
 	public function getStub() : StubItemInterface;		
-	public function __invoke() :?StubHelperInterface;	
+	public function __invoke() :?StubHelperInterface;		
+    public function hugVM(?StubHelperInterface $MimeVM);
 	public function getInvoker();	
 	public function getShield();	
 	public function autoloading() : void;
 	public function config(?array $config = null, $trys = 0) : array;
 	public function configVersion(?array $config = null, $trys = 0) : array;		
 	public function getCodebase() :?\Frdlweb\Contract\Autoload\CodebaseInterface;
+	public function getWebrootConfigDirectory() : string;
+	public function getApplicationsDirectory() : string;
 }	
 }		
 	
@@ -268,8 +272,9 @@ class Codebase extends \frdl\Codebase
 		$config = $StubRunner->config();
 		$save = false;
 		
-		if(!isset($configVersion['appId'])){
-			$configVersion['appId'] = '1.3.6.1.4.1.37553.8.1.8.8.1958965301'; 
+		if(!isset($configVersion['appId'])){	
+			$configVersion['appId'] = 'oid:1.3.6.1.4.1.37553.8.1.8.8.1958965301'; 
+			/****$configVersion['appId'] = '@@@APPID@@@';*****/
 			$save = true;
 		}
 		
@@ -277,8 +282,8 @@ class Codebase extends \frdl\Codebase
 			$configVersion['channel'] = isset($config['FRDL_UPDATE_CHANNEL']) ? $config['FRDL_UPDATE_CHANNEL'] : 'latest'; 
 			$save = true;
 		}		
-		
-		if(true === $save){
+	
+		if(true === $save && null !== $StubRunner){
 			$StubRunner->configVersion($configVersion);
 		}
 		
@@ -543,7 +548,7 @@ use frdlweb\StubRunnerInterface as StubRunnerInterface;
  	protected $host = false;
  	protected $mode = false;
  	protected $offset = false;
- 	
+ 	protected $runner = false;
  	
  //	protected $Context = false; 	
  //	protected $Env = false;
@@ -566,6 +571,11 @@ use frdlweb\StubRunnerInterface as StubRunnerInterface;
          'application/x-httpd-php' => '_run_php_1',
     );
 
+	public function hugRunner(mixed $runner){
+		$this->runner=$runner;		
+	  return $this;
+	}
+	 
 	protected function _run_multipart($_Part){
 
 		 	foreach( $_Part->getParts() as $pos => $part){
@@ -2289,6 +2299,10 @@ class StubRunner implements StubRunnerInterface
 		$this->MimeVM->runStubs();
 		return $this->MimeVM;
 	}
+	public function hugVM(?StubHelperInterface $MimeVM){
+		$this->MimeVM=$MimeVM;
+	  return $this;
+	}
 	public function getInvoker(){
 		return [$this, '__invoke']; 
 	}
@@ -2417,15 +2431,15 @@ class StubRunner implements StubRunnerInterface
 	public function getCodebase() :?\Frdlweb\Contract\Autoload\CodebaseInterface{
 		if(null === $this->Codebase){
 			$this->Codebase = new \Webfan\Webfat\Codebase();
-			$this->Codebase->loadUpdateChannel($this);
+			$this->Codebase->loadUpdateChannel($this);			
 		}
 		return $this->Codebase;
 	}
 	
 	protected function autoloadRemoteCodebase(){
+		$codebase = $this->getCodebase();
 		$configVersion = $this->configVersion();
-		$config = $this->config();
-		$codebase = $this->getCodebase(); 
+		$config = $this->config(); 
 		
 		$loader = false;
 		
@@ -2467,7 +2481,12 @@ class StubRunner implements StubRunnerInterface
       }, 																				 
          $codebase->getUpdateChannel(),
 		 $codebase->getRemotePsr4UrlTemplate(),				
-		 $config['FRDL_REMOTE_PSR4_CACHE_DIR'],			    
+		 rtrim($this->getApplicationsDirectory(), '\\/ ')
+									  .\DIRECTORY_SEPARATOR
+									  .'runtime'.\DIRECTORY_SEPARATOR
+			                         .'cache'.\DIRECTORY_SEPARATOR
+			                         .'classes'.\DIRECTORY_SEPARATOR
+			                         .'psr4'.\DIRECTORY_SEPARATOR,			    
 		'https://raw.githubusercontent.com/frdl/remote-psr4/master/src/implementations/autoloading/RemoteAutoloaderApiClient.php', 			 
 									  $config['FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'],
 									  $config['FRDL_REMOTE_PSR4_CACHE_LIMIT']
@@ -2478,7 +2497,65 @@ class StubRunner implements StubRunnerInterface
 			throw $e;
 		}	
 		return $loader;
-	}				
+	}	
+	
+	public function getWebrootConfigDirectory() : string {
+		return getenv('FRDL_WORKSPACE')
+			.\DIRECTORY_SEPARATOR.urlencode('oid:1.3.6.1.4.1.37553.8.1.8.8.11.6').\DIRECTORY_SEPARATOR	
+			.sha1(str_replace(getenv('HOME'), '', $_SERVER['DOCUMENT_ROOT'])).\DIRECTORY_SEPARATOR;
+	}
+	
+	public function getApplicationsDirectory() : string {
+        $codebase = $this->getCodebase();
+		$configVersion = $this->configVersion();
+				
+		$webrootConfigFile = rtrim($this->getWebrootConfigDirectory(), '\\/ ').\DIRECTORY_SEPARATOR.'app.php';
+
+       if(file_exists($webrootConfigFile)){	  
+		   $webrootConfig = require $webrootConfigFile;       
+		   $ApplicationsDirectory =$webrootConfig['stages'][$webrootConfig['stage']];	 
+	   }else{
+
+		   $ApplicationsDirectory = getenv('FRDL_WORKSPACE')
+			   .\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR	
+			   .urlencode($configVersion['appId'])	
+			   .\DIRECTORY_SEPARATOR.'deployments'	
+			   .\DIRECTORY_SEPARATOR.'blue'	
+			   .\DIRECTORY_SEPARATOR.'deploy'	
+			   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
+ 
+		   if(!is_dir($ApplicationsDirectory) && !@mkdir($ApplicationsDirectory, 0775, true)){  
+			   $ApplicationsDirectory = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'global'.\DIRECTORY_SEPARATOR	  	
+				   .'app'	 
+				   .\DIRECTORY_SEPARATOR.'deployments'	
+				   .\DIRECTORY_SEPARATOR.'blue'	
+				   .\DIRECTORY_SEPARATOR.'deploy'	
+				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
+		   }
+
+
+		   if(!is_dir($ApplicationsDirectory) && !@mkdir($ApplicationsDirectory, 0775, true)){ 
+			   $ApplicationsDirectory =  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR
+				                     . '..'
+				                     .\DIRECTORY_SEPARATOR
+				                     . 'app'
+				                     .\DIRECTORY_SEPARATOR;
+		   } 
+		   
+
+
+		   if(!is_dir($ApplicationsDirectory) && !@mkdir($ApplicationsDirectory, 0775, true)){ 
+			   $ApplicationsDirectory =  __DIR__.\DIRECTORY_SEPARATOR
+				                     . 'app'
+				                     .\DIRECTORY_SEPARATOR;
+
+		   } 
+
+
+	   }
+		return $ApplicationsDirectory;
+	}		
+	
 }
 	
 				
@@ -2522,7 +2599,25 @@ Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.ph
 
 
 
+ try{
+   $f = $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
+   if($f)$config = $this->_run_php_1($f);	
+  if(!is_array($config) ){
+	$config=[];  
+  }
+ }catch(\Exception $e){
+     $config=[];  
+ }	
 
+     $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
+     $ShutdownTasks(function($config, $url, $file){
+		 if(true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'] ){	  
+			 $thisCode = file_get_contents($url);		  
+			 if(false!==$thisCode && true === (new \frdl\Lint\Php($cacheDirLint) )->lintString($thisCode) ){	   
+				 file_put_contents($file, trim($thisCode));	  
+			 }		 
+		 }																 
+     }, $config, 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time(), __FILE__);  
 
 
 	 
@@ -2678,28 +2773,6 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 
 
-	
- try{
-   $f = $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
-   if($f)$config = $this->_run_php_1($f);	
-  if(!is_array($config) ){
-	$config=[];  
-  }
- }catch(\Exception $e){
-     $config=[];  
- }	
-
-     $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
-     $ShutdownTasks(function($config, $url, $file){
-		 if(true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'] ){	  
-			 $thisCode = file_get_contents($url);		  
-			 if(false!==$thisCode && true === (new \frdl\Lint\Php($cacheDirLint) )->lintString($thisCode) ){	   
-				 file_put_contents($file, trim($thisCode));	  
-			 }		 
-		 }																 
-     }, $config, 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time(), __FILE__);    
-
-
 
 																	   
  $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  null);	
@@ -2707,157 +2780,31 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
  $App->setAppId('1.3.6.1.4.1.37553.8.1.8.8.1958965301');
 
  $response = $App->handle( );
-	
-  if(isset($_GET['test'])){
-     $require = $App->getContainer()->get('require');
-      $test = $require('test');
-      print_r($test);
-    die();
-  }
 
- if(404 !== $response->getStatusCode() 	
-	|| !is_dir(rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST']) ){
-	   (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
-	die();
- }
-	
-																	   
-																	   
-																	   
-																	   
-																	   
-   if(isset($_REQUEST['web'])){
+ if(404 === $response->getStatusCode() && isset($_REQUEST['web'])  ){
+    if(isset($_REQUEST['web'])){
 	  $_SERVER['REQUEST_URI'] = ltrim(strip_tags($_REQUEST['web']), '/ ');
     }
-
-$p = explode('?', $_SERVER['REQUEST_URI']);
-$path = $p[0];
-
-
-$webfile= $this->get_file($this->document, '$HOME/$WEB'.$path, 'stub '.$path) ;
-if(false !==$webfile){
-	$p2 = explode('.', $path);
-	$p2 = array_reverse($p2);	
-	$p3 = explode(';', $webfile->getHeader('Content-Type'));
-	
-	if('php' === strtolower($p2[0]) || 'application/x-httpd-php'===$p3[0] ){	
-		call_user_func_array([$this, '_run_php_1'], [$webfile]);
-	}else{
-	   ob_end_clean();
-	   header('Content-Type: '.$webfile->getMimeType());		
-	   echo $webfile->getBody();
-	}
-	
-
-	
-	die();
-}else{	
-
-
-	
-	
- $patchValidatorFile =  $App->getDir('app')
-	  .\DIRECTORY_SEPARATOR.'core'
-	  .\DIRECTORY_SEPARATOR.'3p'
-	  .\DIRECTORY_SEPARATOR.'nette'
-	  .\DIRECTORY_SEPARATOR.'utils'
-	  .\DIRECTORY_SEPARATOR.'Validator.php';
-
-	if(!file_exists($patchValidatorFile)){
-		if(!is_dir(dirname($patchValidatorFile))){
-          mkdir(dirname($patchValidatorFile), 0775, true);
-		}
-       file_put_contents($patchValidatorFile, 
-						 file_get_contents('https://raw.githubusercontent.com/frdlweb/webfat/main/core/3p/nette/utils/Validator.php'));
-	}
-	
-   include_once $patchValidatorFile;
-	
-  
-	
-  if (strtolower(\php_sapi_name()) === 'cli') {
-	$cliFile =  $this->get_file($this->document, '$__FILE__/console.php', 'console.php');
-	 return  $this->_run_php_1( $cliFile  );
-  }
-
-	
-
- if(is_dir(rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'])){
-	 
-
-  $config['jeytill']['pages-dir'] = rtrim($config['jeytill']['hosts-dir'], '/\\ ')
-	  .\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].\DIRECTORY_SEPARATOR.'pages';
-	 
-  $config['jeytill']['blocks-dir'] = rtrim($config['jeytill']['hosts-dir'], '/\\ ')
-	  .\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].\DIRECTORY_SEPARATOR.'blocks';		
-	 
- 
-	 if(file_exists(rtrim($config['jeytill']['hosts-dir'], '/\\ ')
-					.\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST']
-					.\DIRECTORY_SEPARATOR.'_config.yaml')){
-		  
-		    $config['jeytill']['configfile'] = 
-			  rtrim($config['jeytill']['hosts-dir'], '/\\ ').\DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].\DIRECTORY_SEPARATOR.'_config.yaml';
+	 $p = explode('?', $_SERVER['REQUEST_URI']);
+	 $path = $p[0];
+	 $webfile= $this->get_file($this->document, '$HOME/$WEB'.$path, 'stub '.$path) ;
+	 if(false !==$webfile){
+		 $p2 = explode('.', $path);	
+		 $p2 = array_reverse($p2);		
+		 $p3 = explode(';', $webfile->getHeader('Content-Type'));	
+		 if('php' === strtolower($p2[0]) || 'application/x-httpd-php'===$p3[0] ){		
+			 call_user_func_array([$this, '_run_php_1'], [$webfile]);
+		 }else{	
+			 ob_end_clean();	
+			 header('Content-Type: '.$webfile->getMimeType());			
+			 echo $webfile->getBody();	
+		 }	
+		 die();
 	 }
-	 
-  $config['WEBFAT_ALLOW_PHP'] = false; //in_array($_SERVER['HTTP_HOST'], $config['WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_PHP_INPUT'] );   
-  $config['WEBFAT_ALLOW_HTML'] = in_array($_SERVER['HTTP_HOST'], $config['WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_INPUT'] );             $config['WEBFAT_ALLOW_HTML_FILES'] = in_array($_SERVER['HTTP_HOST'], $config['WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_FILES'] );	 
-
- }else{
-	 header( $_SERVER['SERVER_PROTOCOL']." 404 Not Found", true );
-	 $config['WEBFAT_ALLOW_PHP'] = false;
-	 $config['WEBFAT_ALLOW_HTML'] = true;
-	 $config['WEBFAT_ALLOW_HTML_FILES'] = true;	 
  }
- 
-
-  $cms = new \Webfan\Webfat\Jeytill($config['jeytill'], 
-									$config['WEBFAT_ALLOW_PHP'],
-									$config['WEBFAT_ALLOW_HTML'],
-									$config['WEBFAT_ALLOW_HTML_FILES']);
-
-	if(isset($_REQUEST['web'])){
-	  $_SERVER['REQUEST_URI'] = ltrim(strip_tags($_REQUEST['web']), '/ ');
-    }
-
-$p = explode('?', $_SERVER['REQUEST_URI']);
-$path = $p[0];
-
-  $u = explode('?', $_SERVER['REQUEST_URI']);
-
-  $page = ltrim(array_shift($u), '/ ');
-  if ($page === '') {
-    $page = 'index';
-  }
-
-  if (is_dir('pages/' . $page)) {
-    $page .= '/index';
-  }
-
-
-
-
-  $result = $cms('pages', $page, '');
-  if ($result === FALSE) {   
-     header("HTTP/1.0 404 Not Found");
-     $result =  $cms('pages', '404', '');
-  } 
-    
-	//echo $result;
 	
-	exit($result);
 
-
-}
-
-     throw new \Webfan\Webfat\App\ResolvableException(
-            'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.3=Could not resolve the request'
-	    .'|circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.4.1=Default route/app missing? - Thrown by MIMEStub'
-	    .'|circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.4.3=Please setup at least one module!'
-	    .'@No default route/app installed'
-       );
-
-
+   (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
 
 --4444EVGuDPPT--
 --EVGuDPPT--
@@ -2896,7 +2843,8 @@ Content-Type: application/x-httpd-php
 	}
 
 	return array (
-  //'appId' => '1.3.6.1.4.1.37553.8.1.8.8.1958965301',
+   //'appId' => 'oid:1.3.6.1.4.1.37553.8.1.8.8.1958965301',
+   /****'appId'=>'@@@APPID@@@',*****/	
   'time' => 0,
   'version' => '0.0.0',
 ); ?>

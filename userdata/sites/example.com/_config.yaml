@@ -1,9 +1,0 @@
-theme: 'webfantized-standard-theme'
-title: 'Webfat Alpha Test'
-author: 'Till Wehowski, Frdlweb'
-assets-url: '/assets'
-build-hash: 'abcdef0123456789-20220821'
-debug: 'true'
-metatags:
-  description: 'Webfan CMS Framework'
-  keywords: 'frdl, software, webfan'

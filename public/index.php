@@ -2356,7 +2356,7 @@ class StubRunner implements StubRunnerInterface
 				if(is_resource($fp))@flock($fp, \LOCK_UN);
 				if(is_resource($fp))fclose($fp);
 			}, $fp);
-			fwrite($fp, $this->getStubVM()->__toString());   
+			fwrite($fp, $this->getStubVM()->exports);   
 			flock($fp, \LOCK_UN);
 		} else {  
 			//echo 'can\'t lock';
@@ -2412,7 +2412,7 @@ class StubRunner implements StubRunnerInterface
 				if(is_resource($fp))@flock($fp, \LOCK_UN);
 				if(is_resource($fp))fclose($fp);
 			}, $fp);
-			fwrite($fp, $this->getStubVM()->__toString());   
+			fwrite($fp, $this->getStubVM()->exports);   
 			flock($fp, \LOCK_UN);
 		} else {  
 			//echo 'can\'t lock';

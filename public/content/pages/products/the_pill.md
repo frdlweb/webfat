@@ -1,3 +1,0 @@
-# The Pill!
-
-This page is in a folder...

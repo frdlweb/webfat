@@ -2175,7 +2175,7 @@ PHPCODE;
  }
 	  
 	 if(!@is_dir($_ENV['FRDL_WORKSPACE'])){
-		@mkdir($_ENV['FRDL_WORKSPACE'], 0755, true); 
+		@mkdir($_ENV['FRDL_WORKSPACE'], 0775, true); 
 	 }	
 	
  
@@ -2185,7 +2185,7 @@ putenv('FRDL_HPS_CACHE_DIR='.$_ENV['FRDL_HPS_CACHE_DIR']);
 //putenv('TMP='.$_ENV['FRDL_HPS_CACHE_DIR']);
 //ini_set('sys_temp_dir', realpath($_ENV['FRDL_HPS_CACHE_DIR']));	
 	 if(!@is_dir($_ENV['FRDL_HPS_CACHE_DIR'])){
-		@mkdir($_ENV['FRDL_HPS_CACHE_DIR'], 0755, true); 
+		@mkdir($_ENV['FRDL_HPS_CACHE_DIR'], 0775, true); 
 	 }
 
 
@@ -2193,7 +2193,7 @@ $_ENV['FRDL_HPS_PSR4_CACHE_DIR'] = rtrim($_ENV['FRDL_HPS_CACHE_DIR'], \DIRECTORY
 putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 	 if(!@is_dir($_ENV['FRDL_HPS_PSR4_CACHE_DIR'])){
-		@mkdir($_ENV['FRDL_HPS_PSR4_CACHE_DIR'], 0755, true); 
+		@mkdir($_ENV['FRDL_HPS_PSR4_CACHE_DIR'], 0775, true); 
 	 }
 
 	

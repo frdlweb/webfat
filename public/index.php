@@ -153,8 +153,8 @@ interface StubRunnerInterface
 	public function isRootUser() : bool;
 	public function getStubVM() : StubHelperInterface;	
 	public function getStub() : StubItemInterface;		
-	public function __invoke() :?StubHelperInterface;		
-    public function hugVM(?StubHelperInterface $MimeVM);
+	public function __invoke() :?StubHelperInterface;    
+	public function hugVM(?StubHelperInterface $MimeVM);
 	public function getInvoker();	
 	public function getShield();	
 	public function autoloading() : void;
@@ -274,7 +274,7 @@ class Codebase extends \frdl\Codebase
 		
 		if(!isset($configVersion['appId'])){	
 			$configVersion['appId'] = 'oid:1.3.6.1.4.1.37553.8.1.8.8.1958965301'; 
-			/****$configVersion['appId'] = '@@@APPID@@@';*****/
+			/****$configVersion['appId']='@@@APPID@@@';*****/
 			$save = true;
 		}
 		

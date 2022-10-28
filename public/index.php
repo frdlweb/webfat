@@ -134,6 +134,10 @@ namespace frdl\booting{
 	 foreach($vars as $n => $v){
 		$html.='<input type="hidden" name="'.$n.'" value="'.strip_tags($v).'" />';
 	 }
+	  if(true !== $autosubmit){
+		$html.='<button class="btn btn-primary" onclick="document.getElementById(\''.$id.'\').submit();">Reload this page and retry request</button>';  
+	  }
+	 
 	 $html.='</form>';	
 	
 	 if(true === $autosubmit){
@@ -1188,16 +1192,22 @@ use frdlweb\StubRunnerInterface as StubRunnerInterface;
 					if(true !==$fehler ){		
 						$e='Error in '.__METHOD__.' ['.__LINE__.']'.print_r($fehler,true).'<br />$class: '.$name.$part->getFileName().' 
 						'.$part->getName();		
-					    throw new \Exception($e.$fehler);
+					    $e1 =  new \Exception($e.$fehler); 
+			                    echo  \frdl\booting\getFormFromRequestHelper($e1->getMessage(), false);
+		                            die();						
 					}
 		try{
 	         	$res = eval($code);			
 		}catch(\Webfan\Webfat\App\ResolvableException $e3){	
-			throw $e3;
+			//throw $e3;					 
+			echo  \frdl\booting\getFormFromRequestHelper($e3->getMessage(), false);
+		      die();
 		}catch(\Exception $e2){	
 			$e='Error in '.__METHOD__.' ['.__LINE__.']'.print_r($fehler,true).'<br />$class: '.$name.$part->getFileName().''
 				.$part->getName();	                
-			throw new \Exception($e2->getMessage().'<br />'.$e.print_r($res,true));
+			$e4 = new \Exception($e2->getMessage().'<br />'.$e.print_r($res,true));		 
+			echo  \frdl\booting\getFormFromRequestHelper($e4->getMessage(), false);
+		      die();
 		}
 		
 
@@ -3074,8 +3084,8 @@ Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.
 
 	
 	 			  
-	if(file_exists($this->location.'.apc_config.php')){
-	     return require $this->location.'.apc_config.php';				
+	if(file_exists(__FILE__.'.apc_config.php')){
+	     return require __FILE__.'.apc_config.php';				
 	}
 
 	$domain =(isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
@@ -3206,8 +3216,8 @@ Content-Type: application/x-httpd-php
 <?php
 	
 	
-	if(file_exists($this->location.'.version_config.php')){
-	     return require $this->location.'.version_config.php';				
+	if(file_exists(__FILE__.'.version_config.php')){
+	     return require __FILE__.'.version_config.php';				
 	}
 
 	return array (

@@ -3127,10 +3127,10 @@ error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 	
-<?php
+
  $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  null);	
  $App->setStub($this);
-// $App->setAppId('1.3.6.1.4.1.37553.8.1.8.8.1958965301');
+
 
  $response = $App->handle( );
 

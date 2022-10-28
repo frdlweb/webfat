@@ -97,12 +97,6 @@ namespace frdl\booting{
  error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);		
 	
 
-
-    \set_exception_handler(function($exception) {
-           echo $exception->getMessage();	
-    });
-
-	
 	if(!isset($_SERVER['HTTP_HOST'])){ 		
 		$_SERVER['HTTP_HOST'] = null;			
 	}	
@@ -623,11 +617,12 @@ class Codebase extends \frdl\Codebase
 		}		
 		
 	      if(!isset($configVersion['appId'])){	
-		    throw new \Webfan\Webfat\App\ResolvableLogicException(
+		    $e = new \Webfan\Webfat\App\ResolvableLogicException(
                          'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1=The (Main) Application ID must be defined'
                            .'|php:'.get_class($this).'=Thrown by the Codebase Class '.__METHOD__
                            .'@The Application ID must be defined'
                          );	
+			  exit($e->getMessage());
 	      }
 		
 		

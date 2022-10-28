@@ -2929,7 +2929,8 @@ class StubRunner implements StubRunnerInterface
 			                         .'cache'.\DIRECTORY_SEPARATOR
 			                         .'classes'.\DIRECTORY_SEPARATOR
 			                         .'psr4'.\DIRECTORY_SEPARATOR,			    
-		'https://raw.githubusercontent.com/frdl/remote-psr4/master/src/implementations/autoloading/RemoteAutoloaderApiClient.php', 			 
+		'https://raw.githubusercontent.com/frdl/remote-psr4/master/src/implementations/autoloading/RemoteAutoloaderApiClient.php'
+						  .'?cache-bust='.time(), 			 
 									  $config['FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'],
 									  $config['FRDL_REMOTE_PSR4_CACHE_LIMIT']
 									 );
@@ -3001,8 +3002,8 @@ class StubRunner implements StubRunnerInterface
 }
 	
 				
-	$StubRunner = new StubRunner($MimeVM);
-    if(true===$runStubOnInclude){
+	$StubRunner = new StubRunner($MimeVM);  
+	if(true===$runStubOnInclude){
 		$StubRunner();
 	}
 	return $StubRunner;
@@ -3137,7 +3138,7 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
      $config=[];  
  }	
  
-  $App = \Webfan\Webfat\App\Kernel::getInstance(isset($config['appId']) ? $config['appId'] : 'dev',  null);	
+  $App = \Webfan\Webfat\App\Kernel::getInstance(isset($config['appId']) ? $config['appId'] : 'undefined',  null);	
   $App->setStub($this);
 
 

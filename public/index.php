@@ -2858,11 +2858,50 @@ class StubRunner implements StubRunnerInterface
 				}
              	
  
-				if(!file_exists($af) || filemtime($af) < time() - $ccl){ 
-					file_put_contents($af, file_get_contents($l));	
+				$cbCheckFile = $af.'.last-remote-access.txt';
+				$holdBreakDuration = 60;
+				if(!file_exists($af) || filemtime($af) < time() - max($ccl, 60*60)){ 
+					if(file_exists($cbCheckFile)){
+						if(filemtime($cbCheckFile) > time() - $holdBreakDuration || intval(file_get_contents($cbCheckFile)) > time() - $holdBreakDuration ){
+							$mesage = 'We tried to request '.\frdl\implementation\psr4\RemoteAutoloaderApiClient::class;
+							$mesage.= ' unsuccessfully short time , ago. The page will reload automatically...!';
+							echo \frdl\booting\getFormFromRequestHelper($mesage, true, $holdBreakDuration, null);
+							die();
+						}
+					}
+					
+					
+					file_put_contents($cbCheckFile, time());
+					
+					        $options = [        
+								'https' => [          
+									'method'  => 'GET',          
+									'ignore_errors' => true,          
+									//'header'=> "X-Source-Encoding: b64\r\n"               
+									// . "Content-Length: " . strlen($data) . "\r\n"				
+									
+           
+								]
+        
+							];
+      
+					$context  = \stream_context_create($options);       
+					$code = @file_get_contents($l, false, $context);
+					if(false === $code){
+					      touch($cbCheckFile);
+					      echo 'Fehler mit: ';					          
+				           foreach($http_response_header as $i => $header){
+                                               $h = explode(':', $header);
+                                               $k = strtolower(trim($h[0]));
+                                               $v =  (isset($h[1])) ? trim($h[1]) : $header;           
+                                                 echo $k.' : '.$v.'<br />';
+					  }	
+					}else{					
+						file_put_contents($af, $code);	
+					}
 				}
       
-				if(!\class_exists(\frdl\implementation\psr4\RemoteAutoloaderApiClient::class)){   					
+				if(!\class_exists(\frdl\implementation\psr4\RemoteAutoloaderApiClient::class) && file_exists($af) ){   					
 					require $af;         
 				}	
 		

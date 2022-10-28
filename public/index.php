@@ -2777,7 +2777,7 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 																	   
  $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  null);	
  $App->setStub($this);
- $App->setAppId('1.3.6.1.4.1.37553.8.1.8.8.1958965301');
+// $App->setAppId('1.3.6.1.4.1.37553.8.1.8.8.1958965301');
 
  $response = $App->handle( );
 
@@ -2843,8 +2843,7 @@ Content-Type: application/x-httpd-php
 	}
 
 	return array (
-   //'appId' => 'oid:1.3.6.1.4.1.37553.8.1.8.8.1958965301',
-   /****'appId'=>'@@@APPID@@@',*****/	
+  /****'appId'=>'@@@APPID@@@',*****/
   'time' => 0,
   'version' => '0.0.0',
 ); ?>

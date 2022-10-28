@@ -615,7 +615,7 @@ class Codebase extends \frdl\Codebase
 			/****$configVersion['appId']='@@@APPID@@@';*****/
 			$save = true;
 		}		
-		
+	/*	
 	      if(!isset($configVersion['appId'])){	
 		    $e = new \Webfan\Webfat\App\ResolvableLogicException(
                          'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1=The (Main) Application ID must be defined'
@@ -624,8 +624,12 @@ class Codebase extends \frdl\Codebase
                          );	
 			  exit($e->getMessage());
 	      }
-		
-		
+	*/
+		if(!isset($configVersion['appId'])){	
+			/*  Global Register Website | Domain Resolver App */
+			$configVersion['appId'] = 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1'; 
+			$save = true;
+		}			
 		
 		if(!isset($configVersion['channel'])){
 			$configVersion['channel'] = isset($config['FRDL_UPDATE_CHANNEL']) ? $config['FRDL_UPDATE_CHANNEL'] : 'latest'; 

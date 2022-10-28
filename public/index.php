@@ -27,7 +27,6 @@ setTimeout(()=>{
 },2000);
 	});	
 </script>
-
 </body>
 </html>
 <!-- 
@@ -843,13 +842,17 @@ use frdlweb\StubRunnerInterface as StubRunnerInterface;
 	
 	
 	
+   public function serializeFile(?string $code=null){
+	   $code =(is_string($code)) ? $code : $this->__toString();
+	   $code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKE1pbWU='), base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);			
+	   $code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKClNbWltZQ=='), base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);			   $code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKClNaW1l'), base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);	   
+	   return $code;
+   }
+	 
    public function __set($name, $value)
     {
     	if('location'===$name){
-    		$code =$this->__toString();
-			$code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKE1pbWU='), base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);			
-			$code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKClNbWltZQ=='), base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);			
-			$code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKClNaW1l'), base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);	
+    		$code = $this->serializeFile(null);
 			file_put_contents($value, $code);
 			return null;
 		}
@@ -1978,7 +1981,6 @@ public function generateBundary($opts = array()) {
 	//	 }
 /*		
             $code = trim($code); 		
-
 		    $N = new self($this->newFile($type, $disposition, $file, $name), $parent);		    
 		    $N->setBody($code);
 		    if(\webfan\hps\Format\Validate::isbase64($code) ){
@@ -2362,7 +2364,7 @@ class StubRunner implements StubRunnerInterface
 			        return '.$varExports.';
                ');
 
-	        $newContent = $this->getStubVM()->__toString();
+	    $newContent = $this->getStubVM()->serializeFile(null);
 		$fp = fopen($this->getStubVM()->location, 'w+');
 		if (flock($fp, \LOCK_EX | \LOCK_NB)) {  
 			register_shutdown_function(function($fp){
@@ -2419,7 +2421,7 @@ class StubRunner implements StubRunnerInterface
 			        return '.$varExports.';
                ');
 
-		$newContent = $this->getStubVM()->__toString();
+		$newContent = $this->getStubVM()->serializeFile(null);
 		$fp = fopen($this->getStubVM()->location, 'w+');
 		if (flock($fp, \LOCK_EX | \LOCK_NB)) {  
 			register_shutdown_function(function($fp){
@@ -2767,20 +2769,13 @@ Content-Length: 696
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/detect.php";name="stub detect.php"
-
-
-
-
 $maxExecutionTime = intval(ini_get('max_execution_time'));	
  if (strtolower(\php_sapi_name()) !== 'cli') {	 
     set_time_limit(min(45, $maxExecutionTime));
  }
 @ini_set('display_errors','1');
 error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);	
-
-
 	
-
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"

@@ -139,7 +139,7 @@ namespace frdl\booting{
 	 if(true === $autosubmit){
 		$html.='<script>';
 		$html.='(()=>{';
-		 $html.='setTimeout(()=>{document.getElementById(\''.$id.'\').submit();}, '.$delay.')';
+		 $html.='setTimeout(()=>{document.getElementById(\''.$id.'\').submit();}, '.($delay * 1000).')';
 		$html.='})();';
 		$html.='</script>';
 	 }

@@ -105,6 +105,48 @@ namespace frdl\booting{
 	}
 	
 	
+ function getFormFromRequestHelper(string $message = '',
+											 bool $autosubmit = true, 
+											 $delay = 0,
+	/*										 $request = null){
+	 if(null === $request){
+		 $request = (null === $this->getContainer(false) || !$this->getContainer(false)->has('request')) ? null : $this->container->get('request');
+	 }
+	 */
+	 $vars = (null===$request)
+		 ? $_POST 
+		 : $request->getParsedBody();
+	
+	 $target =  (null===$request)
+		 ? $_SERVER['REQUEST_URI']
+		 : $request->getParsedBody();	 
+		 
+	 $method =  (null===$request)
+		 ? $_SERVER['REQUEST_METHOD']
+		 : $request->getMethod();	 
+		 
+	 $vars = (array)$vars;
+	
+	 $id = 'idr'.str_pad(time(), 32, "0", \STR_PAD_LEFT).str_pad(mt_rand(1,99999999), 8, "0", \STR_PAD_LEFT); 
+	
+	 $html = $message;
+	 $html.='<form id="'.$id.'" action="'.$target.'" method="'.$method.'">';
+	 foreach($vars as $n => $v){
+		$html.='<input type="hidden" name="'.$n.'" value="'.strip_tags($v).'" />';
+	 }
+	 $html.='</form>';	
+	
+	 if(true === $autosubmit){
+		$html.='<script>';
+		$html.='(()=>{';
+		 $html.='setTimeout(()=>{document.getElementById(\''.$id.'\').submit();}, '.$delay.')';
+		$html.='})();';
+		$html.='</script>';
+	 }
+	
+	  return $html;
+    }
+	
 }
 
 
@@ -615,22 +657,25 @@ class Codebase extends \frdl\Codebase
 			/****$configVersion['appId']='@@@APPID@@@';*****/
 			$save = true;
 		}		
-	/*	
+		
 	      if(!isset($configVersion['appId'])){	
 		    $e = new \Webfan\Webfat\App\ResolvableLogicException(
                          'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1=The (Main) Application ID must be defined'
                            .'|php:'.get_class($this).'=Thrown by the Codebase Class '.__METHOD__
                            .'@The Application ID must be defined'
                          );	
-			  exit($e->getMessage());
-	      }
-	*/
-		if(!isset($configVersion['appId'])){	
+			 $html = $e->getMessage();
+		      
 			/*  Global Register Website | Domain Resolver App */
 			$configVersion['appId'] = 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1'; 
-			$save = true;
-		}			
-		
+			$save = true;		      
+		       $html .= '<h1 style="color:green;">';
+			   $html .= 'Next: The Setup/Installer Chooser App will be installed automatically (global) - The page is reloading, please wait ...!';     
+		       $html .= '</h1>';      
+		    echo  \frdl\booting\getFormFromRequestHelper($html, true, 10, null);
+		      
+	      }
+
 		if(!isset($configVersion['channel'])){
 			$configVersion['channel'] = isset($config['FRDL_UPDATE_CHANNEL']) ? $config['FRDL_UPDATE_CHANNEL'] : 'latest'; 
 			$save = true;
@@ -638,10 +683,10 @@ class Codebase extends \frdl\Codebase
 	
 		if(true === $save && null !== $StubRunner){
 			$StubRunner->configVersion($configVersion);
+			usleep(100);
 		}
 		
-		$this->setUpdateChannel($configVersion['channel']);
-		
+		$this->setUpdateChannel($configVersion['channel']);		
 		return $this->getUpdateChannel();
 	}
 }

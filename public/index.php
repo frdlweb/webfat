@@ -131,9 +131,9 @@ if (!\interface_exists(StubHelperInterface::class, false)) {
 	
 if (!\interface_exists(StubItemInterface::class, false)) { 	
 interface StubItemInterface
-{
-	    public function getMimeType();
-	    public function getName() ;
+{	
+	public function getMimeType();	  
+	public function getName() ;
         public function getFileName();
         public function isFile();
         public function getParts();
@@ -273,10 +273,22 @@ class Codebase extends \frdl\Codebase
 		$save = false;
 		
 		if(!isset($configVersion['appId'])){	
-			$configVersion['appId'] = 'oid:1.3.6.1.4.1.37553.8.1.8.8.1958965301'; 
+			/* $configVersion['appId'] = 'oid:1.3.6.1.4.1.37553.8.1.8.8.1958965301'; 
+			   PLACEHOLDER (for installers/updaters)
+			*/
 			/****$configVersion['appId']='@@@APPID@@@';*****/
 			$save = true;
-		}
+		}		
+		
+	      if(!isset($configVersion['appId'])){	
+		    throw new ResolvableLogicException(
+                         'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1=The (Main) Application ID must be defined'
+                           .'|php:'.get_class($this).'=Thrown by the Codebase Class '.__METHOD__
+                           .'@The Application ID must be defined'
+                         );	
+	      }
+		
+		
 		
 		if(!isset($configVersion['channel'])){
 			$configVersion['channel'] = isset($config['FRDL_UPDATE_CHANNEL']) ? $config['FRDL_UPDATE_CHANNEL'] : 'latest'; 
@@ -2350,13 +2362,14 @@ class StubRunner implements StubRunnerInterface
 			        return '.$varExports.';
                ');
 
+	        $newContent = $this->getStubVM()->__toString();
 		$fp = fopen($this->getStubVM()->location, 'w+');
 		if (flock($fp, \LOCK_EX | \LOCK_NB)) {  
 			register_shutdown_function(function($fp){
 				if(is_resource($fp))@flock($fp, \LOCK_UN);
 				if(is_resource($fp))fclose($fp);
 			}, $fp);
-			fwrite($fp, $this->getStubVM()->exports);   
+			fwrite($fp, $newContent);   
 			flock($fp, \LOCK_UN);
 		} else {  
 			//echo 'can\'t lock';
@@ -2406,13 +2419,14 @@ class StubRunner implements StubRunnerInterface
 			        return '.$varExports.';
                ');
 
+		$newContent = $this->getStubVM()->__toString();
 		$fp = fopen($this->getStubVM()->location, 'w+');
 		if (flock($fp, \LOCK_EX | \LOCK_NB)) {  
 			register_shutdown_function(function($fp){
 				if(is_resource($fp))@flock($fp, \LOCK_UN);
 				if(is_resource($fp))fclose($fp);
 			}, $fp);
-			fwrite($fp, $this->getStubVM()->exports);   
+			fwrite($fp, $newContent);   
 			flock($fp, \LOCK_UN);
 		} else {  
 			//echo 'can\'t lock';

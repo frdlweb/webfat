@@ -164,14 +164,13 @@ class ResolvableLogicException extends LogicException
 	
 	const URL_TEMPLATE = 'https://webfan.de/apps/registry/?goto=%s';
 	const URL_FORM_TEMPLATE = 'https://webfan.de/apps/webmaster/1.3.6.1.4.1.37553.8.1.8.8.91397908338147/setup?instance=%2$s&errorinfo=%1$s';
-	const LINK_TEXT = '<strong>Help</strong> | Documentation | Infolink';
+	const LINK_TEXT = '<strong>Help</strong> | Documentation | Infolink';	
+  
+	public $dom = null;    
+	public $infos = [];  
+	public $mainMessage;
+	public $formLink; 
 	
-    public $dom = null;
-    public $infos = [];
-    public $mainMessage;
-	public $formLink;
-	
- 
 	public static $urlformtemplate = null;
 
     public function __construct(
@@ -670,9 +669,10 @@ class Codebase extends \frdl\Codebase
 			$configVersion['appId'] = 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1'; 
 			$save = true;		      
 		       $html .= '<h1 style="color:green;">';
-			   $html .= 'Next: The Setup/Installer Chooser App will be installed automatically (global) - The page is reloading, please wait ...!';     
+			   $html .= 'Next: The Setup/Installer Chooser App will be installed automatically (global) - The page is reloads automatically, please wait ...!';     
 		       $html .= '</h1>';      
 		    echo  \frdl\booting\getFormFromRequestHelper($html, true, 10, null);
+		      die();
 		      
 	      }
 
@@ -3079,79 +3079,17 @@ Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.
 
 	$domain =(isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 	
-  $webrootConfigFile = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'1.3.6.1.4.1.37553.8.1.8.8.11.6'.\DIRECTORY_SEPARATOR
-	  .sha1(str_replace(getenv('HOME'), '', $_SERVER['DOCUMENT_ROOT'])).\DIRECTORY_SEPARATOR.'app.php';
-
-
-  if(file_exists($webrootConfigFile)){
-	  $webrootConfig = require $webrootConfigFile;
-      $dirRemotePsr4 =$webrootConfig['stages'][$webrootConfig['stage']]
-		                            .\DIRECTORY_SEPARATOR
-			                         .'runtime'.\DIRECTORY_SEPARATOR
-			                         .'cache'.\DIRECTORY_SEPARATOR
-			                         .'classes'.\DIRECTORY_SEPARATOR
-			                         .'psr4'.\DIRECTORY_SEPARATOR;	  
-  }else{
-
-	  $dirRemotePsr4 = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR
-	 .'1.3.6.1.4.1.37553.8.1.8.8.1958965301'
-	 .\DIRECTORY_SEPARATOR.'deployments'
-	 .\DIRECTORY_SEPARATOR.'blue'
-	 .\DIRECTORY_SEPARATOR.'deploy'
-	 .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR
-			                         .'runtime'.\DIRECTORY_SEPARATOR
-			                         .'cache'.\DIRECTORY_SEPARATOR
-			                         .'classes'.\DIRECTORY_SEPARATOR
-			                         .'psr4'.\DIRECTORY_SEPARATOR;
-
-
- if(!is_dir($dirRemotePsr4) && !mkdir($dirRemotePsr4, 0775, true)){
-
-   $dirRemotePsr4 = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR	   
-	 .'global'
-	 .\DIRECTORY_SEPARATOR.'deployments'
-	 .\DIRECTORY_SEPARATOR.'blue'
-	 .\DIRECTORY_SEPARATOR.'deploy'
-	 .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR
-			                         .'runtime'.\DIRECTORY_SEPARATOR
-			                         .'cache'.\DIRECTORY_SEPARATOR
-			                         .'classes'.\DIRECTORY_SEPARATOR
-			                         .'psr4'.\DIRECTORY_SEPARATOR;
- }
-
- if(!is_dir($dirRemotePsr4) && !mkdir($dirRemotePsr4, 0775, true)){
-   $dirRemotePsr4 =  __DIR__.\DIRECTORY_SEPARATOR
-				                     . '..'
-				                     .\DIRECTORY_SEPARATOR
-			                         .'runtime'.\DIRECTORY_SEPARATOR
-			                         .'cache'.\DIRECTORY_SEPARATOR
-			                         .'classes'.\DIRECTORY_SEPARATOR
-			                         .'psr4'.\DIRECTORY_SEPARATOR;
- }
-
-  }
+ 
 
 
  return array (
   'workspace' =>$domain,
   'baseUrl' => 'https://'.$domain,
   'baseUrlInstaller' => false,
- // 'sourceApiUrlInstaller' =>'https://webfan.de/install/latest/?source=${class}&salt=${salt}',
   'FRDL_UPDATE_CHANNEL' => 'latest', // latest | stable
   'FRDL_CDN_HOST'=>'cdn.startdir.de',  // cdn.webfan.de | cdn.frdl.de
   'FRDL_CDN_PROXY_REMOVE_QUERY'=>	true, 
   'FRDL_CDN_SAVING_METHODS'=>	['GET'], 
-  'FRDL_REMOTE_PSR4_CACHE_DIR'=>$dirRemotePsr4,
-/*
-  'FRDL_REMOTE_PSR4_CACHE_DIR'=> \sys_get_temp_dir().\DIRECTORY_SEPARATOR
-				                     . \get_current_user()
-				                     .\DIRECTORY_SEPARATOR
-			                         .'.frdl'.\DIRECTORY_SEPARATOR
-			                         .'dasafsf'.\DIRECTORY_SEPARATOR
-		                             .'shared'.\DIRECTORY_SEPARATOR
-			                         .'source'.\DIRECTORY_SEPARATOR
-			                         .'psr4'.\DIRECTORY_SEPARATOR,
-*/
   'FRDL_REMOTE_PSR4_CACHE_LIMIT'=>	24 * 60 * 60, 
   'FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'=>	24 * 60 * 60, 
   'ADMIN_EMAIL' => 'admin@'.$domain,
@@ -3162,33 +3100,9 @@ Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.
   'autoupdate' => true,
   'AUTOUPDATE_INTERVAL' => 24 * 60 * 60, 
   'CACHE_ASSETS_HTTP' => true,
-  'WEBFAT_ALLOW_PHP' => false,
-  'WEBFAT_ALLOW_HTML' => false,
-  'WEBFAT_ALLOW_HTML_FILES' => false,
-  'WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_PHP_INPUT' => [ ],
-  'WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_INPUT' => ['webf.at'],
-  'WEBFAT_WHITELST_TRUSTED_WEBMASTER_DOMAINS_HTML_FILES' => ['webf.at'],
   'installed_from_hps_blog_id' => null,
   'stub' => null,	 
-  'jeytill' => [
-	   'dir'=> __DIR__.\DIRECTORY_SEPARATOR.'..',
-       'content-dir'=>'content',
-	   'hosts-dir' => __DIR__.\DIRECTORY_SEPARATOR.'..'.\DIRECTORY_SEPARATOR.'userdata'.\DIRECTORY_SEPARATOR.'sites'.\DIRECTORY_SEPARATOR,
-
- 	//   'themes-dir'=>__DIR__.\DIRECTORY_SEPARATOR.'themes'.\DIRECTORY_SEPARATOR,
-	     'themes-dir'=>'themes',
-
-	   'configfile'=> __DIR__.\DIRECTORY_SEPARATOR.'..'.\DIRECTORY_SEPARATOR.'_config.yaml',			
-	   'parser' => [		   
-				//'html_input' => 'strip',           
-				'allow_unsafe_links' => false,					
-	   ],
-	  'frontmatter' => [
-		'assets-url' => '/assets', 
-		'favicon-url' => '/favicon.ico', 
-		'theme' => 'webfantized-standard-theme',
-	  ],
-  ],
+ 
 	 
 );
 			  

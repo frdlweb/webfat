@@ -108,8 +108,8 @@ namespace frdl\booting{
  function getFormFromRequestHelper(string $message = '',
 											 bool $autosubmit = true, 
 											 $delay = 0,
-	/*										 $request = null){
-	 if(null === $request){
+											 $request = null){
+	/* if(null === $request){
 		 $request = (null === $this->getContainer(false) || !$this->getContainer(false)->has('request')) ? null : $this->container->get('request');
 	 }
 	 */

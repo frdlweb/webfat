@@ -3175,7 +3175,21 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
  $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  null);	
  $App->setStub($this);
 
-
+ try{
+   $f = $this->get_file($this->document, '$HOME/version_config.php', 'stub version_config.php');
+   if($f)$config = $this->_run_php_1($f);	
+  if(!is_array($config) ){
+	$config=[];  
+  }
+ }catch(\Exception $e){
+     $config=[];  
+ }	
+ 
+	if(isset($config['appId'])){
+	  $App->setAppId($config['appId']);	
+	}
+				   
+				   
  $response = $App->handle( );
 
  if(404 === $response->getStatusCode() && isset($_REQUEST['web'])  ){

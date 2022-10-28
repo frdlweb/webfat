@@ -3172,8 +3172,7 @@ Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 	
 
- $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  null);	
- $App->setStub($this);
+ 
 
  try{
    $f = $this->get_file($this->document, '$HOME/version_config.php', 'stub version_config.php');
@@ -3185,6 +3184,10 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
      $config=[];  
  }	
  
+  $App = \Webfan\Webfat\App\Kernel::getInstance(isset($config['appId']) ? $config['appId'] : 'dev',  null);	
+  $App->setStub($this);
+
+
 	if(isset($config['appId'])){
 	  $App->setAppId($config['appId']);	
 	}

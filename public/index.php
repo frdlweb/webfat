@@ -99,9 +99,8 @@ namespace frdl\booting{
 
 
     \set_exception_handler(function($exception) {
-           echo $exception->getMessage();
-       return false;
-	});
+           echo $exception->getMessage();	
+    });
 
 	
 	if(!isset($_SERVER['HTTP_HOST'])){ 		

@@ -129,17 +129,7 @@ class ResolvableLogicException extends LogicException
 	
  
 	public static $urlformtemplate = null;
-	
-	
-    /**
-     * example (from Webfan\Webfat\App\Kernel) :
-            throw new ResolvableException(
-                      'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.2=Environment variable FRDL_BUILD_FLAVOR must be set!'
-					 .'|circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.2=FRDL_BUILD_FLAVOR must be one of 1.3.6.1.4.1.37553.8.1.8.1.1089085 or  1.3.6.1.4.1.37553.8.1.8.1.575874'
-					 .'|php:'.get_class($this).'=Thrown by the Kernel Class'
-				   	 .'@FRDL_BUILD_FLAVOR not valid'
-             );				
-     */
+
     public function __construct(
         string $message = "",
         int $code = 0,
@@ -184,7 +174,7 @@ class ResolvableLogicException extends LogicException
 		parent::__construct(...$args);
     }
 
-    public function html($asText = -1,$message = null, $formLink= null): mixed //HTML5DOMDocument|string
+    public function html($asText = -1,$message = null, $formLink= null): mixed  
     {
 		$info = [
 			'message'=> str_replace([\sys_get_temp_dir(), 
@@ -195,12 +185,7 @@ class ResolvableLogicException extends LogicException
 											  '~',
 											 '/$PUBLIC/www'], $message ? $message : $this->mainMessage),
 			'infos' => $this->infos,
-			/*
-			'client' => [
-				'host'=>$_SERVER['HTTP_HOST'],
-				'uri' => $_SERVER['REQUEST_URI'],
-			],
-		 */
+	
 		  	
 		];
 		
@@ -312,16 +297,7 @@ class ResolvableException extends ErrorException
  
 	public static $urlformtemplate = null;
 	
-	
-    /**
-     * example (from Webfan\Webfat\App\Kernel) :
-            throw new ResolvableException(
-                      'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.2=Environment variable FRDL_BUILD_FLAVOR must be set!'
-					 .'|circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.2=FRDL_BUILD_FLAVOR must be one of 1.3.6.1.4.1.37553.8.1.8.1.1089085 or  1.3.6.1.4.1.37553.8.1.8.1.575874'
-					 .'|php:'.get_class($this).'=Thrown by the Kernel Class'
-				   	 .'@FRDL_BUILD_FLAVOR not valid'
-             );				
-     */
+
     public function __construct(
         string $message = "",
         int $code = 0,
@@ -377,12 +353,6 @@ class ResolvableException extends ErrorException
 											  '~',
 											 '/$PUBLIC/www'], $message ? $message : $this->mainMessage),
 			'infos' => $this->infos,
-			/*
-			'client' => [
-				'host'=>$_SERVER['HTTP_HOST'],
-				'uri' => $_SERVER['REQUEST_URI'],
-			],
-		 */
 		  	
 		];
 		
@@ -3134,6 +3104,8 @@ Content-Length: 696
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/detect.php";name="stub detect.php"
+	
+<?php
 $maxExecutionTime = intval(ini_get('max_execution_time'));	
  if (strtolower(\php_sapi_name()) !== 'cli') {	 
     set_time_limit(min(45, $maxExecutionTime));
@@ -3144,11 +3116,8 @@ error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
-
-
-
-
-																	   
+	
+<?php
  $App = \Webfan\Webfat\App\Kernel::getInstance('dev',  null);	
  $App->setStub($this);
 // $App->setAppId('1.3.6.1.4.1.37553.8.1.8.8.1958965301');

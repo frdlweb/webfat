@@ -2868,6 +2868,8 @@ Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.ph
 	
 	
 	
+	
+	
 	<?php
 
 
@@ -2989,6 +2991,8 @@ namespace frdl\booting{
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.php"
 	
+	
+	
 			 <?php
 
 	
@@ -3030,6 +3034,8 @@ Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/detect.php";name="stub detect.php"
 	
+	
+	
 	<?php
 $maxExecutionTime = intval(ini_get('max_execution_time'));	
  if (strtolower(\php_sapi_name()) !== 'cli') {	 
@@ -3041,6 +3047,8 @@ error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
+	
+	
 	
 
  

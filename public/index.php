@@ -2971,7 +2971,7 @@ namespace frdl\booting{
  }	
 
 
-     register_shutdown_function(function($config, $url, $file){(function($config, $url, $file){
+     register_shutdown_function(function($config, $url, $file){
 		 if(true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'] ){	  
 			 $thisCode = file_get_contents($url);		  
 			 if(false!==$thisCode && true === (new \frdl\Lint\Php($cacheDirLint) )->lintString($thisCode) ){	   
@@ -3241,7 +3241,7 @@ class Codebase extends \frdl\Codebase
 
 
 
---2222EVGuDPPT--
+
 --3333EVGuDPPT
 Content-Disposition: "php" ; filename="$HOME/version_config.php" ; name="stub version_config.php"
 Content-Type: application/x-httpd-php

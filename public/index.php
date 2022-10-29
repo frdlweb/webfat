@@ -2825,7 +2825,7 @@ class StubRunner implements StubRunnerInterface
 	
 }
 	
-}
+
 	
 				
 	$StubRunner = new StubRunner($MimeVM);  

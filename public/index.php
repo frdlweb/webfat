@@ -2866,7 +2866,9 @@ Content-Disposition: php ;filename="$__FILE__/stub.zip";name="archive stub.zip"
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.php"
 	
-<?php
+	
+	
+	<?php
 
 
 namespace frdl\patch{
@@ -3028,9 +3030,7 @@ Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/detect.php";name="stub detect.php"
 	
-
-	
-<?php
+	<?php
 $maxExecutionTime = intval(ini_get('max_execution_time'));	
  if (strtolower(\php_sapi_name()) !== 'cli') {	 
     set_time_limit(min(45, $maxExecutionTime));

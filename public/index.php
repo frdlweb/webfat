@@ -676,6 +676,7 @@ class Codebase extends \frdl\Codebase
 		$configVersion = $StubRunner->configVersion();
 		$config = $StubRunner->config();
 		$save = false;
+		$breakScript = false;
 		
 		if(!isset($configVersion['appId'])){	
 			/* $configVersion['appId'] = 'oid:1.3.6.1.4.1.37553.8.1.8.8.1958965301'; 
@@ -697,11 +698,10 @@ class Codebase extends \frdl\Codebase
 			$configVersion['appId'] = 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1'; 
 			$save = true;		      
 		       $html .= '<h1 style="color:green;">';
-			   $html .= 'Next: The Setup/Installer Chooser App will be installed automatically (global) - The page is reloads automatically, please wait ...!';     
+			   $html .= 'Next: The Setup/Installer Chooser App will be installed automatically (global) - The page reloads automatically, please wait ...!';     
 		       $html .= '</h1>';      
-		    echo  \frdl\booting\getFormFromRequestHelper($html, true, 10, null);
-		      die();
-		      
+		      echo  \frdl\booting\getFormFromRequestHelper($html, true, 10, null);
+		      $breakScript=true;
 	      }
 
 		if(!isset($configVersion['channel'])){
@@ -714,7 +714,10 @@ class Codebase extends \frdl\Codebase
 			usleep(100);
 		}
 		
-		$this->setUpdateChannel($configVersion['channel']);		
+		$this->setUpdateChannel($configVersion['channel']);	
+		if(true === $breakScript){
+		   die();	
+		}
 		return $this->getUpdateChannel();
 	}
 }

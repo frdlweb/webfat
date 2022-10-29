@@ -2970,8 +2970,8 @@ namespace frdl\booting{
      $config=[];  
  }	
 
-     $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
-     $ShutdownTasks(function($config, $url, $file){
+
+     register_shutdown_function(function($config, $url, $file){(function($config, $url, $file){
 		 if(true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'] ){	  
 			 $thisCode = file_get_contents($url);		  
 			 if(false!==$thisCode && true === (new \frdl\Lint\Php($cacheDirLint) )->lintString($thisCode) ){	   

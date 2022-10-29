@@ -88,7 +88,30 @@ setTimeout(()=>{
 * 
 *  - edited by webfan.de
 */ 
+namespace frdl\patch{
+   interface IContainer {
+	   
+   }
+}
+
+//Psr\Container\ContainerInterface
+// Patch Version 1 | 2 incompatibillity
+namespace Psr\Container{
+   use frdl\patch\IContainer;
+
+	if (false) {	
+		interface ContainerInterface extends IContainer	
+		{
+	
+		}
+	} elseif(!interface_exists(ContainerInterface::class, false)) {  
+	    \class_alias(IContainer::class, ContainerInterface::class);
+	}	
+}
+
+
 namespace frdl\booting{
+	
  $maxExecutionTime = intval(ini_get('max_execution_time'));	
  if (strtolower(\php_sapi_name()) !== 'cli') {	 
     @set_time_limit(min(45, max($maxExecutionTime, 45)));

@@ -87,7 +87,7 @@ setTimeout(()=>{
 *  OTHER DEALINGS IN THE SOFTWARE.
 * 
 *  - edited by webfan.de
-*/ 
+ 
 namespace frdl\patch{
    interface IContainer {
 	   
@@ -108,7 +108,7 @@ namespace Psr\Container{
 	    \class_alias(IContainer::class, ContainerInterface::class);
 	}	
 }
-
+*/
 
 namespace Psr\Container{
 

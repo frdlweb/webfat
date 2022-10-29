@@ -110,6 +110,7 @@ namespace Psr\Container{
 }
 
 
+
 namespace frdl\booting{
 	
  $maxExecutionTime = intval(ini_get('max_execution_time'));	

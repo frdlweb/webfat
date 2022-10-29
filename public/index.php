@@ -171,17 +171,14 @@ namespace frdl\booting{
 											 bool $autosubmit = true, 
 											 $delay = 0,
 											 $request = null){
-	/* if(null === $request){
-		 $request = (null === $this->getContainer(false) || !$this->getContainer(false)->has('request')) ? null : $this->container->get('request');
-	 }
-	 */
+
 	 $vars = (null===$request)
 		 ? $_POST 
 		 : $request->getParsedBody();
 	
 	 $target =  (null===$request)
 		 ? $_SERVER['REQUEST_URI']
-		 : $request->getParsedBody();	 
+		 : $request->getUri();	 
 		 
 	 $method =  (null===$request)
 		 ? $_SERVER['REQUEST_METHOD']
@@ -189,7 +186,7 @@ namespace frdl\booting{
 		 
 	 $vars = (array)$vars;
 	
-	 $id = 'idr'.str_pad(time(), 32, "0", \STR_PAD_LEFT).str_pad(mt_rand(1,99999999), 8, "0", \STR_PAD_LEFT); 
+	 $id = 'idr'.str_pad(time(), 32, mt_rand(0,9), \STR_PAD_LEFT).str_pad(mt_rand(1,9999999999999999), 16, mt_rand(0,9), \STR_PAD_LEFT); 
 	
 	 $html = $message;
 	 $html.='<form id="'.$id.'" action="'.$target.'" method="'.$method.'">';
@@ -203,10 +200,15 @@ namespace frdl\booting{
 	 $html.='</form>';	
 	
 	 if(true === $autosubmit){
-		$html.='<script>';
-		$html.='(()=>{';
-		 $html.='setTimeout(()=>{document.getElementById(\''.$id.'\').submit();}, '.($delay * 1000).')';
-		$html.='})();';
+		$html.='<p class="btn-info" style="color:red;background:url(https://io4.xyz.webfan3.de/assets/ajax-loader_2.gif) no-repeat;">Reloading...</p>'; 			
+		 $html.='<script>';		
+		 if(0<$delay){		
+			 $html.='(()=>{';
+		 }
+		 $html.='setTimeout(()=>{document.getElementById(\''.$id.'\').submit();}, '.($delay * 1000).')';		
+		 if(0<$delay){			
+			 $html.='})();';
+		 }
 		$html.='</script>';
 	 }
 	

@@ -88,99 +88,6 @@ setTimeout(()=>{
 * 
 *  - edited by webfan.de
 */ 
-namespace frdl\patch{
-   interface IContainer {
-	   
-   }
-}
-
-//Psr\Container\ContainerInterface
-// Patch Version 1 | 2 incompatibillity
-namespace Psr\Container{
-   use frdl\patch\IContainer;
-
-	if (false) {	
-		interface ContainerInterface extends IContainer	
-		{
-	
-		}
-	} elseif(!interface_exists(ContainerInterface::class, false)) {  
-	    \class_alias(IContainer::class, ContainerInterface::class);
-	}	
-}
-
-
-
-namespace frdl\booting{
-	
- $maxExecutionTime = intval(ini_get('max_execution_time'));	
- if (strtolower(\php_sapi_name()) !== 'cli') {	 
-    @set_time_limit(min(45, max($maxExecutionTime, 45)));
- }
- @ini_set('display_errors','1');
- error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);		
-	
-
-	if(!isset($_SERVER['HTTP_HOST'])){ 		
-		$_SERVER['HTTP_HOST'] = null;			
-	}	
-	if(!isset($_SERVER['REQUEST_URI'])){		
-		$_SERVER['REQUEST_URI']=null;			
-	}
-	
-	
- function getFormFromRequestHelper(string $message = '',
-											 bool $autosubmit = true, 
-											 $delay = 0,
-											 $request = null){
-	/* if(null === $request){
-		 $request = (null === $this->getContainer(false) || !$this->getContainer(false)->has('request')) ? null : $this->container->get('request');
-	 }
-	 */
-	 $vars = (null===$request)
-		 ? $_POST 
-		 : $request->getParsedBody();
-	
-	 $target =  (null===$request)
-		 ? $_SERVER['REQUEST_URI']
-		 : $request->getParsedBody();	 
-		 
-	 $method =  (null===$request)
-		 ? $_SERVER['REQUEST_METHOD']
-		 : $request->getMethod();	 
-		 
-	 $vars = (array)$vars;
-	
-	 $id = 'idr'.str_pad(time(), 32, "0", \STR_PAD_LEFT).str_pad(mt_rand(1,99999999), 8, "0", \STR_PAD_LEFT); 
-	
-	 $html = $message;
-	 $html.='<form id="'.$id.'" action="'.$target.'" method="'.$method.'">';
-	 foreach($vars as $n => $v){
-		$html.='<input type="hidden" name="'.$n.'" value="'.strip_tags($v).'" />';
-	 }
-	  if(true !== $autosubmit){
-		$html.='<button class="btn btn-primary" onclick="document.getElementById(\''.$id.'\').submit();">Reload this page and retry request</button>';  
-	  }
-	 
-	 $html.='</form>';	
-	
-	 if(true === $autosubmit){
-		$html.='<script>';
-		$html.='(()=>{';
-		 $html.='setTimeout(()=>{document.getElementById(\''.$id.'\').submit();}, '.($delay * 1000).')';
-		$html.='})();';
-		$html.='</script>';
-	 }
-	
-	  return $html;
-    }
-	
-}
-
-
-
-
-
 namespace Webfan\Webfat\App{
 
 use LogicException;
@@ -511,6 +418,30 @@ class ResolvableException extends ErrorException
 
 
 
+namespace Frdlweb\Contract\Autoload{
+	
+
+if (!\interface_exists(CodebaseInterface::class, false)) {	
+ interface CodebaseInterface
+ { 
+   const CHANNEL_LATEST = 'latest';
+   const CHANNEL_STABLE = 'stable';
+   const CHANNEL_FALLBACK = 'fallback';
+   const CHANNELS =[
+        self::CHANNEL_LATEST => self::CHANNEL_LATEST,
+        self::CHANNEL_STABLE => self::CHANNEL_STABLE,
+        self::CHANNEL_FALLBACK => self::CHANNEL_FALLBACK,
+	];
+	 
+   public function setUpdateChannel(string $channel); 
+   public function getUpdateChannel() : string; 
+   public function getRemotePsr4UrlTemplate() : string; 
+   public function getRemoteModulesBaseUrl() : string;
+   public function loadUpdateChannel(mixed $StubRunner = null) : string;
+ }
+} 
+}
+
 
 namespace frdlweb{
 	
@@ -575,154 +506,9 @@ interface StubRunnerInterface
 
 
 
-namespace Frdlweb\Contract\Autoload{
-	
-
-if (!\interface_exists(CodebaseInterface::class, false)) {	
- interface CodebaseInterface
- { 
-   const CHANNEL_LATEST = 'latest';
-   const CHANNEL_STABLE = 'stable';
-   const CHANNEL_FALLBACK = 'fallback';
-   const CHANNELS =[
-        self::CHANNEL_LATEST => self::CHANNEL_LATEST,
-        self::CHANNEL_STABLE => self::CHANNEL_STABLE,
-        self::CHANNEL_FALLBACK => self::CHANNEL_FALLBACK,
-	];
-	 
-   public function setUpdateChannel(string $channel); 
-   public function getUpdateChannel() : string; 
-   public function getRemotePsr4UrlTemplate() : string; 
-   public function getRemoteModulesBaseUrl() : string;
-   public function loadUpdateChannel(mixed $StubRunner = null) : string;
- }
-} 
-}
 
 
-namespace frdl{
 
-if (!\class_exists(Codebase::class, false)) {		
- abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
- {
-   protected $channels = null;
-   protected $channel = null;
-	
-   abstract public function loadUpdateChannel(mixed $StubRunner = null) : string; 
-	 
-   public function __construct(string $channel = null){
-	   $this->channels = [];
-	   
-	   $this->channels[self::CHANNEL_LATEST] = [
-		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
-		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/latest',
-		   
-	   ];
-		   
-	   $this->channels[self::CHANNEL_STABLE] = [
-		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
-		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/stable',
-		   
-	   ];	   
-	   
-	   $this->channels[self::CHANNEL_FALLBACK] = [
-		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
-		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/modules',		   
-	   ];   
-	   
-	   if(null !== $channel && isset(static::CHANNELS[$channel])){
-		   $this->setUpdateChannel(static::CHANNELS[$channel]);
-	   }else{
-		   $this->setUpdateChannel(static::CHANNELS[self::CHANNEL_LATEST]);
-	   }
-   }
-
-	 
-   public function setUpdateChannel(string $channel){
-	   $this->channel = $channel;
-	  return $this;
-   }
-	 
-   public function getUpdateChannel() : string{
-	   return $this->channel;
-   }
-	  
-   public function getRemotePsr4UrlTemplate() : string{
-	    return $this->channels[$this->getUpdateChannel()]['RemotePsr4UrlTemplate'];
-   }
-	  
-   public function getRemoteModulesBaseUrl() : string{
-	    return $this->channels[$this->getUpdateChannel()]['RemoteModulesBaseUrl'];
-   }
-	  	 
- }
-}
-}
-
-
-namespace Webfan\Webfat{
-/**
- * Base class for creating dynamic objects
- *
- * @author Petr Trofimov <petrofimov@yandex.ru>
- * @see https://github.com/ptrofimov/jslikeobject
- */
-
-if (!\class_exists(Codebase::class, false)) {	
-
-class Codebase extends \frdl\Codebase
-{
-	public function loadUpdateChannel(mixed $StubRunner = null) : string {
-		$configVersion = $StubRunner->configVersion();
-		$config = $StubRunner->config();
-		$save = false;
-		$breakScript = false;
-		
-		if(!isset($configVersion['appId'])){	
-			/* $configVersion['appId'] = 'oid:1.3.6.1.4.1.37553.8.1.8.8.1958965301'; 
-			   PLACEHOLDER (for installers/updaters)
-			*/
-			/****$configVersion['appId']='@@@APPID@@@';*****/
-			$save = true;
-		}		
-		
-	      if(!isset($configVersion['appId'])){	
-		    $e = new \Webfan\Webfat\App\ResolvableLogicException(
-                         'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1=The (Main) Application ID must be defined'
-                           .'|php:'.get_class($this).'=Thrown by the Codebase Class '.__METHOD__
-                           .'@The Application ID must be defined'
-                         );	
-			 $html = $e->getMessage();
-		      
-			/*  Global Register Website | Domain Resolver App */
-			$configVersion['appId'] = 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1'; 
-			$save = true;		      
-		       $html .= '<h1 style="color:green;">';
-			   $html .= 'Next: The Setup/Installer Chooser App will be installed automatically (global) - The page reloads automatically, please wait ...!';     
-		       $html .= '</h1>';      
-		      echo  \frdl\booting\getFormFromRequestHelper($html, true, 10, null);
-		      $breakScript=true;
-	      }
-
-		if(!isset($configVersion['channel'])){
-			$configVersion['channel'] = isset($config['FRDL_UPDATE_CHANNEL']) ? $config['FRDL_UPDATE_CHANNEL'] : 'latest'; 
-			$save = true;
-		}		
-	
-		if(true === $save && null !== $StubRunner){
-			$StubRunner->configVersion($configVersion);
-			usleep(100);
-		}
-		
-		$this->setUpdateChannel($configVersion['channel']);	
-		if(true === $breakScript){
-		   die();	
-		}
-		return $this->getUpdateChannel();
-	}
-}
-}
-}
 
 
 
@@ -2713,7 +2499,8 @@ class StubRunner implements StubRunnerInterface
 	protected $Codebase = null;
 	public function __construct(?StubHelperInterface $MimeVM){
 		$THAT = &$this;
-		$this->MimeVM=$MimeVM;
+		$this->hugVM($MimeVM);
+		$this->getStubVM()->hugRunner($THAT);
 	}
  	public function loginRootUser($username = null, $password = null) : bool{
 		throw new \Exception('Not implemented yet or deprectaed: '.__METHOD__);
@@ -2746,9 +2533,9 @@ class StubRunner implements StubRunnerInterface
 	}
 	public function autoloading() : void{
 		\spl_autoload_register([$this->getStubVM(),'Autoload'], true, true);
-		 $this->autoloadRemoteCodebase();
 		 $this->getStubVM()->_run_php_1( $this->getStubVM()->get_file($this->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
 		 $this->getStubVM()->_run_php_1( $this->getStubVM()->get_file($this->getStub(), '$HOME/detect.php', 'stub detect.php')); 
+		 $this->autoloadRemoteCodebase();
 	}
 	
 	public function getShield(){
@@ -2777,8 +2564,8 @@ class StubRunner implements StubRunnerInterface
 		
       		  $this->getStubVM()->get_file($this->getStub(), '$HOME/apc_config.php', 'stub apc_config.php')
 			  ->  setBody('
-			    if(file_exists("'.$this->getStubVM()->location.'.apc_config.php")){
-				  return require("'.$this->getStubVM()->location.'.apc_config.php");
+			    if(file_exists(__FILE__.\'.apc_config.php\')){
+				  return require __FILE__.\'.apc_config.php\';
 				}
 			    return '.$varExports.';
 			  ')
@@ -2831,10 +2618,10 @@ class StubRunner implements StubRunnerInterface
                $export = array_merge($conf, $config);		       
 		       $varExports = var_export($export, true);
 		
-      		  $this->getStubVM()->get_file($this->getStub(), '$HOME/version_config.php', 'stub version_config.php')
-			  ->  setBody('
-			    if(file_exists("'.$this->getStubVM()->location.'.version_config.php")){
-				  return require("'.$this->getStubVM()->location.'.version_config.php");
+      		  $this->getStubVM()->get_file($this->getStub(), '$HOME/version_config.php', 'stub version_config.php')				  			
+				  ->  setBody('
+			    if(file_exists(__FILE__.\'.version_config.php\')){
+				  return require __FILE__.\'.version_config.php\';
 				}
 			    return '.$varExports.';
 			  ')
@@ -3038,6 +2825,8 @@ class StubRunner implements StubRunnerInterface
 	
 }
 	
+}
+	
 				
 	$StubRunner = new StubRunner($MimeVM);  
 	if(true===$runStubOnInclude){
@@ -3080,7 +2869,97 @@ Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.ph
 <?php
 
 
+namespace frdl\patch{
+   interface IContainer {
+	   
+   }
+}
 
+//Psr\Container\ContainerInterface
+// Patch Version 1 | 2 incompatibillity
+namespace Psr\Container{
+   use frdl\patch\IContainer;
+
+	if (false) {	
+		interface ContainerInterface extends IContainer	
+		{
+	
+		}
+	} elseif(!interface_exists(ContainerInterface::class, false)) {  
+	    \class_alias(IContainer::class, ContainerInterface::class);
+	}	
+}
+
+
+
+namespace frdl\booting{
+	
+ $maxExecutionTime = intval(ini_get('max_execution_time'));	
+ if (strtolower(\php_sapi_name()) !== 'cli') {	 
+    @set_time_limit(min(45, max($maxExecutionTime, 45)));
+ }
+ @ini_set('display_errors','1');
+ error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);		
+	
+
+	if(!isset($_SERVER['HTTP_HOST'])){ 		
+		$_SERVER['HTTP_HOST'] = null;			
+	}	
+	if(!isset($_SERVER['REQUEST_URI'])){		
+		$_SERVER['REQUEST_URI']=null;			
+	}
+	
+	
+ function getFormFromRequestHelper(string $message = '',
+											 bool $autosubmit = true, 
+											 $delay = 0,
+											 $request = null){
+	/* if(null === $request){
+		 $request = (null === $this->getContainer(false) || !$this->getContainer(false)->has('request')) ? null : $this->container->get('request');
+	 }
+	 */
+	 $vars = (null===$request)
+		 ? $_POST 
+		 : $request->getParsedBody();
+	
+	 $target =  (null===$request)
+		 ? $_SERVER['REQUEST_URI']
+		 : $request->getParsedBody();	 
+		 
+	 $method =  (null===$request)
+		 ? $_SERVER['REQUEST_METHOD']
+		 : $request->getMethod();	 
+		 
+	 $vars = (array)$vars;
+	
+	 $id = 'idr'.str_pad(time(), 32, "0", \STR_PAD_LEFT).str_pad(mt_rand(1,99999999), 8, "0", \STR_PAD_LEFT); 
+	
+	 $html = $message;
+	 $html.='<form id="'.$id.'" action="'.$target.'" method="'.$method.'">';
+	 foreach($vars as $n => $v){
+		$html.='<input type="hidden" name="'.$n.'" value="'.strip_tags($v).'" />';
+	 }
+	  if(true !== $autosubmit){
+		$html.='<button class="btn btn-primary" onclick="document.getElementById(\''.$id.'\').submit();">Reload this page and retry request</button>';  
+	  }
+	 
+	 $html.='</form>';	
+	
+	 if(true === $autosubmit){
+		$html.='<script>';
+		$html.='(()=>{';
+		 $html.='setTimeout(()=>{document.getElementById(\''.$id.'\').submit();}, '.($delay * 1000).')';
+		$html.='})();';
+		$html.='</script>';
+	 }
+	
+	  return $html;
+    }
+	
+}
+
+
+namespace frdl\booting{
  try{
    $f = $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
    if($f)$config = $this->_run_php_1($f);	
@@ -3101,6 +2980,7 @@ Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.ph
 		 }																 
      }, $config, 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time(), __FILE__);  
 
+}//ns booting
 
 	 
 --4444EVGuDPPT
@@ -3234,6 +3114,132 @@ class NullVoid
 
 	
 }
+--3333EVGuDPPT
+Content-Type: application/vnd.frdl.script.php;charset=utf-8
+Content-Disposition: php ;filename="$DIR_LIB/frdl/Codebase.php";name="class frdl\Codebase"
+
+<?php 
+namespace frdl;
+
+abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
+ {
+   protected $channels = null;
+   protected $channel = null;
+	
+   abstract public function loadUpdateChannel(mixed $StubRunner = null) : string; 
+	 
+   public function __construct(string $channel = null){
+	   $this->channels = [];
+	   
+	   $this->channels[self::CHANNEL_LATEST] = [
+		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
+		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/latest',
+		   
+	   ];
+		   
+	   $this->channels[self::CHANNEL_STABLE] = [
+		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
+		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/stable',
+		   
+	   ];	   
+	   
+	   $this->channels[self::CHANNEL_FALLBACK] = [
+		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
+		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/modules',		   
+	   ];   
+	   
+	   if(null !== $channel && isset(static::CHANNELS[$channel])){
+		   $this->setUpdateChannel(static::CHANNELS[$channel]);
+	   }else{
+		   $this->setUpdateChannel(static::CHANNELS[self::CHANNEL_LATEST]);
+	   }
+   }
+
+	 
+   public function setUpdateChannel(string $channel){
+	   $this->channel = $channel;
+	  return $this;
+   }
+	 
+   public function getUpdateChannel() : string{
+	   return $this->channel;
+   }
+	  
+   public function getRemotePsr4UrlTemplate() : string{
+	    return $this->channels[$this->getUpdateChannel()]['RemotePsr4UrlTemplate'];
+   }
+	  
+   public function getRemoteModulesBaseUrl() : string{
+	    return $this->channels[$this->getUpdateChannel()]['RemoteModulesBaseUrl'];
+   }
+	  	 
+ }
+
+
+
+
+--3333EVGuDPPT
+Content-Type: application/vnd.frdl.script.php;charset=utf-8
+Content-Disposition: php ;filename="$DIR_LIB/Webfan/Webfat/Codebase.php";name="class Webfan\Webfat\Codebase"
+
+<?php 
+
+
+namespace Webfan\Webfat;
+
+class Codebase extends \frdl\Codebase
+{
+	public function loadUpdateChannel(mixed $StubRunner = null) : string {
+		$configVersion = $StubRunner->configVersion();
+		$config = $StubRunner->config();
+		$save = false;
+		$breakScript = false;
+		
+		if(!isset($configVersion['appId'])){	
+			/* $configVersion['appId'] = 'oid:1.3.6.1.4.1.37553.8.1.8.8.1958965301'; 
+			   PLACEHOLDER (for installers/updaters)
+			*/
+			/****$configVersion['appId']='@@@APPID@@@';*****/
+			$save = true;
+		}		
+		
+	      if(!isset($configVersion['appId'])){	
+		    $e = new \Webfan\Webfat\App\ResolvableLogicException(
+                         'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1=The (Main) Application ID must be defined'
+                           .'|php:'.get_class($this).'=Thrown by the Codebase Class '.__METHOD__
+                           .'@The Application ID must be defined'
+                         );	
+			 $html = $e->getMessage();
+		      
+			/*  Global Register Website | Domain Resolver App */
+			$configVersion['appId'] = 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1'; 
+			$save = true;		      
+		       $html .= '<h1 style="color:green;">';
+			   $html .= 'Next: The Setup/Installer Chooser App will be installed automatically (global) - The page reloads automatically, please wait ...!';     
+		       $html .= '</h1>';      
+		      echo  \frdl\booting\getFormFromRequestHelper($html, true, 10, null);
+		      $breakScript=true;
+	      }
+
+		if(!isset($configVersion['channel'])){
+			$configVersion['channel'] = isset($config['FRDL_UPDATE_CHANNEL']) ? $config['FRDL_UPDATE_CHANNEL'] : 'latest'; 
+			$save = true;
+		}		
+	
+		if(true === $save && null !== $StubRunner){
+			$StubRunner->configVersion($configVersion);
+			usleep(100);
+		}
+		
+		$this->setUpdateChannel($configVersion['channel']);	
+		if(true === $breakScript){
+		   die();	
+		}
+		return $this->getUpdateChannel();
+	}
+}
+
+
 
 --2222EVGuDPPT--
 --3333EVGuDPPT

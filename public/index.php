@@ -2921,7 +2921,7 @@ class StubRunner implements StubRunnerInterface
 	   }
 		
          if(false === $ApplicationsDirectory && isset($configVersion['appId'])){	
-		 $webrootConfigFile = rtrim(getenv('FRDL_WORKSPACE'), '\\/ '). 
+		 $webrootConfigFile = rtrim(getenv('FRDL_WORKSPACE'), '\\/ ')
 			   .\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR	
 			   .urlencode($configVersion['appId'])	
 			   .\DIRECTORY_SEPARATOR.'app.php';
@@ -2930,7 +2930,7 @@ class StubRunner implements StubRunnerInterface
 		   $webrootConfig = require $webrootConfigFile;       
 		   $ApplicationsDirectory =$webrootConfig['stages'][$webrootConfig['stage']];	 	 
 		 }else{ 
-			 $ApplicationsDirectory =  rtrim(getenv('FRDL_WORKSPACE'), '\\/ '). 
+			 $ApplicationsDirectory =  rtrim(getenv('FRDL_WORKSPACE'), '\\/ ')
 			   .\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR	
 			   .urlencode($configVersion['appId'])	
 			   .\DIRECTORY_SEPARATOR.'deployments'	

@@ -2902,24 +2902,48 @@ class StubRunner implements StubRunnerInterface
 	}
 	
 	public function getApplicationsDirectory() : string {
-        $codebase = $this->getCodebase();
+     
+		$codebase = $this->getCodebase();
+		$ApplicationsDirectory = false;
 		$configVersion = $this->configVersion();
 				
 		$webrootConfigFile = rtrim($this->getWebrootConfigDirectory(), '\\/ ').\DIRECTORY_SEPARATOR.'app.php';
 
-         if(file_exists($webrootConfigFile)){	  
+         if(false === $ApplicationsDirectory && file_exists($webrootConfigFile)){	  
 		   $webrootConfig = require $webrootConfigFile;       
 		   $ApplicationsDirectory =$webrootConfig['stages'][$webrootConfig['stage']];	 
-	   }else{
-
-		   $ApplicationsDirectory = getenv('FRDL_WORKSPACE')
+		   if(!is_dir($ApplicationsDirectory)
+		      && is_string($ApplicationsDirectory)
+		      && !empty($ApplicationsDirectory)
+		      && !@mkdir($ApplicationsDirectory, 0775, true)){
+		          $ApplicationsDirectory = false;	 
+		  }		 
+	   }
+		
+         if(false === $ApplicationsDirectory && isset($configVersion['appId'])){	
+		 $webrootConfigFile = rtrim(getenv('FRDL_WORKSPACE'), '\\/ '). 
+			   .\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR	
+			   .urlencode($configVersion['appId'])	
+			   .\DIRECTORY_SEPARATOR.'app.php';
+         
+		 if(file_exists($webrootConfigFile)){	  
+		   $webrootConfig = require $webrootConfigFile;       
+		   $ApplicationsDirectory =$webrootConfig['stages'][$webrootConfig['stage']];	 	 
+		 }else{ 
+			 $ApplicationsDirectory =  rtrim(getenv('FRDL_WORKSPACE'), '\\/ '). 
 			   .\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR	
 			   .urlencode($configVersion['appId'])	
 			   .\DIRECTORY_SEPARATOR.'deployments'	
-			   .\DIRECTORY_SEPARATOR.'blue'	
-			   .\DIRECTORY_SEPARATOR.'deploy'	
-			   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
- 
+				   .\DIRECTORY_SEPARATOR.'blue'	
+				   .\DIRECTORY_SEPARATOR.'deploy'	
+				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 			 
+		 }
+		 
+		 if(!is_dir($ApplicationsDirectory) && !@mkdir($ApplicationsDirectory, 0775, true)){
+		   $ApplicationsDirectory = false;	 
+		 }
+	   }
+
 		   if(!is_dir($ApplicationsDirectory) ){
 			   $ApplicationsDirectory = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'global'.\DIRECTORY_SEPARATOR	  	
 				   .'app'	 
@@ -2927,12 +2951,11 @@ class StubRunner implements StubRunnerInterface
 				   .\DIRECTORY_SEPARATOR.'blue'	
 				   .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
-		   }
+		   } 
 
 
-		   if(!is_dir($ApplicationsDirectory) && !@mkdir($ApplicationsDirectory, 0775, true)){  
-			   
-			   		    
+
+		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  			   		    
 			$html .= '<h1 style="color:red;">';
 			   $html .= 'Error: Coould not find app config for this host and could not create global app directory!';     
 		       $html .= '</h1>';      
@@ -2941,7 +2964,7 @@ class StubRunner implements StubRunnerInterface
 		   } 
 
 
-	   }
+	   
 		return $ApplicationsDirectory;
 	}		
 	

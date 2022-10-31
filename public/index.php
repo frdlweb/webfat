@@ -2907,7 +2907,7 @@ class StubRunner implements StubRunnerInterface
 				
 		$webrootConfigFile = rtrim($this->getWebrootConfigDirectory(), '\\/ ').\DIRECTORY_SEPARATOR.'app.php';
 
-       if(file_exists($webrootConfigFile)){	  
+         if(file_exists($webrootConfigFile)){	  
 		   $webrootConfig = require $webrootConfigFile;       
 		   $ApplicationsDirectory =$webrootConfig['stages'][$webrootConfig['stage']];	 
 	   }else{
@@ -2920,7 +2920,7 @@ class StubRunner implements StubRunnerInterface
 			   .\DIRECTORY_SEPARATOR.'deploy'	
 			   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
  
-		   if(!is_dir($ApplicationsDirectory) && !@mkdir($ApplicationsDirectory, 0775, true)){  
+		   if(!is_dir($ApplicationsDirectory) ){
 			   $ApplicationsDirectory = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'global'.\DIRECTORY_SEPARATOR	  	
 				   .'app'	 
 				   .\DIRECTORY_SEPARATOR.'deployments'	
@@ -2930,21 +2930,14 @@ class StubRunner implements StubRunnerInterface
 		   }
 
 
-		   if(!is_dir($ApplicationsDirectory) && !@mkdir($ApplicationsDirectory, 0775, true)){ 
-			   $ApplicationsDirectory =  $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR
-				                     . '..'
-				                     .\DIRECTORY_SEPARATOR
-				                     . 'app'
-				                     .\DIRECTORY_SEPARATOR;
-		   } 
-		   
-
-
-		   if(!is_dir($ApplicationsDirectory) && !@mkdir($ApplicationsDirectory, 0775, true)){ 
-			   $ApplicationsDirectory =  __DIR__.\DIRECTORY_SEPARATOR
-				                     . 'app'
-				                     .\DIRECTORY_SEPARATOR;
-
+		   if(!is_dir($ApplicationsDirectory) && !@mkdir($ApplicationsDirectory, 0775, true)){  
+			   
+			   		    
+			$html .= '<h1 style="color:red;">';
+			   $html .= 'Error: Coould not find app config for this host and could not create global app directory!';     
+		       $html .= '</h1>';      
+		      echo  \frdl\booting\getFormFromRequestHelper($html, false);
+			   die();
 		   } 
 
 
@@ -3183,7 +3176,7 @@ class Codebase extends \frdl\Codebase
                            .'|php:'.get_class($this).'=Thrown by the Codebase Class '.__METHOD__
                            .'@The Application ID must be defined'
                          );	
-			 $html = $e->getMessage();
+			 $html ='';// $e->getMessage();
 		      
 			/*  Global Register Website | Domain Resolver App */
 			$configVersion['appId'] = 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1'; 

@@ -153,7 +153,7 @@ namespace frdl\booting{
 	
  $maxExecutionTime = intval(ini_get('max_execution_time'));	
  if (strtolower(\php_sapi_name()) !== 'cli') {	 
-    @set_time_limit(min(45, max($maxExecutionTime, 45)));
+    @set_time_limit(180);
  }
  @ini_set('display_errors','1');
  error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);		

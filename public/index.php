@@ -2717,7 +2717,8 @@ class StubRunner implements StubRunnerInterface
 			//echo 'can\'t lock';
 			fclose($fp);
 			if($trys < 999999){
-				set_time_limit(min(45, max(intval(ini_get('max_execution_time')), 45)));
+				//set_time_limit(min(45, max(intval(ini_get('max_execution_time')), 45)));
+				set_time_limit(180);
 				usleep(100);
 				return $this->config($config, $trys);
 			}
@@ -2774,7 +2775,8 @@ class StubRunner implements StubRunnerInterface
 			//echo 'can\'t lock';
 			fclose($fp);
 			if($trys < 999999){
-				set_time_limit(min(45, max(intval(ini_get('max_execution_time')), 45)));
+				//set_time_limit(min(45, max(intval(ini_get('max_execution_time')), 45)));
+				set_time_limit(180);
 				usleep(100);
 				return $this->config($config, $trys);
 			}

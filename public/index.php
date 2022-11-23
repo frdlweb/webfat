@@ -3250,7 +3250,9 @@ class Codebase extends \frdl\Codebase
                            .'|php:'.get_class($this).'=Thrown by the Codebase Class '.__METHOD__
                            .'@The Application ID must be defined'
                          );	
-			 $html ='';// $e->getMessage();
+			 // $html ='';
+			 $html = $e->html(-1);
+		      
 		      
 			/*  Global Register Website | Domain Resolver App */
 			$configVersion['appId'] = 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1'; 

@@ -3162,7 +3162,7 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
  $configVersion=$this->getRunner()->configVersion( ); 
  
-  $App = \Webfan\Webfat\App\Kernel::getInstance(isset($configVersion['appId']) ? $configVersion['appId'] : 'undefined',  null);	
+  $App = \Webfan\Webfat\App\Kernel::getInstance(isset($configVersion['appId']) ? $configVersion['appId'] : 'global',  null);	
   $App->setStub($this);		 
   if(isset($configVersion['appId'])){
 	$App->setAppId($configVersion['appId']);	

@@ -962,6 +962,10 @@ use frdlweb\StubRunnerInterface as StubRunnerInterface;
 		$this->runner=$runner;		
 	  return $this;
 	}
+	
+	 public function getRunner(){	
+	  return $this->runner;
+	}
 	 
 	protected function _run_multipart($_Part){
 
@@ -2692,6 +2696,26 @@ class StubRunner implements StubRunnerInterface
 	public function getStub() : StubItemInterface{
 		return $this->MimeVM->document;
 	}
+	
+	
+	public function autoUpdateStub(string $url = null){
+	  if(null === $url){
+	     $url = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time();	  
+	  }
+	
+	   $config=$this->config();	
+		
+           $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
+           $ShutdownTasks(function($config, $url, $file){
+		 if(true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'] ){	  
+			 $thisCode = file_get_contents($url);		  
+			 if(false!==$thisCode && true === (new \frdl\Lint\Php($cacheDirLint) )->lintString($thisCode) ){	   
+				 file_put_contents($file, trim($thisCode));	  
+			 }		 
+		 }																 
+             }, $config, $url, $this->getStubVM()->location );  	
+	}
+	
 	public function __invoke() :?StubHelperInterface{	
 
 		if(defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){ 
@@ -3065,26 +3089,7 @@ Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.ph
 <?php
 
 
-
- try{
-   $f = $this->get_file($this->document, '$HOME/apc_config.php', 'stub apc_config.php');
-   if($f)$config = $this->_run_php_1($f);	
-  if(!is_array($config) ){
-	$config=[];  
-  }
- }catch(\Exception $e){
-     $config=[];  
- }	
-
-     $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
-     $ShutdownTasks(function($config, $url, $file){
-		 if(true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'] ){	  
-			 $thisCode = file_get_contents($url);		  
-			 if(false!==$thisCode && true === (new \frdl\Lint\Php($cacheDirLint) )->lintString($thisCode) ){	   
-				 file_put_contents($file, trim($thisCode));	  
-			 }		 
-		 }																 
-     }, $config, 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time(), __FILE__);  
+ $this->getRunner()->autoUpdateStub( null );
 
 
 	 
@@ -3092,7 +3097,7 @@ Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.ph
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.php"
 	
-			 <?php
+<?php
 
 	
 	 			  

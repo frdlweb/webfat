@@ -2704,16 +2704,21 @@ class StubRunner implements StubRunnerInterface
 	  }
 	
 	   $config=$this->config();	
+	   $configVersion = $this->configVersion();
 		
            $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
-           $ShutdownTasks(function($config, $url, $file){
+           $ShutdownTasks(function($config, $configVersion, $url, $file){
 		 if(true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'] ){	  
-			 $thisCode = file_get_contents($url);		  
+			 $thisCode = file_get_contents($url);	
+			 if(isset($configVersion['appId'])){
+			   $thisCode = str_replace("/****'appId'=>'@@@APPID@@@',*****/", '\'appId\'=>\''.$configVersion['appId'].'\',', $thisCode);	
+                           $thisCode = str_replace('/****$configVersion[\'appId\']=\'@@@APPID@@@\';*****/', '$configVersion[\'appId\']=\''.$configVersion['appId'].'\';', $thisCode);
+			 }
 			 if(false!==$thisCode && true === (new \frdl\Lint\Php($cacheDirLint) )->lintString($thisCode) ){	   
 				 file_put_contents($file, trim($thisCode));	  
 			 }		 
 		 }																 
-             }, $config, $url, $this->getStubVM()->location );  	
+             }, $config, $configVersion, $url, $this->getStubVM()->location );  	
 	}
 	
 	public function __invoke() :?StubHelperInterface{	
@@ -2948,7 +2953,7 @@ class StubRunner implements StubRunnerInterface
 		          $loader->register(false);	
 		
                  return $loader;
-      }, 																				 
+        }, 																				 
          $codebase->getUpdateChannel(),
 		 $codebase->getRemotePsr4UrlTemplate(),				
 		 rtrim($this->getApplicationsDirectory(), '\\/ ')
@@ -3155,22 +3160,12 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
  
 
- try{
-   $f = $this->get_file($this->document, '$HOME/version_config.php', 'stub version_config.php');
-   if($f)$config = $this->_run_php_1($f);	
-  if(!is_array($config) ){
-	$config=[];  
-  }
- }catch(\Exception $e){
-     $config=[];  
- }	
+ $configVersion=$this->getRunner()->configVersion( ); 
  
-  $App = \Webfan\Webfat\App\Kernel::getInstance(isset($config['appId']) ? $config['appId'] : 'undefined',  null);	
+  $App = \Webfan\Webfat\App\Kernel::getInstance(isset($configVersion['appId']) ? $configVersion['appId'] : 'undefined',  null);	
   $App->setStub($this);
-
-
-	if(isset($config['appId'])){
-	  $App->setAppId($config['appId']);	
+	if(isset($configVersion['appId'])){
+	  $App->setAppId($configVersion['appId']);	
 	}
 				   
 				   

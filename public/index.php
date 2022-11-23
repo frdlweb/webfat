@@ -2467,6 +2467,12 @@ call_user_func(function() {
 	
 $drush_server_home = (function() {
 	
+	if(function_exists('\posix_getpwuid') && function_exists('\posix_getui') ){		
+		$user = \posix_getpwuid(\posix_getuid());		
+		return $user['dir'];
+	}
+	
+	
 $getRootDir;	
  $getRootDir = (function($path = null) use(&$getRootDir){
 	if(null===$path){

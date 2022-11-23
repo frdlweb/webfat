@@ -632,6 +632,7 @@ if (!\interface_exists(StubHelperInterface::class, false)) {
   public function __call($name, $arguments);
   public function getFileAttachment($file = null, $offset = null);	
   public function hugRunner(mixed $runner);
+  public function getRunner();
  }
 } 
  
@@ -2628,13 +2629,8 @@ chdir($_cwd);
  	$args = func_get_args();
 
  	$MimeVM = new MimeVM($args[0]);
- 	if($doRun){
-	//	set_time_limit(min(900, ini_get('max_execution_time') + 300));
- 
-	//	if (!headers_sent()){ 	  
-//			header_remove(); 	
-//		}
-		$MimeVM('run');
+ 	if($doRun){   
+	  $MimeVM('run');
 	}
  	return $MimeVM;
  };
@@ -2725,7 +2721,8 @@ class StubRunner implements StubRunnerInterface
 		if(defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){ 
 			throw new \Exception('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___ is defined in '.__FILE__.' '.__LINE__);
 		}
-
+		
+                $this->MimeVM->hugRunner($this); 
 		$this->autoloading();	
 		$this->MimeVM->runStubs();
 		return $this->MimeVM;

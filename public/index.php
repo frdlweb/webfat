@@ -3102,7 +3102,7 @@ Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.ph
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.php"
 	
-<?php
+	<?php
 
 	
 	 			  

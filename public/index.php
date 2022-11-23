@@ -198,7 +198,7 @@ function once(callable $callback): mixed
  if (strtolower(\php_sapi_name()) !== 'cli') {	 
     @set_time_limit(180);
  }
- @ini_set('display_errors','1');
+ @ini_set('display_errors','On');
  error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);		
 	
 
@@ -2679,10 +2679,8 @@ class StubRunner implements StubRunnerInterface
 {
 	protected $MimeVM = null;
 	protected $Codebase = null;
-	public function __construct(?StubHelperInterface $MimeVM){
-		$THAT = &$this;
-		$this->hugVM($MimeVM);
-		$this->getStubVM()->hugRunner($THAT);
+	public function __construct(?StubHelperInterface &$MimeVM){
+		$this->MimeVM=$MimeVM;		
 	}
  	public function loginRootUser($username = null, $password = null) : bool{
 		throw new \Exception('Not implemented yet or deprectaed: '.__METHOD__);
@@ -2690,11 +2688,12 @@ class StubRunner implements StubRunnerInterface
 	public function isRootUser() : bool{
 		throw new \Exception('Not implemented yet or deprectaed: '.__METHOD__);
 	}
-	public function getStubVM() : StubHelperInterface{
+	public function getStubVM() : StubHelperInterface{		
+		$this->MimeVM->hugRunner($this);   
 		return $this->MimeVM;
 	}
 	public function getStub() : StubItemInterface{
-		return $this->MimeVM->document;
+		return $this->getStubVM()->document;
 	}
 	
 	
@@ -2718,7 +2717,7 @@ class StubRunner implements StubRunnerInterface
 				 file_put_contents($file, trim($thisCode));	  
 			 }		 
 		 }																 
-             }, $config, $configVersion, $url, $this->getStubVM()->location );  	
+             }, $config, $configVersion, $url, __FILE__ );  	
 	}
 	
 	public function __invoke() :?StubHelperInterface{	
@@ -2955,18 +2954,18 @@ class StubRunner implements StubRunnerInterface
                  return $loader;
         }, 																				 
          $codebase->getUpdateChannel(),
-		 $codebase->getRemotePsr4UrlTemplate(),				
-		 rtrim($this->getApplicationsDirectory(), '\\/ ')
+	 $codebase->getRemotePsr4UrlTemplate(),				
+	 rtrim($this->getApplicationsDirectory(), '\\/ ')
 									  .\DIRECTORY_SEPARATOR
 									  .'runtime'.\DIRECTORY_SEPARATOR
 			                         .'cache'.\DIRECTORY_SEPARATOR
 			                         .'classes'.\DIRECTORY_SEPARATOR
 			                         .'psr4'.\DIRECTORY_SEPARATOR,			    
-		'https://raw.githubusercontent.com/frdl/remote-psr4/master/src/implementations/autoloading/RemoteAutoloaderApiClient.php'
+	'https://raw.githubusercontent.com/frdl/remote-psr4/master/src/implementations/autoloading/RemoteAutoloaderApiClient.php'
 						  .'?cache-bust='.time(), 			 
-									  $config['FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'],
-									  $config['FRDL_REMOTE_PSR4_CACHE_LIMIT']
-									 );
+	  $config['FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'],
+	  $config['FRDL_REMOTE_PSR4_CACHE_LIMIT']
+	);
 
 		}catch(\Exception $e){ 
 			$loader = false; 
@@ -3162,12 +3161,11 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
  $configVersion=$this->getRunner()->configVersion( ); 
  
-  $App = \Webfan\Webfat\App\Kernel::getInstance(isset($configVersion['appId']) ? $configVersion['appId'] : 'undefined',  null);	
-  $App->setStub($this);
+  $App = \Webfan\Webfat\App\Kernel::getInstance(isset($configVersion['appId']) ? $configVersion['appId'] : 'undefined',  null);	 
 	if(isset($configVersion['appId'])){
 	  $App->setAppId($configVersion['appId']);	
 	}
-				   
+ $App->setStub($this);				   
 				   
  $response = $App->handle( );
 

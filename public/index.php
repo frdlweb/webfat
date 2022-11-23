@@ -3053,6 +3053,7 @@ class StubRunner implements StubRunnerInterface
 	
 				
 	$StubRunner = new StubRunner($MimeVM);  
+	$MimeVM->hugRunner($StubRunner);
 	if(true===$runStubOnInclude){
 		$StubRunner();
 	}
@@ -3161,11 +3162,11 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
  $configVersion=$this->getRunner()->configVersion( ); 
  
-  $App = \Webfan\Webfat\App\Kernel::getInstance(isset($configVersion['appId']) ? $configVersion['appId'] : 'undefined',  null);	 
-	if(isset($configVersion['appId'])){
-	  $App->setAppId($configVersion['appId']);	
-	}
- $App->setStub($this);				   
+  $App = \Webfan\Webfat\App\Kernel::getInstance(isset($configVersion['appId']) ? $configVersion['appId'] : 'undefined',  null);	
+  $App->setStub($this);		 
+  if(isset($configVersion['appId'])){
+	$App->setAppId($configVersion['appId']);	
+  }		   
 				   
  $response = $App->handle( );
 

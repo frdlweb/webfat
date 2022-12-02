@@ -609,7 +609,8 @@ if (!\interface_exists(CodebaseInterface::class, false)) {
    public function getUpdateChannel() : string; 
    public function getRemotePsr4UrlTemplate() : string; 
    public function getRemoteModulesBaseUrl() : string;
-   public function loadUpdateChannel(mixed $StubRunner = null) : string;
+   public function loadUpdateChannel(mixed $StubRunner = null) : string;    
+   public function getRemoteApiBaseUrl() : string; 	 
  }
 } 
 }
@@ -3297,19 +3298,25 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 	   
 	   $this->channels[self::CHANNEL_LATEST] = [
 		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
-		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/latest',
+		//   'RemoteModulesBaseUrl' => 'https://webfan.de/install/latest',
+		   'RemoteModulesBaseUrl' => 'https://startdir.de/install',
+		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 		   
 	   ];
 		   
 	   $this->channels[self::CHANNEL_STABLE] = [
 		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
-		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/stable',
+		//   'RemoteModulesBaseUrl' => 'https://webfan.de/install/stable',
+		   'RemoteModulesBaseUrl' => 'https://startdir.de/install',
+		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 		   
 	   ];	   
 	   
 	   $this->channels[self::CHANNEL_FALLBACK] = [
 		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
-		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/modules',		   
+		//   'RemoteModulesBaseUrl' => 'https://webfan.de/install/modules',
+		   'RemoteModulesBaseUrl' => 'https://startdir.de/install',
+		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 	   ];   
 	   
 	   if(null !== $channel && isset(static::CHANNELS[$channel])){
@@ -3319,7 +3326,9 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 	   }
    }
 
-	 
+   public function getRemoteApiBaseUrl() : string{ 
+	   return $this->channels[$this->getUpdateChannel()]['RemoteApiBaseUrl'];
+   }	 
    public function setUpdateChannel(string $channel){
 	   $this->channel = $channel;
 	  return $this;

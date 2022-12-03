@@ -1242,8 +1242,9 @@ use Frdlweb\Contract\Autoload\LoaderInterface;
 	
    public function serializeFile(?string $code=null){
 	   $code =(is_string($code)) ? $code : $this->__toString();
-	   $code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKE1pbWU='), base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);			
-	   $code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKClNbWltZQ=='), base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);			   $code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKClNaW1l'), base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);	   
+	   $code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKE1pbWU='),     base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);			
+	   $code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKClNbWltZQ=='), base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);	
+	   $code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKClNaW1l'),     base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);	   
 	   return $code;
    }
 	 
@@ -2706,7 +2707,7 @@ class StubRunner implements StubRunnerInterface
 	}
 	
 	
-	public function autoUpdateStub(string $url = null){
+	public function autoUpdateStub(string | bool $update = null, string $newVersion = null, string $url = null){
 	  if(null === $url){
 	     $url = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time();	  
 	  }
@@ -2715,8 +2716,20 @@ class StubRunner implements StubRunnerInterface
 	   $configVersion = $this->configVersion();
 		
            $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
-           $ShutdownTasks(function($config, $configVersion, $url, $file){
-		 if(true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'] ){	  
+           $ShutdownTasks(function($update, $newVersion, $config, $configVersion, $url, $file, &$me){
+		 if((is_string($update) && 'auto' === $update) || (is_null($update) && !is_string($newVersion))  ){
+			 $update =  true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'];
+		 }elseif( is_string($update) && 'auto' !== $update  ){
+			$update =  false;
+		 }elseif( is_bool($update) ){
+			$update =  (bool)$update;
+		 }
+		   
+		   if( is_string($newVersion) ){
+			$update =  $update && !version_compare($configVersion['version'], $newVersion, '==');
+		   }
+		   
+		 if(true === $update){	  
 			 $thisCode = file_get_contents($url);	
 			 if(isset($configVersion['appId'])){
 			   $thisCode = str_replace("/****'appId'=>'@@@APPID@@@',*****/", '\'appId\'=>\''.$configVersion['appId'].'\',', $thisCode);	
@@ -2724,9 +2737,24 @@ class StubRunner implements StubRunnerInterface
 			 }
 			 if(false!==$thisCode && true === (new \frdl\Lint\Php($cacheDirLint) )->lintString($thisCode) ){	   
 				 file_put_contents($file, trim($thisCode));	  
-			 }		 
+			 }	
+			 
+			 if(is_string($newVersion)){
+			     //    $configVersion['version'] = $newVersion;
+			     //   $me->configVersion($configVersion);	
+				
+				 $export = array_merge($configVersion, [
+					 'version' => $newVersion,
+				 ]);			    
+				 $varExports = var_export($export, true);
+				 
+			     file_put_contents($this->getStubVM()->location.'.version_config.php', '<?php
+			        return '.$varExports.';             
+	                    ');
+
+			 }
 		 }																 
-             }, $config, $configVersion, $url, __FILE__ );  	
+             }, $update, $newVersion, $config, $configVersion, $url, __FILE__ , $this);  	
 	}
 	
 	public function __invoke() :?StubHelperInterface{	
@@ -3118,8 +3146,11 @@ Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.ph
 	
 <?php
 
-
- $this->getRunner()->autoUpdateStub( null );
+$maxExecutionTime = intval(ini_get('max_execution_time'));	
+ if (strtolower(\php_sapi_name()) !== 'cli') {	 
+    set_time_limit(min(45, $maxExecutionTime));
+ }
+ /* move to jobs module/cronjobs: $this->getRunner()->autoUpdateStub( null ); */
 
 
 	 
@@ -3171,10 +3202,6 @@ Content-Disposition: php ;filename="$HOME/detect.php";name="stub detect.php"
 
 	
 <?php
-$maxExecutionTime = intval(ini_get('max_execution_time'));	
- if (strtolower(\php_sapi_name()) !== 'cli') {	 
-    set_time_limit(min(45, $maxExecutionTime));
- }
 @ini_set('display_errors','1');
 error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);	
 	

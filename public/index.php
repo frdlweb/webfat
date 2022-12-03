@@ -2727,7 +2727,7 @@ class StubRunner implements StubRunnerInterface
 		 }
 		   
 		   if( is_string($newVersion) ){
-			$update =  $update && !version_compare($configVersion['version'], $newVersion, '==');
+			$update =  $update || !version_compare($configVersion['version'], $newVersion, '==');
 		   }
 		   
 		 if(true === $update){	  
@@ -2741,7 +2741,7 @@ class StubRunner implements StubRunnerInterface
 			 }	
 			 
 			 if(is_string($newVersion)){
-			     //    $configVersion['version'] = $newVersion;
+			          $configVersion['version'] = $newVersion;
 			     //   $me->configVersion($configVersion);	
 				
 				 $export = array_merge($configVersion, [

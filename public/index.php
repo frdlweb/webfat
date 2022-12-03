@@ -683,6 +683,7 @@ interface StubRunnerInterface
 	public function getWebrootConfigDirectory() : string;
 	public function getApplicationsDirectory() : string;
 	public function getRemoteAutoloader() : LoaderInterface;
+	public function autoUpdateStub(string | bool $update = null, string $newVersion = null, string $url = null);
 }	
 }		
 	

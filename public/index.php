@@ -3146,6 +3146,7 @@ Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$STUB/bootstrap.php";name="stub bootstrap.php"
 
 <?php 
+
 $maxExecutionTime = intval(ini_get('max_execution_time'));	
  if (strtolower(\php_sapi_name()) !== 'cli') {	 
     set_time_limit(min(45, $maxExecutionTime));
@@ -3159,11 +3160,9 @@ $maxExecutionTime = intval(ini_get('max_execution_time'));
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.php"
-	
-	<?php
 
-	
-	 			  
+<?php 
+
 	if(file_exists(__FILE__.'.apc_config.php')){
 	     return require __FILE__.'.apc_config.php';				
 	}
@@ -3200,20 +3199,17 @@ Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/detect.php";name="stub detect.php"
-	
 
-	
-<?php
+<?php 
+
 @ini_set('display_errors','1');
 error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);	
 	
 --4444EVGuDPPT
 Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
-	
 
- 
-
+<?php 
  $configVersion=$this->getRunner()->configVersion( ); 
  
   $App = \Webfan\Webfat\App\Kernel::getInstance(isset($configVersion['appId']) ? $configVersion['appId'] : 'global',  null);	

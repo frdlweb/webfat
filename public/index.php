@@ -615,10 +615,19 @@ if (!\interface_exists(CodebaseInterface::class, false)) {
 } 
 }
 
+namespace Frdlweb\Contract\Autoload{ 
+ if (!interface_exists(LoaderInterface::class)) {		
+	interface LoaderInterface {
+	   public function register(bool $prepend = false);
+	}
+ }
+}//ns Frdlweb\Contract\Autoload
+
 
 namespace frdlweb{
 	
-
+use Frdlweb\Contract\Autoload\LoaderInterface;
+	
 if (!\interface_exists(StubHelperInterface::class, false)) {	
  interface StubHelperInterface
  { 
@@ -673,6 +682,7 @@ interface StubRunnerInterface
 	public function getCodebase() :?\Frdlweb\Contract\Autoload\CodebaseInterface;
 	public function getWebrootConfigDirectory() : string;
 	public function getApplicationsDirectory() : string;
+	public function getRemoteAutoloader() : LoaderInterface;
 }	
 }		
 	
@@ -916,7 +926,7 @@ use frdl;
 use frdlweb\StubItemInterface as StubItemInterface;	 
 use frdlweb\StubHelperInterface as StubHelperInterface;
 use frdlweb\StubRunnerInterface as StubRunnerInterface;	
-	
+use Frdlweb\Contract\Autoload\LoaderInterface;	
 
 
 
@@ -2676,6 +2686,8 @@ class StubRunner implements StubRunnerInterface
 {
 	protected $MimeVM = null;
 	protected $Codebase = null;
+	protected $RemoteAutoloader = null;
+	
 	public function __construct(?StubHelperInterface &$MimeVM){
 		$this->MimeVM=$MimeVM;		
 	}
@@ -2861,6 +2873,7 @@ class StubRunner implements StubRunnerInterface
 	   return $export;		
 	}
 				
+	
 	public function getCodebase() :?\Frdlweb\Contract\Autoload\CodebaseInterface{
 		if(null === $this->Codebase){
 			$this->Codebase = new \Webfan\Webfat\Codebase();
@@ -2869,16 +2882,21 @@ class StubRunner implements StubRunnerInterface
 		return $this->Codebase;
 	}
 	
-	protected function autoloadRemoteCodebase(){
+	public function getRemoteAutoloader() : LoaderInterface {
+		
+		if(null !== $this->RemoteAutoloader){
+		   return $this->RemoteAutoloader;	
+		}
+		
 		$codebase = $this->getCodebase();
 		$configVersion = $this->configVersion();
 		$config = $this->config(); 
 		
-		$loader = false;
+		 
 		
 		try{
 	
-			$loader = \call_user_func(function($version, $s, $cacheDir, $l, $ccl, $cl) {	 
+			$this->RemoteAutoloader = \call_user_func(function($version, $s, $cacheDir, $l, $ccl, $cl) {	 
 				$af = rtrim($cacheDir, '\\/ ') 
 					.\DIRECTORY_SEPARATOR
 					.str_replace('\\', \DIRECTORY_SEPARATOR, \frdl\implementation\psr4\RemoteAutoloaderApiClient::class).'.php';
@@ -2966,10 +2984,19 @@ class StubRunner implements StubRunnerInterface
 	);
 
 		}catch(\Exception $e){ 
-			$loader = false; 
+			$this->RemoteAutoloader = false; 
 			throw $e;
 		}	
-		return $loader;
+		
+		
+		//$this->RemoteAutoloader = &$loader;
+		
+	   return $this->RemoteAutoloader;
+	}	
+	
+	
+	protected function autoloadRemoteCodebase(){
+	  return $this->getRemoteAutoloader();
 	}	
 	
 	public function getWebrootConfigDirectory() : string {

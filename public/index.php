@@ -271,172 +271,6 @@ class ResolvableLogicException extends LogicException
 	
 	const URL_TEMPLATE = 'https://webfan.de/apps/registry/?goto=%s';
 	const URL_FORM_TEMPLATE = 'https://webfan.de/apps/webmaster/1.3.6.1.4.1.37553.8.1.8.8.91397908338147/setup?instance=%2$s&errorinfo=%1$s';
-	const LINK_TEXT = '<strong>Help</strong> | Documentation | Infolink';	
-  
-	public $dom = null;    
-	public $infos = [];  
-	public $mainMessage;
-	public $formLink; 
-	
-	public static $urlformtemplate = null;
-
-    public function __construct(
-        string $message = "",
-        int $code = 0,
-        int $severity = \E_ERROR,
-        ?string $filename = null,
-        ?int $line = null,
-        ?Throwable $previous = null
-    ) {
-        $args = func_get_args();
-
-        $this->infos = [];
-         $i = explode('@', $message, 3);
-		if(count($i)<2){
-		   	$i[]='';			
-		   	$i[]='';
-		}elseif(count($i)<3){
-		   	$i[]='';		   	
-		}
-        list($INFOS, $message, $formLink) = $i;
-        if(empty($message)){
-            $message = $INFOS;
-            $INFOS = '';
-        }
-      
-		  $formLink =(is_string(self::$urlformtemplate)) ? self::$urlformtemplate : self::URL_FORM_TEMPLATE;	
-	 
-		$this->formLink = $formLink;
-        $informationObjects = preg_split("/([\,\;\|\+])/", $INFOS);
- 
-        foreach($informationObjects as $info){
-			@list($infoID, $text) = explode('=', $info, 2);
-            $this->infos[]=[$infoID, $text];
-        }
-
-      //   $this->dom = $this->html(false, $message, $formLink);
-
-		//$args[0] = $this->html(true, $message, $formLink);
-		$args[0] = $this->html(-1, $message, $formLink);
-		//$args[0] =$this->dom->saveHTML();
-		$this->mainMessage =$message; 
-		
-		parent::__construct(...$args);
-    }
-
-    public function html($asText = -1,$message = null, $formLink= null): mixed  
-    {
-		$info = [
-			'message'=> str_replace([\sys_get_temp_dir(), 
-											  getenv('HOME'),
-											  $_SERVER['DOCUMENT_ROOT'],
-											 ],
-											 ['/{$tmp}',
-											  '~',
-											 '/$PUBLIC/www'], $message ? $message : $this->mainMessage),
-			'infos' => $this->infos,
-	
-		  	
-		];
-		
-         $istance = urlencode(base64_encode(json_encode([
-				'host'=>$_SERVER['HTTP_HOST'],
-				'uri' => $_SERVER['REQUEST_URI'],
-			])));
-		 $info = urlencode(base64_encode(json_encode($info)));
-		
-        $h = '';
-		$h.='<style>[ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak{	display:none;}</style>';
-        $h .= '<table style="width:100%;">';
-
-        $h .= '<tr>';
-
-            $h .= '<th>';
-                  $h .= '<h1 class="btn-danger">';
-                     $h .= $message ? $message : $this->mainMessage;
-                  $h .= '</h1>';
-            $h .= '</th>';
-
-            $h .= '<th>';
-                  $h .= '<i>';
-                     $h .= sprintf('Line %d in file %s', $this->getLine(), str_replace(getenv('HOME'), '',
-								 str_replace([\sys_get_temp_dir(), 
-											  getenv('HOME'),
-											  $_SERVER['DOCUMENT_ROOT'],
-											 ],
-											 ['/{$tmp}',
-											  '~',
-											 '/$PUBLIC/www'], $this->getFile())																			
-							 ));
-                  $h .= '</i>';
-            $h .= '</th>';
-
-        $h .= '</tr>';
-		
-		if(!isset($_GET['errorinfo'])){
-          $h .= '<tr>';
-
-             $h .= '<th colspan="2">';
-                  $h .= '<h1 class="btn-info">';
-                  $h .= '<a href="'
-								.sprintf($formLink ? $formLink : $this->formLink, $info, $istance)
-								.'" target="_top"><span ng-show="langIsDefault==true || langShortCode==\'en\'">Click here to fix the error</span><span ng-show="langShortCode==\'de\'" ng-cloak>Klicken Sie hier um den Fehler zu beheben</span></a>!';
-		           $h .= '</h1>';
-            $h .= '</th>';
-
-          $h .= '</tr>';		
-		}//if(!isset($_GET['errorinfo'])){
-
-
-		
-		if(!isset($_GET['errorinfo'])){
-            foreach($this->infos as $num => $info){
-				list($id, $text) = $info;
-                //$h .= '<tr>';
-                $h .= sprintf('<tr data-information-object-identifier="%s" frdl-information-object-chunk="ResolvableExceptionTableRow">', $id);
-         $h .= sprintf('<td data-information-object-identifier="%s" frdl-information-object-chunk="ResolvableExceptionText">', $id);
-                          $h .= $text;
-                      $h .= '</td>';
-         $h .= sprintf('<td data-information-object-identifier="%s" frdl-information-object-chunk="ResolvableExceptionLinks">', $id);
-                  $h .= sprintf('<a href="'
-								.self::URL_TEMPLATE
-								.'" target="_blank">'.self::LINK_TEXT.'</a><br />about %s.', 
-								urlencode($id), $id);
-                      $h .= '</td>';
-                $h .= '</tr>';
-            }
-		}//if(!isset($_GET['errorinfo'])){
-		
-        $h .= '</table>';
-
-		if(-1 === $asText || !class_exists(HTML5DOMDocument::class)){
-			return $h;
-		}
-        $this->dom = new HTML5DOMDocument();
-        $this->dom->substituteEntities = false;
-        $this->dom->loadHTML((string)$h);
-
-        return true === $asText ? $this->dom->saveHTML() : $this->dom;
-    }
-}
-}
-
-
-
-
-
-
-namespace Webfan\Webfat\App{
-
-use ErrorException;
-use Exception;
-use IvoPetkov\HTML5DOMDocument;
-
-class ResolvableException extends ErrorException
-{
-	
-	const URL_TEMPLATE = 'https://webfan.de/apps/registry/?goto=%s';
-	const URL_FORM_TEMPLATE = 'https://webfan.de/apps/webmaster/1.3.6.1.4.1.37553.8.1.8.8.91397908338147/setup?instance=%2$s&errorinfo=%1$s';
 	const LINK_TEXT = '<strong>Help</strong> | Documentation | Infolink';
 	
     public $dom = null;
@@ -447,7 +281,16 @@ class ResolvableException extends ErrorException
  
 	public static $urlformtemplate = null;
 	
-
+	
+    /**
+     * example (from Webfan\Webfat\App\Kernel) :
+            throw new ResolvableException(
+                      'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.2=Environment variable FRDL_BUILD_FLAVOR must be set!'
+					 .'|circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.2=FRDL_BUILD_FLAVOR must be one of 1.3.6.1.4.1.37553.8.1.8.1.1089085 or  1.3.6.1.4.1.37553.8.1.8.1.575874'
+					 .'|php:'.get_class($this).'=Thrown by the Kernel Class'
+				   	 .'@FRDL_BUILD_FLAVOR not valid'
+             );				
+     */
     public function __construct(
         string $message = "",
         int $code = 0,
@@ -503,6 +346,12 @@ class ResolvableException extends ErrorException
 											  '~',
 											 '/$PUBLIC/www'], $message ? $message : $this->mainMessage),
 			'infos' => $this->infos,
+			/*
+			'client' => [
+				'host'=>$_SERVER['HTTP_HOST'],
+				'uri' => $_SERVER['REQUEST_URI'],
+			],
+		 */
 		  	
 		];
 		
@@ -511,6 +360,8 @@ class ResolvableException extends ErrorException
 				'uri' => $_SERVER['REQUEST_URI'],
 			])));
 		 $info = urlencode(base64_encode(json_encode($info)));
+		
+		$hash = sha1($info);
 		
         $h = '';
 		$h.='<style>[ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak{	display:none;}</style>';
@@ -547,7 +398,7 @@ class ResolvableException extends ErrorException
                   $h .= '<h1 class="btn-info">';
                   $h .= '<a href="'
 								.sprintf($formLink ? $formLink : $this->formLink, $info, $istance)
-								.'" target="_top"><span ng-show="langIsDefault==true || langShortCode==\'en\'">Click here to fix the error</span><span ng-show="langShortCode==\'de\'" ng-cloak>Klicken Sie hier um den Fehler zu beheben</span></a>!';
+								.'" target="_top" frdl-information-object-chunk-link="'.$hash.'"><span ng-show="langIsDefault==true || langShortCode==\'en\'">Click here to fix the error</span><span ng-show="langShortCode==\'de\'" ng-cloak>Klicken Sie hier um den Fehler zu beheben</span></a>!';
 		           $h .= '</h1>';
             $h .= '</th>';
 
@@ -567,8 +418,193 @@ class ResolvableException extends ErrorException
          $h .= sprintf('<td data-information-object-identifier="%s" frdl-information-object-chunk="ResolvableExceptionLinks">', $id);
                   $h .= sprintf('<a href="'
 								.self::URL_TEMPLATE
-								.'" target="_blank">'.self::LINK_TEXT.'</a><br />about %s.', 
-								urlencode($id), $id);
+								.'" target="_blank" frdl-information-object-chunk-link="%s">'.self::LINK_TEXT.'</a><br />about %s.', 
+								urlencode($id), $id, $id);
+                      $h .= '</td>';
+                $h .= '</tr>';
+            }
+		}//if(!isset($_GET['errorinfo'])){
+		
+        $h .= '</table>';
+
+		if(-1 === $asText || !class_exists(HTML5DOMDocument::class)){
+			return $h;
+		}
+        $this->dom = new HTML5DOMDocument();
+        $this->dom->substituteEntities = false;
+        $this->dom->loadHTML((string)$h);
+
+        return true === $asText ? $this->dom->saveHTML() : $this->dom;
+    }
+}
+}
+
+
+
+
+
+
+namespace Webfan\Webfat\App{
+
+use ErrorException;
+use Exception;
+use IvoPetkov\HTML5DOMDocument;
+
+class ResolvableException extends ErrorException
+{
+	
+	const URL_TEMPLATE = 'https://webfan.de/apps/registry/?goto=%s';
+	const URL_FORM_TEMPLATE = 'https://webfan.de/apps/webmaster/1.3.6.1.4.1.37553.8.1.8.8.91397908338147/setup?instance=%2$s&errorinfo=%1$s';
+	const LINK_TEXT = '<strong>Help</strong> | Documentation | Infolink';
+	
+    public $dom = null;
+    public $infos = [];
+    public $mainMessage;
+	public $formLink;
+	
+ 
+	public static $urlformtemplate = null;
+	
+	
+    /**
+     * example (from Webfan\Webfat\App\Kernel) :
+            throw new ResolvableException(
+                      'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.2=Environment variable FRDL_BUILD_FLAVOR must be set!'
+					 .'|circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.2=FRDL_BUILD_FLAVOR must be one of 1.3.6.1.4.1.37553.8.1.8.1.1089085 or  1.3.6.1.4.1.37553.8.1.8.1.575874'
+					 .'|php:'.get_class($this).'=Thrown by the Kernel Class'
+				   	 .'@FRDL_BUILD_FLAVOR not valid'
+             );				
+     */
+    public function __construct(
+        string $message = "",
+        int $code = 0,
+        int $severity = \E_ERROR,
+        ?string $filename = null,
+        ?int $line = null,
+        ?Throwable $previous = null
+    ) {
+        $args = func_get_args();
+
+        $this->infos = [];
+         $i = explode('@', $message, 3);
+		if(count($i)<2){
+		   	$i[]='';			
+		   	$i[]='';
+		}elseif(count($i)<3){
+		   	$i[]='';		   	
+		}
+        list($INFOS, $message, $formLink) = $i;
+        if(empty($message)){
+            $message = $INFOS;
+            $INFOS = '';
+        }
+      
+		  $formLink =(is_string(self::$urlformtemplate)) ? self::$urlformtemplate : self::URL_FORM_TEMPLATE;	
+	 
+		$this->formLink = $formLink;
+        $informationObjects = preg_split("/([\,\;\|\+])/", $INFOS);
+ 
+        foreach($informationObjects as $info){
+			@list($infoID, $text) = explode('=', $info, 2);
+            $this->infos[]=[$infoID, $text];
+        }
+
+      //   $this->dom = $this->html(false, $message, $formLink);
+
+		//$args[0] = $this->html(true, $message, $formLink);
+		$args[0] = $this->html(-1, $message, $formLink);
+		//$args[0] =$this->dom->saveHTML();
+		$this->mainMessage =$message; 
+		
+		parent::__construct(...$args);
+    }
+
+    public function html($asText = -1,$message = null, $formLink= null): mixed //HTML5DOMDocument|string
+    {
+		$info = [
+			'message'=> str_replace([\sys_get_temp_dir(), 
+											  getenv('HOME'),
+											  $_SERVER['DOCUMENT_ROOT'],
+											 ],
+											 ['/{$tmp}',
+											  '~',
+											 '/$PUBLIC/www'], $message ? $message : $this->mainMessage),
+			'infos' => $this->infos,
+			/*
+			'client' => [
+				'host'=>$_SERVER['HTTP_HOST'],
+				'uri' => $_SERVER['REQUEST_URI'],
+			],
+		 */
+		  	
+		];
+		
+         $istance = urlencode(base64_encode(json_encode([
+				'host'=>$_SERVER['HTTP_HOST'],
+				'uri' => $_SERVER['REQUEST_URI'],
+			])));
+		 $info = urlencode(base64_encode(json_encode($info)));
+		
+		  $hash = sha1($info);
+		
+        $h = '';
+		$h.='<style>[ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak{	display:none;}</style>';
+        $h .= '<table style="width:100%;">';
+
+        $h .= '<tr>';
+
+            $h .= '<th>';
+                  $h .= '<h1 class="btn-danger">';
+                     $h .= $message ? $message : $this->mainMessage;
+                  $h .= '</h1>';
+            $h .= '</th>';
+
+            $h .= '<th>';
+                  $h .= '<i>';
+                     $h .= sprintf('Line %d in file %s', $this->getLine(), str_replace(getenv('HOME'), '',
+								 str_replace([\sys_get_temp_dir(), 
+											  getenv('HOME'),
+											  $_SERVER['DOCUMENT_ROOT'],
+											 ],
+											 ['/{$tmp}',
+											  '~',
+											 '/$PUBLIC/www'], $this->getFile())																			
+							 ));
+                  $h .= '</i>';
+            $h .= '</th>';
+
+        $h .= '</tr>';
+		
+		if(!isset($_GET['errorinfo'])){
+          $h .= '<tr>';
+
+             $h .= '<th colspan="2">';
+                  $h .= '<h1 class="btn-info">';
+                  $h .= '<a href="'
+								.sprintf($formLink ? $formLink : $this->formLink, $info, $istance)
+								.'" target="_top" frdl-information-object-chunk-link="'.$hash.'"><span ng-show="langIsDefault==true || langShortCode==\'en\'">Click here to fix the error</span><span ng-show="langShortCode==\'de\'" ng-cloak>Klicken Sie hier um den Fehler zu beheben</span></a>!';
+		           $h .= '</h1>';
+            $h .= '</th>';
+
+          $h .= '</tr>';		
+		}//if(!isset($_GET['errorinfo'])){
+
+
+		
+		if(!isset($_GET['errorinfo'])){
+            foreach($this->infos as $num => $info){
+				list($id, $text) = $info;
+                //$h .= '<tr>';
+                $h .= sprintf('<tr data-information-object-identifier="%s" frdl-information-object-chunk="ResolvableExceptionTableRow">', $id);
+         $h .= sprintf('<td data-information-object-identifier="%s" frdl-information-object-chunk="ResolvableExceptionText">', $id);
+                          $h .= $text;
+                      $h .= '</td>';
+         $h .= sprintf('<td data-information-object-identifier="%s" frdl-information-object-chunk="ResolvableExceptionLinks">', $id);
+                  $h .= sprintf('<a href="'
+								.self::URL_TEMPLATE
+								.'" target="_blank" frdl-information-object-chunk-link="%s">'
+								.self::LINK_TEXT.'</a><br />about %s.', 
+								urlencode($id), $id, $id);
                       $h .= '</td>';
                 $h .= '</tr>';
             }

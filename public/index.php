@@ -3256,7 +3256,7 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 				   
  $response = $App->handle( );
 
- if(404 === $response->getStatusCode() && isset($_REQUEST['web'])  ){
+ if(!$App->isCLI() && (is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface && 404 === $response->getStatusCode() ) && isset($_REQUEST['web'])  ){
     if(isset($_REQUEST['web'])){
 	  $_SERVER['REQUEST_URI'] = ltrim(strip_tags($_REQUEST['web']), '/ ');
     }
@@ -3278,8 +3278,10 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 	 }
  }
 	
-
+if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){
    (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
+}
+
 
 --4444EVGuDPPT--
 --EVGuDPPT--

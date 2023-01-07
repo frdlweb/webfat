@@ -3387,17 +3387,18 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 	   $this->channels = [];
 	   
 	   $this->channels[self::CHANNEL_LATEST] = [
-		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
-		//   'RemoteModulesBaseUrl' => 'https://webfan.de/install/latest',
-		   'RemoteModulesBaseUrl' => 'https://startdir.de/install',
+		//   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
+		    'RemotePsr4UrlTemplate' => 'https://latest.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
+		   'RemoteModulesBaseUrl' => 'https://startdir.de/install/',
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 		   
 	   ];
 		   
 	   $this->channels[self::CHANNEL_STABLE] = [
-		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
+		   'RemotePsr4UrlTemplate' => 'https://stable.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
+		  // 'RemotePsr4UrlTemplate' => 'https://webfan.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
 		//   'RemoteModulesBaseUrl' => 'https://webfan.de/install/stable',
-		   'RemoteModulesBaseUrl' => 'https://startdir.de/install',
+		   'RemoteModulesBaseUrl' => 'https://startdir.de/install/',
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 		   
 	   ];	   
@@ -3405,7 +3406,7 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 	   $this->channels[self::CHANNEL_FALLBACK] = [
 		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
 		//   'RemoteModulesBaseUrl' => 'https://webfan.de/install/modules',
-		   'RemoteModulesBaseUrl' => 'https://startdir.de/install',
+		   'RemoteModulesBaseUrl' => 'https://startdir.de/install/',
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 	   ];   
 	   

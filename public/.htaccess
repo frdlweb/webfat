@@ -1,0 +1,12 @@
+ 
+RewriteEngine On
+ 
+FallbackResource /index.php
+
+ErrorDocument 403 /
+ErrorDocument 404 /
+ErrorDocument 500 /
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . index.php [PT,E=PATH_INFO:$1]

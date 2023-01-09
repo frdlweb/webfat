@@ -3388,17 +3388,17 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 	   
 	   $this->channels[self::CHANNEL_LATEST] = [
 		     //   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
-		    //    'RemotePsr4UrlTemplate' => 'https://latest.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
-		   'RemotePsr4UrlTemplate' =>'https://startdir.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
+		      'RemotePsr4UrlTemplate' => 'https://latest.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
+		   //  'RemotePsr4UrlTemplate' =>'https://startdir.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
 		   'RemoteModulesBaseUrl' => 'https://startdir.de/install/',
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 		   
 	   ];
 		   
 	   $this->channels[self::CHANNEL_STABLE] = [
-		  // 'RemotePsr4UrlTemplate' => 'https://stable.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
+		   'RemotePsr4UrlTemplate' => 'https://stable.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
 		  // 'RemotePsr4UrlTemplate' => 'https://webfan.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
-		    'RemotePsr4UrlTemplate' =>'https://startdir.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
+		  //  'RemotePsr4UrlTemplate' =>'https://startdir.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
 		    'RemoteModulesBaseUrl' => 'https://startdir.de/install/',
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 		   

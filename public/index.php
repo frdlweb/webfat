@@ -3216,8 +3216,8 @@ Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.
   'FRDL_CDN_HOST'=>'cdn.startdir.de',  // cdn.webfan.de | cdn.frdl.de
   'FRDL_CDN_PROXY_REMOVE_QUERY'=>	true, 
   'FRDL_CDN_SAVING_METHODS'=>	['GET'], 
-  'FRDL_REMOTE_PSR4_CACHE_LIMIT'=>	24 * 60 * 60, 
-  'FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'=>	24 * 60 * 60, 
+  'FRDL_REMOTE_PSR4_CACHE_LIMIT'=>	-1,//24 * 60 * 60, 
+  'FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'=>	-1,//24 * 60 * 60, 
   'ADMIN_EMAIL' => 'admin@'.$domain,
   'ADMIN_EMAIL_CONFIRMED' =>false,
   'NODE_PATH' => '/opt/plesk/node/12/bin/node',

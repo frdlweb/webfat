@@ -3022,7 +3022,7 @@ class StubRunner implements StubRunnerInterface
                  $loader = \frdl\implementation\psr4\RemoteAutoloaderApiClient::getInstance($s,
 																	 false, 
 																	 $version,
-																	 false,
+																	 true,
 																	 false, 
 																	 null/*[]*/,
 																	 $cacheDir/*null*/, 

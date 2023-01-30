@@ -2700,7 +2700,7 @@ if(('cli'===substr(strtolower(\PHP_SAPI), 0, 3)) || (
    && 
 	(
 (explode('?', $_SERVER['REQUEST_URI'])[0] ===  $_SERVER['PHP_SELF'] && basename( $_SERVER['PHP_SELF']) === basename(__FILE__))
-	 || (basename( $_SERVER['PHP_SELF']) === 'index.php')
+	// || (basename( $_SERVER['PHP_SELF']) === 'index.php')
 
 		)
 	)

@@ -2697,12 +2697,7 @@ $_NotIsTemplateContext =	(
 $included_files = \get_included_files();  
 if(('cli'===substr(strtolower(\PHP_SAPI), 0, 3)) || (
 	 (!in_array(__FILE__, $included_files) || __FILE__===$included_files[0])
-   && 
-	(
-(explode('?', $_SERVER['REQUEST_URI'])[0] ===  $_SERVER['PHP_SELF'] && basename( $_SERVER['PHP_SELF']) === basename(__FILE__))
-	// || (basename( $_SERVER['PHP_SELF']) === 'index.php')
-
-		)
+  
 	)
    
   ) {

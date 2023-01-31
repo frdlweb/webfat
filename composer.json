@@ -1,0 +1,12 @@
+{
+  "name" : "frdlweb/webfat",
+  "type" : "library",
+  "description": "Single point of no godclasses in a file ;-) - The next Frdlweb and future Webfan Projects...",	  
+  "license": ["MIT"],	  
+  "require" : {
+	    "php": ">=7.1 | >=8.0"
+  },	  
+  "autoload": {
+      "files": ["public/index.php"]
+  }  
+}

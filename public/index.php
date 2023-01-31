@@ -3147,8 +3147,53 @@ class StubRunner implements StubRunnerInterface
 	if(true===$runStubOnInclude){
 		$StubRunner();
 	}
-	return $StubRunner;
+	
 }//namespace
+
+//Laufzeit Fassaden ;-) ...
+namespace frdl\r {
+  	
+
+class f 
+{
+ 
+    protected static $_instance = null;
+    protected $_m = [];
+
+    protected function __construct(array $data = null){
+        $this->_m = is_array($data) ? $data : [];
+    }
+	//instance 
+    public static function i(array $members = null){
+        if( is_null( self::$_instance ) ){
+            self::$_instance = new self( $members ); 
+        }elseif(is_array($members)){
+			foreach($members as $name => $value){
+				self::$_instance->{$name} = $value;
+			}
+		}
+        return self::$_instance;
+    }
+
+	public function __get($key) {
+        if( isset($this->_m[$key] )){
+            return $this->_m[$key];
+        }
+    }
+
+    public function __set($key, $value) {
+        $this->_m[$key] = $value;
+    }
+}
+	
+
+  f::i([
+   'StubRunner' => &$StubRunner,
+  ]);
+		   
+ return $StubRunner;
+}
+
 
 __halt_compiler();Mime-Version: 1.0
 Content-Type: multipart/mixed;boundary=hoHoBundary12344dh

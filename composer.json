@@ -1,7 +1,7 @@
 {
   "name" : "frdlweb/webfat",
   "type" : "library",
-  "description": "Single point of no godclasses in a file ;-) - The next Frdlweb and future Webfan Projects...",	  
+  "description": "Multihost/Multisite Markdown Hub and Frdlweb CMS/Framework Implementation. Single point of no godclasses in a file ;-) - The next World of Frdlweb and future Webfan Projects entry point...",	  
   "license": ["MIT"],	  
   "require" : {
 	    "php": ">=7.1 | >=8.0"

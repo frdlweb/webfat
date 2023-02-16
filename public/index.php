@@ -894,7 +894,7 @@ class Php
            $fileName = realpath($fileName);
 
         // Get the shell output from the syntax check command
-        $output = shell_exec(sprintf('%s -l "%s"',  (new \webfan\hps\patch\PhpBinFinder())->find(), $fileName));
+        $output = shell_exec(sprintf('%s -l "%s"',  (new \Webfan\Helper\PhpBinFinder())->find(), $fileName));
 
         // Try to find the parse error text and chop it off
         $syntaxError = preg_replace("/Errors parsing.*$/", "", $output, -1, $count);
@@ -1235,7 +1235,7 @@ use Frdlweb\Contract\Autoload\LoaderInterface;
 		
 		$fehler =      true === $lint  
 			       &&  class_exists(\frdl\Lint\Php::class, $class !== \frdl\Lint\Php::class)
-			       &&  class_exists(\webfan\hps\patch\PhpBinFinder::class, $class !== \webfan\hps\patch\PhpBinFinder::class) 
+			       &&  class_exists(\Webfan\Helper\PhpBinFinder::class, $class !== \Webfan\Helper\PhpBinFinder::class) 
 			       &&  class_exists(\Symfony\Component\Process\ExecutableFinder::class, $class !== \Symfony\Component\Process\ExecutableFinder::class) 
 			       &&  class_exists(\Symfony\Component\Process\PhpExecutableFinder::class, $class !== \Symfony\Component\Process\PhpExecutableFinder::class) 
 			    ? (new \frdl\Lint\Php($cacheDirLint) ) ->lintString($codeWithStartTags)

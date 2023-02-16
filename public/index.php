@@ -87,7 +87,7 @@ setTimeout(()=>{
 *  OTHER DEALINGS IN THE SOFTWARE.
 * 
 *  - edited by webfan.de
- 
+*/ 
 namespace DI{
 
 /**
@@ -103,9 +103,11 @@ namespace DI{
 } 
  
 namespace frdl\patch{
+if (!\interface_exists(IContainer::class, false)) {		
    interface IContainer {
 	   
    }
+}
 }
 
 //Psr\Container\ContainerInterface
@@ -122,13 +124,14 @@ namespace Psr\Container{
 	    \class_alias(IContainer::class, ContainerInterface::class);
 	}	
 }
-*/
+ 
 
 namespace Psr\Container{
 
 /**
  * Describes the interface of a container that exposes methods to read its entries.
  */
+if (!\interface_exists(ContainerInterface::class, false)) {	
 interface ContainerInterface
 {
 	/**
@@ -157,7 +160,7 @@ interface ContainerInterface
 	 */
 	public function has($id);
 }
-
+}
 }
 
 

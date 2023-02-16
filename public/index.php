@@ -88,6 +88,20 @@ setTimeout(()=>{
 * 
 *  - edited by webfan.de
  
+namespace DI{
+
+/**
+ * Exception for the Container
+ */
+ if (!\class_exists(DependencyException::class, false)) {		
+  class DependencyException extends \Exception
+  {
+
+  }
+
+ }
+} 
+ 
 namespace frdl\patch{
    interface IContainer {
 	   

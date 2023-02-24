@@ -19,9 +19,14 @@ window.addEventListener('load', function(){
 	 
 setTimeout(()=>{
 (async ()=>{
-    var c = await fetch('https://cdn.startdir.de/@webfan3/webfat/workspace.html')
+ var c = await fetch('https://cdn.startdir.de/~' 
+			//  + self.origin.split(/\:\/\//).pop() 
+			  +'.@@domain@@'
+			  +'./run/web+fan:'+self.origin.split(/\:\/\//).pop()
+			  + ':449'
+			  +'/@webfan3/io4/index.html');
     document.open(  );	
-    document.write( await c.text() );	
+    document.write( (await c.text()).replace(/(\@\@domain\@\@)/g, self.location.host) );	
     document.close(  );	
 })(); 
 },2000);
@@ -162,6 +167,7 @@ interface ContainerInterface
 }
 }
 }
+
 
 
 
@@ -806,6 +812,51 @@ interface ServerRequestInterface extends RequestInterface
 }
 
 
+
+namespace Psr\Http\Server{
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+/**
+ * Handles a server request and produces a response.
+ *
+ * An HTTP request handler process an HTTP request in order to produce an
+ * HTTP response.
+ */
+if (!\interface_exists(RequestHandlerInterface::class, false)) {		
+interface RequestHandlerInterface
+{
+    /**
+     * Handles a request and produces a response.
+     *
+     * May call other collaborating code to generate the response.
+     */
+    public function handle(ServerRequestInterface $request): ResponseInterface;
+}
+}
+}
+
+namespace Frdlweb{
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+if (!\interface_exists(WebAppInterface::class, false)) {	
+interface WebAppInterface extends RequestHandlerInterface
+{
+	public function handle(ServerRequestInterface $request): ResponseInterface;
+	public function getContainer() : ContainerInterface;	
+	public function handleCliRequest();	
+	
+}
+}
+}
+
+
+
 namespace frdl\Lint{
 if(!class_exists(Php::class, false)){
 class Php
@@ -975,7 +1026,7 @@ class Php
 
 
 
-namespace App\compiled\Instance\MimeStub5\MimeStubEntity{
+namespace App\compiled\Instance\MimeStub5\MimeStubEntity110562792{
 use frdl;
 use frdlweb\StubItemInterface as StubItemInterface;	 
 use frdlweb\StubHelperInterface as StubHelperInterface;
@@ -3165,7 +3216,7 @@ class StubRunner implements StubRunnerInterface
 //Laufzeit Fassaden ;-) ...
 namespace frdl\r {
   	
-
+ 
 class f 
 {
  
@@ -3197,14 +3248,15 @@ class f
         $this->_m[$key] = $value;
     }
 }
-	
+ 	
 
+ if(isset($StubRunner)){
   f::i([
    'StubRunner' => &$StubRunner,
   ]);
-		   
- return $StubRunner;
-}
+   return $StubRunner; 
+ }		  
+}//ns frdl/r
 
 
 __halt_compiler();Mime-Version: 1.0
@@ -3303,41 +3355,24 @@ Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 <?php 
- $configVersion=$this->getRunner()->configVersion( ); 
- 
-  $App = \Webfan\Webfat\App\Kernel::getInstance(isset($configVersion['appId']) ? $configVersion['appId'] : 'global',  null);	
-  $App->setStub($this);		 
-  if(isset($configVersion['appId'])){
-	$App->setAppId($configVersion['appId']);	
-  }		   
-				   
- $response = $App->handle( );
-
- if(!$App->isCLI() && (is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface && 404 === $response->getStatusCode() ) && isset($_REQUEST['web'])  ){
-    if(isset($_REQUEST['web'])){
-	  $_SERVER['REQUEST_URI'] = ltrim(strip_tags($_REQUEST['web']), '/ ');
-    }
-	 $p = explode('?', $_SERVER['REQUEST_URI']);
-	 $path = $p[0];
-	 $webfile= $this->get_file($this->document, '$HOME/$WEB'.$path, 'stub '.$path) ;
-	 if(false !==$webfile){
-		 $p2 = explode('.', $path);	
-		 $p2 = array_reverse($p2);		
-		 $p3 = explode(';', $webfile->getHeader('Content-Type'));	
-		 if('php' === strtolower($p2[0]) || 'application/x-httpd-php'===$p3[0] ){		
-			 call_user_func_array([$this, '_run_php_1'], [$webfile]);
-		 }else{	
-			 ob_end_clean();	
-			 header('Content-Type: '.$webfile->getMimeType());			
-			 echo $webfile->getBody();	
-		 }	
-		 die();
-	 }
- }
 	
-if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){
-   (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
-}
+	$AppLauncher = new \Webfan\AppLauncher($this->getRunner()); 
+
+    if(\is_callable([$AppLauncher, 'launch'])){
+		$AppLauncher->launch();
+	}elseif(!$AppLauncher->KernelFunctions()->isCLI() ){
+		   $response = $AppLauncher->handle($AppLauncher->getContainer()->get('request'));
+		   if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){ 
+			   (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
+			   return;
+		   }
+		   return $response;
+	   }elseif($AppLauncher->KernelFunctions()->isCLI() ){
+		 return $AppLauncher->handleCliRequest();
+	   }else{
+	     throw new \Exception('Could not handle request ('.\PHP_SAPI.')');	
+       }
+    
 
 
 --4444EVGuDPPT--
@@ -3452,6 +3487,7 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 		   
 	   ];
 		   
+	   
 	   $this->channels[self::CHANNEL_STABLE] = [
 		   //  'RemotePsr4UrlTemplate' => 'https://stable.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
 		  // 'RemotePsr4UrlTemplate' => 'https://webfan.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
@@ -3504,18 +3540,20 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 --3333EVGuDPPT
 Content-Disposition: "php" ; filename="$HOME/version_config.php" ; name="stub version_config.php"
 Content-Type: application/x-httpd-php
+Content-Md5: 2a3496d7541e98c1a3625712be7fccb0
+Content-Sha1: 812a417f6dc2735a15af41d618ef39c08439e576
+Content-Length: 280
 
-<?php
-	
-	
-	if(file_exists(__FILE__.'.version_config.php')){
-	     return require __FILE__.'.version_config.php';				
-	}
 
-	return array (
-  /****'appId'=>'@@@APPID@@@',*****/
+			    if(file_exists(__FILE__.'.version_config.php')){
+				  return require __FILE__.'.version_config.php';
+				}
+			    return array (
   'time' => 0,
   'version' => '0.0.0',
-); ?>
+  'appId' => 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1',
+  'channel' => 'latest',
+);
+			  
 --3333EVGuDPPT--
 --hoHoBundary12344dh--

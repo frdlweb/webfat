@@ -3356,21 +3356,9 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 <?php 
 	
-	$AppLauncher = new \Webfan\AppLauncher($this->getRunner()); 
-
-    if(\is_callable([$AppLauncher, 'launch'])){
-	   $AppLauncher->launch();
-	}elseif(!$AppLauncher->KernelFunctions()->isCLI() ){
-		   $response = $AppLauncher->handle($AppLauncher->getContainer()->get('request'));
-		   if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){ 
-			   (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
-		   }
-	   }elseif($AppLauncher->KernelFunctions()->isCLI() ){
-		 return $AppLauncher->handleCliRequest();
-	   }else{
-	     throw new \Exception('Could not handle request ('.\PHP_SAPI.')');	
-       }
-     die();
+ 	
+   $Engine=new \Webfan\Engine; 
+   $Engine->load(\Webfan\DescriptorType::WebApp, $this); 
     
 
 

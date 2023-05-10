@@ -2585,18 +2585,6 @@ if ( !function_exists('sys_get_temp_dir')) {
 } 	
 	
 
-
-
-call_user_func(function() {
-	
-$drush_server_home = (function() {
-	
-	if(function_exists('\posix_getpwuid') && function_exists('\posix_getui') ){		
-		$user = \posix_getpwuid(\posix_getuid());		
-		return $user['dir'];
-	}
-	
-	
 $getRootDir;	
  $getRootDir = (function($path = null) use(&$getRootDir){
 	if(null===$path){
@@ -2605,7 +2593,7 @@ $getRootDir;
 
 		
  if(''!==dirname($path) && '/'!==dirname($path) //&& @chmod(dirname($path), 0755) 
-    &&  true===@is_writable(dirname($path))
+    &&  true===@is_writable(dirname($path)) && true===@is_readable(dirname($path))
     ){
  	return $getRootDir(dirname($path));
  }else{
@@ -2613,6 +2601,18 @@ $getRootDir;
  }
 
  });		
+
+call_user_func(function()use($getRootDir) {
+	
+$drush_server_home = (function() use($getRootDir) {
+	
+	if(function_exists('\posix_getpwuid') && function_exists('\posix_getui') ){		
+		$user = \posix_getpwuid(\posix_getuid());		
+		return $user['dir'];
+	}
+	
+	
+
 	
   // Cannot use $_SERVER superglobal since that's empty during UnitUnishTestCase
   // getenv('HOME') isn't set on Windows and generates a Notice.
@@ -2675,6 +2675,7 @@ $_dir = getenv('FRDL_HOME') . \DIRECTORY_SEPARATOR . '.frdl';
  }
   if(0<count($g)){
 	//	$_dir = dirname($g[0]);	
+	 
 	  $workspaces = require $g[0];
 	  if(isset($workspaces['Frdlweb'])){
 		$_dir = $workspaces['Frdlweb']['DIR'];		   
@@ -2690,10 +2691,35 @@ $_dir = getenv('FRDL_HOME') . \DIRECTORY_SEPARATOR . '.frdl';
   }
 //}
 	
-	  
-	$_ENV['FRDL_WORKSPACE']= rtrim($_dir, '\\/');
-	putenv('FRDL_WORKSPACE='.$_ENV['FRDL_WORKSPACE']);
+	   if(!is_dir($_dir) ){
+	   	 @mkdir($_dir, 0775, true);
+	   }
 
+  if(!is_dir($_dir) || !is_writable($_dir)   || !is_readable($_dir)  ){  
+
+      $dirs = array_filter(glob($_SERVER['DOCUMENT_ROOT'].'/../*'), 'is_dir');
+      
+      foreach ($dirs as $dir) {
+      		
+        if (false===strpos($dir, '@') && is_writable($dir) && is_readable($dir)) {
+            //echo realpath($dir).' is writable.<br>';
+            $_dir = realpath($dir) 
+			   .\DIRECTORY_SEPARATOR
+			   .'~frdl';
+				   if(is_dir($_dir)  || @mkdir($_dir, 0775, true) ){  
+				     break;
+			       }				   
+        } else {
+           //    echo $dir.' is not writable. Permissions may have to be adjusted.<br>';
+        } 
+      }
+	}		
+	
+	 
+	$_ENV['FRDL_WORKSPACE']= rtrim($_dir, '\\/');
+	putenv('FRDL_WORKSPACE='.$_ENV['FRDL_WORKSPACE']);	
+	
+	 
 	
 	  
  $_f = $_ENV['FRDL_WORKSPACE']. \DIRECTORY_SEPARATOR.'frdl.workspaces.php';
@@ -3203,7 +3229,26 @@ class StubRunner implements StubRunnerInterface
 				   .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
 		   } 
- 
+		   
+		/*   
+ 		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
+		  
+		   		   $ApplicationsDirectory = $_SERVER['DOCUMENT_ROOT']
+			   .\DIRECTORY_SEPARATOR
+			   .'..'
+			   .\DIRECTORY_SEPARATOR
+			   .'~frdl'
+			   .\DIRECTORY_SEPARATOR
+			   .'global'
+			   .\DIRECTORY_SEPARATOR	  	
+				   .'app'	 
+				   .\DIRECTORY_SEPARATOR.'deployments'	
+				   .\DIRECTORY_SEPARATOR.'blue'	
+				   .\DIRECTORY_SEPARATOR.'deploy'	
+				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
+		   } 
+		   
+		   */
 		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
 		  
 		   		   $ApplicationsDirectory = __DIR__
@@ -3221,23 +3266,7 @@ class StubRunner implements StubRunnerInterface
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
 		   } 
 		   
-		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
-		  
-		   		   $ApplicationsDirectory = __DIR__
-			   .\DIRECTORY_SEPARATOR
-			   .'.frdl'
-			   .\DIRECTORY_SEPARATOR
-			   .'~frdl'
-			   .\DIRECTORY_SEPARATOR
-			   .'global'
-			   .\DIRECTORY_SEPARATOR	  	
-				   .'app'	 
-				   .\DIRECTORY_SEPARATOR.'deployments'	
-				   .\DIRECTORY_SEPARATOR.'blue'	
-				   .\DIRECTORY_SEPARATOR.'deploy'	
-				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
-		   } 
-		   
+
 	
     if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
 
@@ -3267,9 +3296,38 @@ class StubRunner implements StubRunnerInterface
       }
 	}	
 	
-		   
-		   // isWritable.php detects all directories in the same directory the script is in
-// and writes to the page whether each directory is writable or not.
+	
+    if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
+
+      $dirs = array_filter(glob($_SERVER['DOCUMENT_ROOT'].'/../*'), 'is_dir');
+
+      foreach ($dirs as $dir) {
+      		
+        if (false===strpos($dir, '@') && is_writable($dir) && is_readable($dir)) {
+            //echo realpath($dir).' is writable.<br>';
+            $ApplicationsDirectory = realpath($dir) 
+			   .\DIRECTORY_SEPARATOR
+			   .'~frdl'
+			   .\DIRECTORY_SEPARATOR
+			   .'global'
+			   .\DIRECTORY_SEPARATOR	  	
+				   .'app'	 
+				   .\DIRECTORY_SEPARATOR.'deployments'	
+				   .\DIRECTORY_SEPARATOR.'blue'	
+				   .\DIRECTORY_SEPARATOR.'deploy'	
+				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
+				   if(is_dir($ApplicationsDirectory)  || @mkdir($ApplicationsDirectory, 0775, true) ){  
+				     break;
+			       }				   
+        } else {
+           //    echo $dir.' is not writable. Permissions may have to be adjusted.<br>';
+        } 
+      }
+	}		
+	
+	
+
+
     if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
 
       $dirs = array_filter(glob(__DIR__.'/../*'), 'is_dir');
@@ -3296,8 +3354,57 @@ class StubRunner implements StubRunnerInterface
         } 
       }
 	}		   
+
+
+	
+		   
+		   // isWritable.php detects all directories in the same directory the script is in
+// and writes to the page whether each directory is writable or not.
+    if(getcwd() !== __DIR__ && !is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
+
+      $dirs = array_filter(glob(getcwd().'/../*'), 'is_dir');
+
+      foreach ($dirs as $dir) {
+        if (false===strpos($dir, '@') && is_writable($dir) && is_readable($dir)) {
+            //echo realpath($dir).' is writable.<br>';
+            $ApplicationsDirectory = realpath($dir).\DIRECTORY_SEPARATOR 
+			   .\DIRECTORY_SEPARATOR
+			   .'~frdl'
+			   .\DIRECTORY_SEPARATOR
+			   .'global'
+			   .\DIRECTORY_SEPARATOR	  	
+				   .'app'	 
+				   .\DIRECTORY_SEPARATOR.'deployments'	
+				   .\DIRECTORY_SEPARATOR.'blue'	
+				   .\DIRECTORY_SEPARATOR.'deploy'	
+				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
+				   if(is_dir($ApplicationsDirectory)  || @mkdir($ApplicationsDirectory, 0775, true) ){  
+				     break;
+			       }
+        } else {
+           //    echo $dir.' is not writable. Permissions may have to be adjusted.<br>';
+        } 
+      }
+	}		   
 	   
 		
+		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
+		  
+		   		   $ApplicationsDirectory = __DIR__
+			   .\DIRECTORY_SEPARATOR
+			   .'.frdl'
+			   .\DIRECTORY_SEPARATOR
+			   .'~frdl'
+			   .\DIRECTORY_SEPARATOR
+			   .'global'
+			   .\DIRECTORY_SEPARATOR	  	
+				   .'app'	 
+				   .\DIRECTORY_SEPARATOR.'deployments'	
+				   .\DIRECTORY_SEPARATOR.'blue'	
+				   .\DIRECTORY_SEPARATOR.'deploy'	
+				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
+		   } 
+		   	
     @ ob_end_clean();
 
 	
@@ -3313,7 +3420,7 @@ class StubRunner implements StubRunnerInterface
 		   } 
 
 
-	   
+	 
 		return $ApplicationsDirectory;
 	}		
 	

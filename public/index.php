@@ -3187,7 +3187,8 @@ class StubRunner implements StubRunnerInterface
 
 
 
-		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  			   		    
+		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){
+			   $html='';	
 			$html .= '<h1 style="color:red;">';
 			   $html .= 'Error: Coould not find app config for this host and could not create global app directory!';     
 		       $html .= '</h1>';      

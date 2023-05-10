@@ -252,7 +252,7 @@ function once(callable $callback): mixed
 		 
 	 $vars = (array)$vars;
 	
-	 $id = 'idr'.str_pad(time(), 32, mt_rand(0,9), \STR_PAD_LEFT).str_pad(mt_rand(1,9999999999999999), 16, mt_rand(0,9), \STR_PAD_LEFT); 
+	 $id = 'idr'.str_pad(time(), 32, mt_rand(0,(int)9), \STR_PAD_LEFT).str_pad(mt_rand(1,(int)9999999999), 16, mt_rand(0,(int)9), \STR_PAD_LEFT); 
 	
 	 $html = $message;
 	 $html.='<form id="'.$id.'" action="'.$target.'" method="'.$method.'">';
@@ -1302,11 +1302,13 @@ use Frdlweb\Contract\Autoload\LoaderInterface;
 			                    echo  \frdl\booting\getFormFromRequestHelper($e1->getMessage(), false);
 		                            die();						
 					}
+					
+					
 		try{
 	         	$res = eval($code);			
 		}catch(\Webfan\Webfat\App\ResolvableException $e3){	
 			//throw $e3;					 
-			echo  \frdl\booting\getFormFromRequestHelper($e3->getMessage(), false);
+			echo  \frdl\booting\getFormFromRequestHelper($class.' : '.$e3->getMessage(), false);
 		      die();
 		}catch(\Exception $e2){	
 			$e='Error in '.__METHOD__.' ['.__LINE__.']'.print_r($fehler,true).'<br />$class: '.$name.$part->getFileName().''
@@ -2945,7 +2947,8 @@ class StubRunner implements StubRunnerInterface
 	
 	public function configVersion(?array $config = null, $trys = 0) : array{
 		  $trys++;
-		
+		  @chmod(dirname($this->getStubVM()->location), 0777); 
+		  @chmod($this->getStubVM()->location, 0777);
           try{  
 			  $f =  $this->getStubVM()->get_file($this->getStub(), '$HOME/version_config.php', 'stub version_config.php'); 
 			  if($f)$conf = $this->getStubVM()->_run_php_1($f);	 
@@ -3032,6 +3035,8 @@ class StubRunner implements StubRunnerInterface
 				if(!is_dir(dirname($af))){	
 					mkdir( dirname($af) , 0775 , true); 
 				}
+             	
+             
              	
  
 				$cbCheckFile = $af.'.last-remote-access.txt';
@@ -3134,7 +3139,7 @@ class StubRunner implements StubRunnerInterface
 	}
 	
 	public function getApplicationsDirectory() : string {
-     
+    @ ob_start();
 		$codebase = $this->getCodebase();
 		$ApplicationsDirectory = false;
 		$configVersion = $this->configVersion();
@@ -3171,12 +3176,12 @@ class StubRunner implements StubRunnerInterface
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 			 
 		 }
 		 
-		 if(!is_dir($ApplicationsDirectory) && !@mkdir($ApplicationsDirectory, 0775, true)){
-		   $ApplicationsDirectory = false;	 
-		 }
+		// if(!is_dir($ApplicationsDirectory) && !@mkdir($ApplicationsDirectory, 0775, true)){
+		//   $ApplicationsDirectory = false;	 
+		// }
 	   }
 
-		   if(!is_dir($ApplicationsDirectory) ){
+		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true)  ){
 			   $ApplicationsDirectory = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'global'.\DIRECTORY_SEPARATOR	  	
 				   .'app'	 
 				   .\DIRECTORY_SEPARATOR.'deployments'	
@@ -3185,12 +3190,123 @@ class StubRunner implements StubRunnerInterface
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
 		   } 
 
+		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
+			   $ApplicationsDirectory = getenv('HOME')
+			   .\DIRECTORY_SEPARATOR
+			   .'.frdl'
+			   .\DIRECTORY_SEPARATOR
+			   .'global'
+			   .\DIRECTORY_SEPARATOR	  	
+				   .'app'	 
+				   .\DIRECTORY_SEPARATOR.'deployments'	
+				   .\DIRECTORY_SEPARATOR.'blue'	
+				   .\DIRECTORY_SEPARATOR.'deploy'	
+				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
+		   } 
+ 
+		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
+		  
+		   		   $ApplicationsDirectory = __DIR__
+			   .\DIRECTORY_SEPARATOR
+			   .'..'
+			   .\DIRECTORY_SEPARATOR
+			   .'~frdl'
+			   .\DIRECTORY_SEPARATOR
+			   .'global'
+			   .\DIRECTORY_SEPARATOR	  	
+				   .'app'	 
+				   .\DIRECTORY_SEPARATOR.'deployments'	
+				   .\DIRECTORY_SEPARATOR.'blue'	
+				   .\DIRECTORY_SEPARATOR.'deploy'	
+				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
+		   } 
+		   
+		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
+		  
+		   		   $ApplicationsDirectory = __DIR__
+			   .\DIRECTORY_SEPARATOR
+			   .'.frdl'
+			   .\DIRECTORY_SEPARATOR
+			   .'~frdl'
+			   .\DIRECTORY_SEPARATOR
+			   .'global'
+			   .\DIRECTORY_SEPARATOR	  	
+				   .'app'	 
+				   .\DIRECTORY_SEPARATOR.'deployments'	
+				   .\DIRECTORY_SEPARATOR.'blue'	
+				   .\DIRECTORY_SEPARATOR.'deploy'	
+				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
+		   } 
+		   
+	
+    if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
 
+      $dirs = array_filter(glob(getenv('HOME').'/*'), 'is_dir');
 
-		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){
-			   $html='';	
+      foreach ($dirs as $dir) {
+      		
+        if (false===strpos($dir, '@') && is_writable($dir) && is_readable($dir)) {
+            //echo realpath($dir).' is writable.<br>';
+            $ApplicationsDirectory = realpath($dir) 
+			   .\DIRECTORY_SEPARATOR
+			   .'~frdl'
+			   .\DIRECTORY_SEPARATOR
+			   .'global'
+			   .\DIRECTORY_SEPARATOR	  	
+				   .'app'	 
+				   .\DIRECTORY_SEPARATOR.'deployments'	
+				   .\DIRECTORY_SEPARATOR.'blue'	
+				   .\DIRECTORY_SEPARATOR.'deploy'	
+				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
+				   if(is_dir($ApplicationsDirectory)  || @mkdir($ApplicationsDirectory, 0775, true) ){  
+				     break;
+			       }				   
+        } else {
+           //    echo $dir.' is not writable. Permissions may have to be adjusted.<br>';
+        } 
+      }
+	}	
+	
+		   
+		   // isWritable.php detects all directories in the same directory the script is in
+// and writes to the page whether each directory is writable or not.
+    if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
+
+      $dirs = array_filter(glob(__DIR__.'/../*'), 'is_dir');
+
+      foreach ($dirs as $dir) {
+        if (false===strpos($dir, '@') && is_writable($dir) && is_readable($dir)) {
+            //echo realpath($dir).' is writable.<br>';
+            $ApplicationsDirectory = realpath($dir).\DIRECTORY_SEPARATOR 
+			   .\DIRECTORY_SEPARATOR
+			   .'~frdl'
+			   .\DIRECTORY_SEPARATOR
+			   .'global'
+			   .\DIRECTORY_SEPARATOR	  	
+				   .'app'	 
+				   .\DIRECTORY_SEPARATOR.'deployments'	
+				   .\DIRECTORY_SEPARATOR.'blue'	
+				   .\DIRECTORY_SEPARATOR.'deploy'	
+				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
+				   if(is_dir($ApplicationsDirectory)  || @mkdir($ApplicationsDirectory, 0775, true) ){  
+				     break;
+			       }
+        } else {
+           //    echo $dir.' is not writable. Permissions may have to be adjusted.<br>';
+        } 
+      }
+	}		   
+	   
+		
+    @ ob_end_clean();
+
+	
+  	
+		   
+		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
+		   $html='';			   		    
 			$html .= '<h1 style="color:red;">';
-			   $html .= 'Error: Coould not find app config for this host and could not create global app directory!';     
+			   $html .= 'Error: Coould not find app config for this host and could not create global app directory ('.$ApplicationsDirectory.')!<br />'.getenv('HOME').'<br />'.__DIR__;     
 		       $html .= '</h1>';      
 		      echo  \frdl\booting\getFormFromRequestHelper($html, false);
 			   die();
@@ -3357,9 +3473,27 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 <?php 
 	
- 	
-   $Engine=new \Webfan\Engine; 
-   $Engine->load(\Webfan\DescriptorType::WebApp, $this); 
+ if (version_compare(PHP_VERSION, '8.1.0') >= 0) {
+    $Engine=new \Webfan\Engine; 
+    $Engine->load(\Webfan\DescriptorType::WebApp, $this); 
+ }	else{
+ 	$AppLauncher = new \Webfan\AppLauncher($this->getRunner()); 
+ 	 if(\method_exists($AppLauncher, 'launch')){
+	   $AppLauncher->launch();
+	}elseif(!$AppLauncher->KernelFunctions()->isCLI() ){
+		   $response = $AppLauncher->handle($AppLauncher->getContainer()->get('request'));
+		   if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){ 
+			   (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
+		   }
+	 
+	   }elseif($AppLauncher->KernelFunctions()->isCLI() ){
+		 return $AppLauncher->handleCliRequest();
+	   }else{
+	     throw new \Exception('Could not handle request ('.\PHP_SAPI.')');	
+       }	
+	
+ }
+ 
     
 
 
@@ -3539,7 +3673,6 @@ Content-Length: 280
 			    return array (
   'time' => 0,
   'version' => '0.0.0',
-  'appId' => 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1',
   'channel' => 'latest',
 );
 			  

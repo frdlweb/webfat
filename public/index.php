@@ -115,6 +115,99 @@ if (!\interface_exists(IContainer::class, false)) {
 }
 }
 
+
+namespace frdl\patch{
+if (!\class_exists(RelativePath::class, false)) {		
+ /**
+ * Simple relative path normalizer utility.
+ *
+ * The utility was inspired by PHP's realPath function, though that required the given path to exist, RelativePath does not.
+ *
+ * Particularly useful is you need to parse and normalize paths gathered from for instance URL's and HTML pages.
+ *
+ * These functions are also included in Zip and ZipStream classes version 1.23 onwards on PHPClasses.org.
+ * http://www.phpclasses.org/package/6110 and http://www.phpclasses.org/package/6616 respectively.
+ *
+ * License: GNU LGPL, Attribution required for commercial implementations, requested for everything else.
+ *
+ * @author A. Grandt <php@grandt.com>
+ * @copyright 2011 A. Grandt
+ * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
+ * @link http://www.phpclasses.org/package/6844
+ * @version 1.01
+ */
+ //mentioned here: https://webfan.de/install/
+ class RelativePath {
+    const VERSION = 1.01;
+
+    /**
+     * Join $file to $dir path, and clean up any excess slashes.
+     *
+     * @author A. Grandt <php@grandt.com>
+     * @author Greg Kappatos
+     *
+     * @param string $dir
+     * @param string $file
+     *
+     * @return string Joined path, with the correct forward slash dir separator.
+     */
+    public static function pathJoin($dir, $file) {
+        return \RelativePath::getRelativePath(
+            $dir . (empty($dir) || empty($file) ? '' : DIRECTORY_SEPARATOR) . $file
+        );
+    }
+
+    /**
+     * Clean up a path, removing any unnecessary elements such as /./, // or redundant ../ segments.
+     * If the path starts with a "/", it is deemed an absolute path and any /../ in the beginning is stripped off.
+     * The returned path will not end in a "/".
+     *
+     * @param String $path The path to clean up
+     * @return String the clean path
+     */
+    public static function getRelativePath($path) {
+        $path = preg_replace("#/+\.?/+#", "/", str_replace("\\", "/", $path));
+        $dirs = explode("/", rtrim(preg_replace('#^(\./)+#', '', $path), '/'));
+               
+        $offset = 0;
+        $sub = 0;
+        $subOffset = 0;
+        $root = "";
+
+        if (empty($dirs[0])) {
+            $root = "/";
+            $dirs = array_splice($dirs, 1);
+        } else if (preg_match("#[A-Za-z]:#", $dirs[0])) {
+            $root = strtoupper($dirs[0]) . "/";
+            $dirs = array_splice($dirs, 1);
+        }
+
+        $newDirs = array();
+        foreach ($dirs as $dir) {
+            if ($dir !== "..") {
+                $subOffset--;
+                $newDirs[++$offset] = $dir;
+            } else {
+                $subOffset++;
+                if (--$offset < 0) {
+                    $offset = 0;
+                    if ($subOffset > $sub) {
+                        $sub++;
+                    }
+                }
+            }
+        }
+
+        if (empty($root)) {
+            $root = str_repeat("../", $sub);
+        }
+        return $root . implode("/", array_slice($newDirs, 0, $offset));
+    }
+ }
+}
+}
+
+
 //Psr\Container\ContainerInterface
 // Patch Version 1 | 2 incompatibillity
 namespace Psr\Container{
@@ -2691,21 +2784,20 @@ $_dir = getenv('FRDL_HOME') . \DIRECTORY_SEPARATOR . '.frdl';
   }
 //}
 	
-	   if(!is_dir($_dir) ){
-	   	 @mkdir($_dir, 0775, true);
-	   }
-
+ //die($drush_server_home());
   if(!is_dir($_dir) || !is_writable($_dir)   || !is_readable($_dir)  ){  
 
-      $dirs = array_filter(glob($_SERVER['DOCUMENT_ROOT'].'/../*'), 'is_dir');
+       //$getRootDir($_SERVER['DOCUMENT_ROOT'])
+     // $dirs = array_filter(glob($_SERVER['DOCUMENT_ROOT'].'/../*'), 'is_dir');
+      $dirs = array_filter(glob($drush_server_home().'/*/'), 'is_dir');
       
       foreach ($dirs as $dir) {
       		
-        if (false===strpos($dir, '@') && is_writable($dir) && is_readable($dir)) {
+        if (false===strpos($dir, '@') && false!==strpos($dir, 'frdl') &&  is_writable($dir) && is_readable($dir)) {
             //echo realpath($dir).' is writable.<br>';
-            $_dir = realpath($dir) 
+            $_dir = $dir 
 			   .\DIRECTORY_SEPARATOR
-			   .'~frdl';
+			   .'.frdl';
 				   if(is_dir($_dir)  || @mkdir($_dir, 0775, true) ){  
 				     break;
 			       }				   
@@ -2715,7 +2807,11 @@ $_dir = getenv('FRDL_HOME') . \DIRECTORY_SEPARATOR . '.frdl';
       }
 	}		
 	
-	 
+	$_dir= \frdl\patch\RelativePath::getRelativePath($_dir);
+	// if(!is_dir($_dir)){
+	// 	mkdir($_dir, 0775);
+	// }
+ 
 	$_ENV['FRDL_WORKSPACE']= rtrim($_dir, '\\/');
 	putenv('FRDL_WORKSPACE='.$_ENV['FRDL_WORKSPACE']);	
 	
@@ -3215,6 +3311,9 @@ class StubRunner implements StubRunnerInterface
 				   .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
 		   } 
+//mkdir(realpath('/volume1/web/~frdl/global/app/deployments/blue/deploy/app/'), 0775, true);
+  
+
 
 		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
 			   $ApplicationsDirectory = getenv('HOME')
@@ -3229,8 +3328,8 @@ class StubRunner implements StubRunnerInterface
 				   .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
 		   } 
-		   
-		/*   
+		  
+		 
  		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
 		  
 		   		   $ApplicationsDirectory = $_SERVER['DOCUMENT_ROOT']
@@ -3247,8 +3346,8 @@ class StubRunner implements StubRunnerInterface
 				   .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
 		   } 
-		   
-		   */
+		  
+		  /*   */
 		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
 		  
 		   		   $ApplicationsDirectory = __DIR__
@@ -3274,7 +3373,7 @@ class StubRunner implements StubRunnerInterface
 
       foreach ($dirs as $dir) {
       		
-        if (false===strpos($dir, '@') && is_writable($dir) && is_readable($dir)) {
+        if (false!==strpos($dir, 'frdl') &&  false===strpos($dir, '@') && is_writable($dir) && is_readable($dir)) {
             //echo realpath($dir).' is writable.<br>';
             $ApplicationsDirectory = realpath($dir) 
 			   .\DIRECTORY_SEPARATOR
@@ -3303,7 +3402,7 @@ class StubRunner implements StubRunnerInterface
 
       foreach ($dirs as $dir) {
       		
-        if (false===strpos($dir, '@') && is_writable($dir) && is_readable($dir)) {
+        if (false!==strpos($dir, 'frdl') &&  false===strpos($dir, '@') && is_writable($dir) && is_readable($dir)) {
             //echo realpath($dir).' is writable.<br>';
             $ApplicationsDirectory = realpath($dir) 
 			   .\DIRECTORY_SEPARATOR
@@ -3413,14 +3512,15 @@ class StubRunner implements StubRunnerInterface
 		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
 		   $html='';			   		    
 			$html .= '<h1 style="color:red;">';
-			   $html .= 'Error: Coould not find app config for this host and could not create global app directory ('.$ApplicationsDirectory.')!<br />'.getenv('HOME').'<br />'.__DIR__;     
+			   $html .= 'Error: Coould not find app config for this host and could not create global app directory ('.$ApplicationsDirectory.')!'
+			   .'Try to create directory '.getenv('FRDL_WORKSPACE').' manually!';//.'<br />'.getenv('HOME').'<br />'.__DIR__;     
 		       $html .= '</h1>';      
 		      echo  \frdl\booting\getFormFromRequestHelper($html, false);
 			   die();
 		   } 
 
 
-	 
+	 die($ApplicationsDirectory);
 		return $ApplicationsDirectory;
 	}		
 	

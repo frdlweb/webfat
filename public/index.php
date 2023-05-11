@@ -106,45 +106,6 @@ namespace DI{
 
  }
 } 
- 
-namespace frdl\patch{
-if (!\interface_exists(IContainer::class, false)) {		
-   interface IContainer {
-	   
-   }
-}
-}
-
-
-namespace frdl\patch{
- 
-/**
- * Return relative path between two sources
- * @param $from
- * @param $to
- * @param string $separator
- * @return string
- */
- function relPath($from, $to, $separator = \DIRECTORY_SEPARATOR)
- {
-    $from   = str_replace(array('/', '\\'), $separator, $from);
-    $to     = str_replace(array('/', '\\'), $separator, $to);
-
-    $arFrom = explode($separator, rtrim($from, $separator));
-    $arTo = explode($separator, rtrim($to, $separator));
-    while(count($arFrom) && count($arTo) && ($arFrom[0] == $arTo[0]))
-    {
-        array_shift($arFrom);
-        array_shift($arTo);
-    }
-
-    return str_pad("", count($arFrom) * 3, '..'.$separator).implode($separator, $arTo);
- }
-}
-
-
-
-
 
 
 namespace frdl\patch{
@@ -171,6 +132,23 @@ if (!\class_exists(RelativePath::class, false)) {
  class RelativePath {
     const VERSION = 1.01;
 
+	 
+ public static function rel($from, $to, $separator = \DIRECTORY_SEPARATOR)
+ {
+    $from   = str_replace(array('/', '\\'), $separator, $from);
+    $to     = str_replace(array('/', '\\'), $separator, $to);
+
+    $arFrom = explode($separator, rtrim($from, $separator));
+    $arTo = explode($separator, rtrim($to, $separator));
+    while(count($arFrom) && count($arTo) && ($arFrom[0] == $arTo[0]))
+    {
+        array_shift($arFrom);
+        array_shift($arTo);
+    }
+
+    return str_pad("", count($arFrom) * 3, '..'.$separator).implode($separator, $arTo);
+ }	 
+	 
     /**
      * Join $file to $dir path, and clean up any excess slashes.
      *
@@ -239,6 +217,24 @@ if (!\class_exists(RelativePath::class, false)) {
 }
 
 
+
+namespace frdl\patch{
+ use frdl\patch\RelativePath;
+/**
+ * Return relative path between two sources
+ * @param $from
+ * @param $to
+ * @param string $separator
+ * @return string
+ */
+ function relPath($from, $to, $separator = \DIRECTORY_SEPARATOR)
+ {
+   return RelativePath::rel($from, $to, $separator);
+ }
+}
+
+
+
 //Psr\Container\ContainerInterface
 // Patch Version 1 | 2 incompatibillity
 namespace Psr\Container{
@@ -254,6 +250,16 @@ namespace Psr\Container{
 	}	
 }
  
+ 
+namespace frdl\patch{
+ if (!\interface_exists(IContainer::class, false)) {		
+   interface IContainer {
+	//public function get($id);
+	//public function has($id);	   
+   }
+ }
+}
+
 
 namespace Psr\Container{
 

@@ -234,6 +234,14 @@ namespace frdl\patch{
 }
 
 
+namespace frdl\patch{
+ if (!\interface_exists(IContainer::class, false)) {		
+   interface IContainer {
+	//public function get($id);
+	//public function has($id);	   
+   }
+ }
+}
 
 //Psr\Container\ContainerInterface
 // Patch Version 1 | 2 incompatibillity
@@ -251,15 +259,6 @@ namespace Psr\Container{
 }
  
  
-namespace frdl\patch{
- if (!\interface_exists(IContainer::class, false)) {		
-   interface IContainer {
-	//public function get($id);
-	//public function has($id);	   
-   }
- }
-}
-
 
 namespace Psr\Container{
 

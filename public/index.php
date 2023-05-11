@@ -1150,7 +1150,7 @@ class Php
 
 
 
-namespace App\compiled\Instance\MimeStub5\MimeStubEntity110562792{
+namespace App\compiled\Instance\MimeStub5\MimeStubEntity69344050{
 use frdl;
 use frdlweb\StubItemInterface as StubItemInterface;	 
 use frdlweb\StubHelperInterface as StubHelperInterface;
@@ -3288,9 +3288,16 @@ class StubRunner implements StubRunnerInterface
 	}	
 	
 	public function getWebrootConfigDirectory() : string {
-		return getenv('FRDL_WORKSPACE')
-			.\DIRECTORY_SEPARATOR.urlencode('oid:1.3.6.1.4.1.37553.8.1.8.8.11.6').\DIRECTORY_SEPARATOR	
-			.sha1(str_replace(getenv('HOME'), '', $_SERVER['DOCUMENT_ROOT'])).\DIRECTORY_SEPARATOR;
+		 
+	  $webrootConfigDir = 
+	        getenv('FRDL_WORKSPACE')
+			.\DIRECTORY_SEPARATOR.urlencode('circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1').\DIRECTORY_SEPARATOR	
+			.sha1(str_replace(getenv('HOME'), '', $_SERVER['DOCUMENT_ROOT']))
+			.\DIRECTORY_SEPARATOR;
+		if(!is_dir($webrootConfigDir)){
+			 @mkdir($webrootConfigDir,0775,true);
+		}
+	  return $webrootConfigDir;
 	}
 	
 	public function getApplicationsDirectory() : string {
@@ -3300,7 +3307,7 @@ class StubRunner implements StubRunnerInterface
 		$configVersion = $this->configVersion();
 				
 		$webrootConfigFile = rtrim($this->getWebrootConfigDirectory(), '\\/ ').\DIRECTORY_SEPARATOR.'app.php';
-
+   
          if(false === $ApplicationsDirectory && file_exists($webrootConfigFile)){	  
 		   $webrootConfig = require $webrootConfigFile;       
 		   $ApplicationsDirectory =$webrootConfig['stages'][$webrootConfig['stage']];	 
@@ -3317,7 +3324,7 @@ class StubRunner implements StubRunnerInterface
 			   .\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR	
 			   .urlencode($configVersion['appId'])	
 			   .\DIRECTORY_SEPARATOR.'app.php';
-         
+      
 		 if(file_exists($webrootConfigFile)){	  
 		   $webrootConfig = require $webrootConfigFile;       
 		   $ApplicationsDirectory =$webrootConfig['stages'][$webrootConfig['stage']];	 	 
@@ -3921,8 +3928,8 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 --3333EVGuDPPT
 Content-Disposition: "php" ; filename="$HOME/version_config.php" ; name="stub version_config.php"
 Content-Type: application/x-httpd-php
-Content-Md5: 2a3496d7541e98c1a3625712be7fccb0
-Content-Sha1: 812a417f6dc2735a15af41d618ef39c08439e576
+Content-Md5: e55aa14a732a962ea3048724df295cb9
+Content-Sha1: 56bfa0b2657a79c737dac9d31d2de688942b6686
 Content-Length: 280
 
 
@@ -3933,6 +3940,7 @@ Content-Length: 280
   'time' => 0,
   'version' => '0.0.0',
   'channel' => 'latest',
+//  'appId' => 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1',
 );
 			  
 --3333EVGuDPPT--

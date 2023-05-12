@@ -1,10 +1,10 @@
 {
   "name" : "frdlweb/webfat",
-  "type" : "library",
-  "description": "Multihost/Multisite Markdown Hub and Frdlweb CMS/Framework Implementation. Single point of no godclasses in a file ;-) - The next World of Frdlweb and future Webfan Projects entry point...",	  
+  "type" : "webfan-endpoint",
+  "description": "Starting point for Webfat Initial Apps: DefaultPage, IO4, Docu, Demo, ...Wayne Insane",	  
   "license": ["MIT"],	  
   "require" : {
-	    "php": ">=7.1 | >=8.0"
+	    "php": ">=8.0"
   },	  
   "autoload": {
       "files": ["public/index.php"]

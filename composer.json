@@ -10,6 +10,9 @@
        "psr-4": {
 		"Webfan\\Wayne\\": "wayne-insane"
        },
-      "files": ["public/index.php"]
+      "files": [
+	      "public/index.php",
+	      "webfan.start.php"
+      ]
   }  
 }

@@ -1,12 +1,15 @@
 {
   "name" : "frdlweb/webfat",
-  "type" : "webfan-endpoint",
+  "type" : "project",
   "description": "Starting point for Webfat Initial Apps: DefaultPage, IO4, Docu, Demo, ...Wayne Insane",	  
   "license": ["MIT"],	  
   "require" : {
 	    "php": ">=8.0"
   },	  
   "autoload": {
+       "psr-4": {
+		"Webfan\\Wayne\\": "wayne-insane"
+       },
       "files": ["public/index.php"]
   }  
 }

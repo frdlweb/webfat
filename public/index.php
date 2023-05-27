@@ -2831,7 +2831,7 @@ $_dir = getenv('FRDL_HOME') . \DIRECTORY_SEPARATOR . '.frdl';
 //}
 	
  
-  if(!is_dir($_dir) || !is_writable($_dir)   || !is_readable($_dir)  ){  
+  if(@!is_dir($_dir) || !is_writable($_dir)   || !is_readable($_dir)  ){  
 
        //$getRootDir($_SERVER['DOCUMENT_ROOT'])
      // $dirs = array_filter(glob($_SERVER['DOCUMENT_ROOT'].'/../*'), 'is_dir');

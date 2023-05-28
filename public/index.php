@@ -2253,13 +2253,15 @@ public function generateBundary($opts = array()) {
                 $charset = self::getHeaderOption($contentType, 'charset');
                 if (null === $charset) {
                     // Try to detect
-                    $charset = \mb_detect_encoding($body) ?: 'utf-8';
+                    $charset =function_exists('mb_detect_encoding') && \mb_detect_encoding($body) ?: 'utf-8';
                 }
                 $this->charset=$charset;
             
                 // Only convert if not UTF-8
                 if ('utf-8' !== strtolower($charset)) {
-                    $body = \mb_convert_encoding($body, 'utf-8', $charset);
+                    $body =function_exists('mb_convert_encoding') 
+						? \mb_convert_encoding($body, 'utf-8', $charset)
+						: $body;
                 }
             }
 

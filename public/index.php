@@ -2174,7 +2174,7 @@ public function generateBundary($opts = array()) {
             if (2 === count($lineSplit)) {
                 list($key, $value) = $lineSplit;
                 // Decode value
-                $value = mb_decode_mimeheader(trim($value));
+                $value = \mb_decode_mimeheader(trim($value));
             } else {
                 // Bogus header
                 $key = $lineSplit[0];
@@ -2249,7 +2249,7 @@ public function generateBundary($opts = array()) {
                 $charset = self::getHeaderOption($contentType, 'charset');
                 if (null === $charset) {
                     // Try to detect
-                    $charset = mb_detect_encoding($body) ?: 'utf-8';
+                    $charset = \mb_detect_encoding($body) ?: 'utf-8';
                 }
                 $this->charset=$charset;
             
@@ -2429,7 +2429,7 @@ public function generateBundary($opts = array()) {
                     $body = $this->urlsafeB64Encode($body);
                     break;
                 case 'quoted-printable':
-                    $body = quoted_printable_encode($body);
+                    $body = \quoted_printable_encode($body);
                     break;
             }
 
@@ -2437,11 +2437,11 @@ public function generateBundary($opts = array()) {
             if (!in_array($encoding, array('binary', '7bit'))) {
                 // back de-/encode 
                 if (    'utf-8' !== strtolower(self::getHeaderOption($this->getMimeType(), 'charset'))
-                     && 'utf-8' === mb_detect_encoding($body)) {
-                    $body = mb_convert_encoding($body, self::getHeaderOption($this->getMimeType(), 'charset'), 'utf-8');
+                     && 'utf-8' === \mb_detect_encoding($body)) {
+                    $body = \mb_convert_encoding($body, self::getHeaderOption($this->getMimeType(), 'charset'), 'utf-8');
                 }elseif (    'utf-8' === strtolower(self::getHeaderOption($this->getMimeType(), 'charset'))
-                     && 'utf-8' !== mb_detect_encoding($body)) {
-                    $body = mb_convert_encoding($body, 'utf-8', mb_detect_encoding($body));
+                     && 'utf-8' !== \mb_detect_encoding($body)) {
+                    $body = \mb_convert_encoding($body, 'utf-8', \mb_detect_encoding($body));
                 }
             }   		 	
 		 }	
@@ -2636,7 +2636,7 @@ public function generateBundary($opts = array()) {
 	     //	$parent->append($N);
 		 */
 		// $parent->append( $this->newFile($type, $disposition, $file, $name, $code) );
-		    $class = get_class($this);
+		    $class = \get_class($this);
 		    $N = new $class($this->newFile($type, $disposition, $file, $name, $code), $parent);		    
 		 //   $N->setBody($code);
 		   // $N->setBoundary($N->getBoundary($N->isMultiPart()));

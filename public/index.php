@@ -2174,7 +2174,9 @@ public function generateBundary($opts = array()) {
             if (2 === count($lineSplit)) {
                 list($key, $value) = $lineSplit;
                 // Decode value
-                $value = \mb_decode_mimeheader(trim($value));
+                              $value =function_exists('mb_decode_mimeheader') 
+					? \mb_decode_mimeheader(trim($value)) 
+					:  \imap_mime_header_decode(trim($value));
             } else {
                 // Bogus header
                 $key = $lineSplit[0];

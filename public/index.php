@@ -3762,8 +3762,9 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 	
  if (version_compare(PHP_VERSION, '8.1.0') >= 0) {
     $Engine=new \Webfan\Engine; 
-    $Engine->load(\Webfan\DescriptorType::WebApp, $this); 
- }	else{
+    //$Engine->load(\Webfan\DescriptorType::WebApp, $this); 
+     $Engine->load( $this); 
+ }else{
  	$AppLauncher = new \Webfan\AppLauncher($this->getRunner()); 
  	 if(\method_exists($AppLauncher, 'launch')){
 	   $AppLauncher->launch();

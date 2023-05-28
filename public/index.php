@@ -2253,7 +2253,7 @@ public function generateBundary($opts = array()) {
                 $charset = self::getHeaderOption($contentType, 'charset');
                 if (null === $charset) {
                     // Try to detect
-                    $charset =function_exists('mb_detect_encoding') && \mb_detect_encoding($body) ?: 'utf-8';
+                   $charset =function_exists('mb_detect_encoding') && \mb_detect_encoding($body) ? \mb_detect_encoding($body) : 'utf-8';
                 }
                 $this->charset=$charset;
             

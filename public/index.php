@@ -237,9 +237,11 @@ namespace frdl\patch{
  * @param string $separator
  * @return string
  */
+ if(!function_exists('\frdl\patch\relPath')){	
  function relPath($from, $to, $separator = \DIRECTORY_SEPARATOR)
  {
    return RelativePath::rel($from, $to, $separator);
+ }
  }
 }
 
@@ -315,7 +317,7 @@ namespace frdl\booting{
 	
 use Spatie\Once\Backtrace;
 use Spatie\Once\Cache;
-
+ if(!function_exists('\frdl\booting\once')){	
 /**
  * once by:
  * https://github.com/spatie/once
@@ -354,7 +356,7 @@ function once(callable $callback): mixed
 
     return $cache->get($object, $hash);
 }
-	
+ }	
 	
  $maxExecutionTime = intval(ini_get('max_execution_time'));	
  if (strtolower(\php_sapi_name()) !== 'cli') {	 
@@ -371,7 +373,7 @@ function once(callable $callback): mixed
 		$_SERVER['REQUEST_URI']=null;			
 	}
 	
-	
+ if(!function_exists('\frdl\booting\getFormFromRequestHelper')){		
  function getFormFromRequestHelper(string $message = '',
 											 bool $autosubmit = true, 
 											 $delay = 0,
@@ -419,7 +421,7 @@ function once(callable $callback): mixed
 	
 	  return $html;
     }
-	
+ }
 }
 
 namespace Webfan\Webfat\App{
@@ -427,7 +429,7 @@ namespace Webfan\Webfat\App{
 use LogicException;
 use Exception;
 use IvoPetkov\HTML5DOMDocument;
-
+if (!\class_exists(ResolvableLogicException::class, false)) {
 class ResolvableLogicException extends LogicException
 {
 	
@@ -600,7 +602,7 @@ class ResolvableLogicException extends LogicException
     }
 }
 }
-
+}
 
 
 
@@ -611,7 +613,7 @@ namespace Webfan\Webfat\App{
 use ErrorException;
 use Exception;
 use IvoPetkov\HTML5DOMDocument;
-
+if (!\class_exists(ResolvableException::class, false)) {
 class ResolvableException extends ErrorException
 {
 	
@@ -785,7 +787,7 @@ class ResolvableException extends ErrorException
     }
 }
 }
-
+}
 
 
 namespace Frdlweb\Contract\Autoload{

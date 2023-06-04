@@ -3622,7 +3622,7 @@ class StubRunner implements StubRunnerInterface
 //Laufzeit Fassaden ;-) ...
 namespace frdl\r {
   	
- 
+ if(!class_exists(f::class,false)){
 class f 
 {
  
@@ -3654,14 +3654,16 @@ class f
         $this->_m[$key] = $value;
     }
 }
- 	
+} 	
 
  if(isset($StubRunner)){
   f::i([
    'StubRunner' => &$StubRunner,
   ]);
    return $StubRunner; 
- }		  
+ }
+	 
+
 }//ns frdl/r
 
 

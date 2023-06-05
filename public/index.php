@@ -102,6 +102,15 @@ namespace Webfan\Wayne {
 }
 
 
+namespace PSX\Sandbox{
+	if(!function_exists('\PSX\Sandbox\runIsolate')){
+		function runIsolate($file, array $context){   
+			extract($context);    
+			return include $file;
+		}		
+	}
+}
+
 
 namespace DI{
 

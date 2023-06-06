@@ -3774,7 +3774,7 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
     //$Engine->load(\Webfan\DescriptorType::WebApp, $this); 
      $Engine->load( $this); 
  }else{
- 	$AppLauncher = new \Webfan\AppLauncher($this->getRunner()); 
+ 	$AppLauncher = new \Webfan\AppLauncherLegacy($this->getRunner()); 
  	 if(\method_exists($AppLauncher, 'launch')){
 	   $AppLauncher->launch();
 	}elseif(!$AppLauncher->KernelFunctions()->isCLI() ){

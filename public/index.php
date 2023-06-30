@@ -327,7 +327,7 @@ interface StubModuleInterface extends StubInterface
 if (!\interface_exists(StubHelperInterface::class, false)) {	
  interface StubHelperInterface
  { 
-  public function runStubs();
+  public function runStubs($stubs=null);
   public function addPhpStub($code, $file = null);	 
   public function addWebfile($path, $contents, $contentType = 'application/x-httpd-php', $n = 'php');	 
   public function addClassfile($class, $contents);
@@ -1472,7 +1472,7 @@ class Php
 
 
 
-namespace App\compiled\Instance\MimeStub5\MimeStubEntity757294932{
+namespace App\compiled\Instance\MimeStub5\MimeStubEntity305344575{
 use frdl;
 use frdlweb\StubItemInterface as StubItemInterface;	 
 use frdlweb\StubHelperInterface as StubHelperInterface;
@@ -1558,13 +1558,14 @@ use Frdlweb\Contract\Autoload\LoaderInterface;
    }
 	 
 	 
-  	public function runStubs($stubs = null){
+  	public function runStubs($stubs = null){	
       $BootStubs = (!is_null($stubs)) ? $stubs : $this->getBootStubs();	
 		
 		
 	  foreach( $BootStubs->getParts() as $rootPos => $rootPart){
-		
-		  	  
+		//echo __METHOD__;
+		  	 
+		  
           if($rootPart->isMultiPart())	{
 		 	foreach( $rootPart->getParts() as $pos => $part){		
 				
@@ -1573,14 +1574,21 @@ use Frdlweb\Contract\Autoload\LoaderInterface;
 				}				
     	    }
 		  }else{
-			 	if(isset($this->mimes_engine[$rootPart->getMimeType()])){
-					call_user_func_array(array($this, $this->mimes_engine[$rootPart->getMimeType()]), array($rootPart));
+			 	if(isset($this->mimes_engine[$rootPart->getMimeType()])){ 
+					//echo $rootPart->getName().'<br />';
+					try{
+					  \call_user_func_array(array($this, $this->mimes_engine[$rootPart->getMimeType()]), array($rootPart));
+					}catch(\Exception $e){
+					  echo $e->getMessage();
+						throw $e;
+					}
+					 
 				}			  
 		  }
 		//  break;
        }// each
 		
-		
+		 
 	 }
 
 
@@ -3131,18 +3139,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
              }, $update, $newVersion, $config, $configVersion, $url, __FILE__ , $this);  	
 	}
 	
-	public function __invoke() :?StubHelperInterface{	
-     
-		
-		if(defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') && false !== ___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___){ 
-			throw new \Exception('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___ is defined in '.__FILE__.' '.__LINE__);
-		}
-		
-                $this->MimeVM->hugRunner($this); 
-		$this->autoloading();	
-		$this->MimeVM->runStubs();
-		return $this->MimeVM;
-	}
+	
 	public function hugVM(?StubHelperInterface $MimeVM){
 		$this->MimeVM=$MimeVM;
 	  return $this;
@@ -4076,7 +4073,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
       */
       public function runAsIndex(?bool $showErrorPageReturnBoolean = true) : bool|object{
 		
-	if(true===$this->isIndex(true)){//echo __METHOD__;
+	if(true===$this->isIndex(true)){ 
 		$this();
 	   return $showErrorPageReturnBoolean ? true : $this;
 	}elseif(true===$showErrorPageReturnBoolean && $this->isIndexRequest()){
@@ -4096,6 +4093,19 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
           return $showErrorPageReturnBoolean ? false : $this;
 	} 
      }
+	
+	public function __invoke() :?StubHelperInterface{	
+    
+		
+		if(defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') && false !== ___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___){ 
+			throw new \Exception('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___ is defined in '.__FILE__.' '.__LINE__);
+		}
+	
+                $this->MimeVM->hugRunner($this); 
+		$this->autoloading();	
+		$this->MimeVM->runStubs();
+		return $this->MimeVM;
+	}
 }
 	
 //\class_alias('\\'.__NAMESPACE__.'\\MimeStub5', '\\'.__NAMESPACE__.'\\MimeStubIndex');
@@ -4134,9 +4144,7 @@ namespace{
 	$MimeVM->hugRunner($StubRunner);
 
 if(!isset($module)){
-  $module = new \ArrayObject([
-	'exports' => new \ArrayObject(),		    
-  ]);	
+  $module = new \ArrayObject();	
 }
 $module['exports'] = &$StubRunner;// new \ArrayObject();	
 $module['exports']['util']['path']['relative']=function ($from, $to, $separator = \DIRECTORY_SEPARATOR)

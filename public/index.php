@@ -4133,7 +4133,11 @@ namespace{
 	$StubRunner = new StubRunner($MimeVM);  
 	$MimeVM->hugRunner($StubRunner);
 
-	
+if(!isset($module)){
+  $module = new \ArrayObject([
+	'exports' => new \ArrayObject(),		    
+  ]);	
+}
 $module['exports'] = &$StubRunner;// new \ArrayObject();	
 $module['exports']['util']['path']['relative']=function ($from, $to, $separator = \DIRECTORY_SEPARATOR)
  {

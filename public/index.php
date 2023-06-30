@@ -204,19 +204,21 @@ if (!\interface_exists(CodebaseInterface::class, false)) {
         self::ENDPOINT_RDAP,
         self::ENDPOINT_PROXY_OBJECT_REMOTE,
         self::ENDPOINT_WEBFAT_CENTRAL,
-	self::ENDPOINT_OIDIP,
+	    self::ENDPOINT_OIDIP,
    ];
-	 
-   public function setUpdateChannel(string $channel); 
-   public function getUpdateChannel() : string; 
-   public function getRemotePsr4UrlTemplate() : string; 
+     
+   public function loadUpdateChannel(mixed $StubRunner = null) : string;     
+   public function getRemoteApiBaseUrl(?string $serviceEndpoint = self::ENDPOINT_DEFAULT) : string|bool;
+   public function setUpdateChannel(string $channel);	 
+   public function getUpdateChannel() : string;	  
+   public function getRemotePsr4UrlTemplate() : string;	  
    public function getRemoteModulesBaseUrl() : string;
-   public function loadUpdateChannel(mixed $StubRunner = null) : string;    
-   public function getRemoteApiBaseUrl(?string $serviceEndpoint = self::ENDPOINT_DEFAULT) : string|bool; 	 
-   public function getServiceEndpoints() : array; 	 	 	 
-   public function getServiceEndpointNames() : array; 	 	 	 
-   public function setServiceEndpoints(array $serviceEndpoints) : CodebaseInterface;
-   public function setServiceEndpoint(string $serviceEndpointName, string|\Closure|\callable $baseUrl, ?string $channel = self::ALL_CHANNELS) : CodebaseInterface; 	 	 
+   public function getServiceEndpoints() : array;	 
+   public function getServiceEndpointNames() : array;	  	 	 	 
+   public function setServiceEndpoints(array $serviceEndpoints) : CodebaseInterface;	 
+   public function setServiceEndpoint(string $serviceEndpointName,
+									 string|\Closure|\callable $baseUrl, 
+									 ?string $channel = self::ALL_CHANNELS) : CodebaseInterface;
  }
 } 
 }
@@ -234,24 +236,7 @@ namespace frdlweb{
 	
 use Frdlweb\Contract\Autoload\LoaderInterface;
 	
-if (!\interface_exists(StubHelperInterface::class, false)) {	
- interface StubHelperInterface
- { 
-  public function runStubs();
-  public function addPhpStub($code, $file = null);	 
-  public function addWebfile($path, $contents, $contentType = 'application/x-httpd-php', $n = 'php');	 
-  public function addClassfile($class, $contents);
-  public function get_file($part, $file, $name); 
-  public function Autoload($class);   
-  public function __toString();	
-  public function __invoke(); 	
-  public function __call($name, $arguments);
-  public function getFileAttachment($file = null, $offset = null, ?bool $throw = true);	
-  public function hugRunner(mixed $runner);
-  public function getRunner();
- }
-} 
- 
+
 
 	
 if (!\interface_exists(StubItemInterface::class, false)) { 	
@@ -324,7 +309,25 @@ interface StubModuleInterface extends StubInterface
  }	
 }			
 	
-
+if (!\interface_exists(StubHelperInterface::class, false)) {	
+ interface StubHelperInterface
+ { 
+  public function runStubs();
+  public function addPhpStub($code, $file = null);	 
+  public function addWebfile($path, $contents, $contentType = 'application/x-httpd-php', $n = 'php');	 
+  public function addClassfile($class, $contents);
+  public function get_file($part, $file, $name); 
+  public function Autoload($class);   
+  public function __toString();	
+  public function __invoke(); 	
+  public function __call($name, $arguments);
+  public function getFileAttachment($file = null, $offset = null, ?bool $throw = true);	
+  public function hugRunner(mixed $runner);
+  public function getRunner();
+  //public function _run_php_1(StubItemInterface $part, $class = null, ?bool $lint = null);
+ }
+} 
+ 
 }//namespace frdlweb
 
 
@@ -1648,15 +1651,16 @@ use Frdlweb\Contract\Autoload\LoaderInterface;
            $name = 'class '.$class;
            
           foreach($fnames as $fn){
+			  
 		  	$_p = $this->get_file($this->document, $fn, $name);
-		  	if(false !== $_p){
+		  	if(false !== $_p){ 
 				$this->_run_php_1($_p, $class);
 				//return $_p;
 				return true;
 			}
 		  } 
            
-        return false;   
+      //  return false;   
 	}
 	 
     public function lint(?bool $lint = null) : bool {
@@ -1666,7 +1670,7 @@ use Frdlweb\Contract\Autoload\LoaderInterface;
 		return $this->_lint;
     }
 	 
-	public function _run_php_1(MimeStub5 $part, $class = null, ?bool $lint = null){
+	public function _run_php_1($part, $class = null, ?bool $lint = null){
 	
 	
 	//	set_time_limit(min(900, ini_get('max_execution_time') + 300));
@@ -1732,7 +1736,7 @@ use Frdlweb\Contract\Autoload\LoaderInterface;
 		                            die();						
 					}
 					
-					
+				// 	echo $part->getName().'<br />'.$class.'<br />'.$fehler.'<br />'; 
 		try{
 	         	$res = eval($code);			
 		}catch(\Webfan\Webfat\App\ResolvableException $e3){	
@@ -1746,7 +1750,7 @@ use Frdlweb\Contract\Autoload\LoaderInterface;
 			echo  \frdl\booting\getFormFromRequestHelper($e4->getMessage(), false);
 		      die();
 		}
-		
+		// echo '<br />'.$code.'<br />'.'<br />';
 
 		return $res;
 	}
@@ -3113,7 +3117,8 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	}
 	
 	public function __invoke() :?StubHelperInterface{	
-
+     
+		
 		if(defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') && false !== ___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___){ 
 			throw new \Exception('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___ is defined in '.__FILE__.' '.__LINE__);
 		}
@@ -3132,7 +3137,8 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	}
 	public function autoloading() : void{
 		if(!empty($this->getStubVM()->getFileAttachment(null, null, false))){
-			\spl_autoload_register([$this->getStubVM(),'Autoload'], $this->isIndexRequest(), $this->isIndexRequest());
+		//	\spl_autoload_register([$this->getStubVM(),'Autoload'], $this->isIndexRequest(), $this->isIndexRequest());
+			\spl_autoload_register([$this->getStubVM(),'Autoload'], true, true);
 		}
 		 $this->autoloadRemoteCodebase();
 		 $this->getStubVM()->_run_php_1( $this->getStubVM()->get_file($this->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
@@ -3200,7 +3206,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	   return $export;
 	}
 	
-	public function configVersion(?array $config = null, $trys = 0) : array{
+	public function configVersion(?array $config = null, $trys = 0) : array{	
 		  $trys++;
 		  @chmod(dirname($this->getStubVM()->location), 0777); 
 		  @chmod($this->getStubVM()->location, 0777);
@@ -3261,10 +3267,24 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 				
 	
 	public function getCodebase() :?\Frdlweb\Contract\Autoload\CodebaseInterface{
-		if(null === $this->Codebase){
-			$this->Codebase = new \Webfan\Webfat\Codebase();
-			$this->Codebase->loadUpdateChannel($this);			
+		//	die(__METHOD__.\class_exists(\Webfan\Webfat\Codebase::class));
+		
+		if(null === $this->Codebase){ 
+			try{
+			       \class_exists(\Webfan\Webfat\Codebase::class);
+				}catch(\Exception $e){
+			  exit($e->getMessage());	
+			}
+				
+			try{	
+			   $this->Codebase = new \Webfan\Webfat\Codebase();
+			  $this->Codebase->loadUpdateChannel($this);			
+			}catch(\Exception $e){
+			  exit($e->getMessage());	
+			}
 		}
+		
+		
 		return $this->Codebase;
 	}
 	
@@ -3383,8 +3403,10 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	}	
 	
 	
-	protected function autoloadRemoteCodebase(){
-	  return $this->getRemoteAutoloader()->register(false);
+	protected function autoloadRemoteCodebase(){ 
+	  $loader = $this->getRemoteAutoloader();
+		$loader->register(false);
+		return $loader;
 	}	
 	
 	public function getFrdlwebWorkspaceDirectory() : string {
@@ -4038,7 +4060,8 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
       * @ var $showErrorPageReturnBoolean bool - if false returns the object! 
       */
       public function runAsIndex(?bool $showErrorPageReturnBoolean = true) : bool|object{
-	if(true===$this->isIndex(true)){
+		
+	if(true===$this->isIndex(true)){//echo __METHOD__;
 		$this();
 	   return $showErrorPageReturnBoolean ? true : $this;
 	}elseif(true===$showErrorPageReturnBoolean && $this->isIndexRequest()){
@@ -4109,7 +4132,7 @@ $module['exports']['util']['path']['relative']=function ($from, $to, $separator 
 	
 namespace{
    $module['exports']->runAsIndex(true);
-   $StubRunner = $module['exports'];
+   $StubRunner = &$module['exports'];
    return $module['exports'];
 } 
 
@@ -4258,9 +4281,18 @@ Content-Disposition: php ;filename="$DIR_LIB/Webfan/Webfat/Codebase.php";name="c
 
 namespace Webfan\Webfat;
 
-class Codebase extends \frdl\Codebase
+use Frdlweb\Contract\Autoload\CodebaseInterface;
+
+class Codebase extends \frdl\Codebase implements CodebaseInterface
 {
+	
+	public function __construct(?string $channel = null, ?array $channels = []){
+		parent::__construct($channel, $channels);
+	}
+	
+	
 	public function loadUpdateChannel(mixed $StubRunner = null) : string {
+	
 		$configVersion = $StubRunner->configVersion();
 		$config = $StubRunner->config();
 		$save = false;
@@ -4319,17 +4351,19 @@ Content-Disposition: php ;filename="$DIR_LIB/frdl/Codebase.php";name="class frdl
 <?php 
 namespace frdl;
 
-abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
+use Frdlweb\Contract\Autoload\CodebaseInterface;
+
+abstract class Codebase
  {
    protected $channels = null;
    protected $channel = null;
 	
    abstract public function loadUpdateChannel(mixed $StubRunner = null) : string; 
 	 
-   public function __construct(string $channel = null, ?array $channels = []){
+   public function __construct(?string $channel = null, ?array $channels = []){
 	   $this->channels = $channels;
 	   
-	   $this->channels[self::CHANNEL_LATEST] =array_merge(isset($this->channels[self::CHANNEL_LATEST]) ? $this->channels[self::CHANNEL_LATEST] : [],
+	   $this->channels[CodebaseInterface::CHANNEL_LATEST] =array_merge(isset($this->channels[CodebaseInterface::CHANNEL_LATEST]) ? $this->channels[self::CHANNEL_LATEST] : [],
 							     [
 		     //   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
 		     // 'RemotePsr4UrlTemplate' => 'https://latest.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
@@ -4340,7 +4374,7 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 	   ]);
 		   
 	   
-	   $this->channels[self::CHANNEL_STABLE] =array_merge(isset($this->channels[self::CHANNEL_STABLE]) ? $this->channels[self::CHANNEL_STABLE] : [],
+	   $this->channels[CodebaseInterface::CHANNEL_STABLE] =array_merge(isset($this->channels[CodebaseInterface::CHANNEL_STABLE]) ? $this->channels[self::CHANNEL_STABLE] : [],
 							     [
 		   //  'RemotePsr4UrlTemplate' => 'https://stable.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
 		  // 'RemotePsr4UrlTemplate' => 'https://webfan.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
@@ -4350,7 +4384,7 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 		   
 	   ]);	   
 	   
-	   $this->channels[self::CHANNEL_FALLBACK] =array_merge(isset($this->channels[self::CHANNEL_FALLBACK]) ? $this->channels[self::CHANNEL_FALLBACK] : [],
+	   $this->channels[CodebaseInterface::CHANNEL_FALLBACK] =array_merge(isset($this->channels[CodebaseInterface::CHANNEL_FALLBACK]) ? $this->channels[self::CHANNEL_FALLBACK] : [],
 							     [
 		   'RemotePsr4UrlTemplate' => 'https://startdir.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
 		 // 'RemotePsr4UrlTemplate' => 'https://webfan.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
@@ -4358,7 +4392,7 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 	   ]);   
 	   
-	   $this->channels[self::CHANNEL_TEST] = array_merge(isset($this->channels[self::CHANNEL_TEST]) ? $this->channels[self::CHANNEL_TEST] : [],
+	   $this->channels[CodebaseInterface::CHANNEL_TEST] = array_merge(isset($this->channels[CodebaseInterface::CHANNEL_TEST]) ? $this->channels[CodebaseInterface::CHANNEL_TEST] : [],
 							     [
 		 //  'RemotePsr4UrlTemplate' => 'https://startdir.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
 		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
@@ -4366,31 +4400,35 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 	   ]);  
 
-             $this->setServiceEndpoint(self::ENDPOINT_OIDIP, 'https://whois.viathinksoft.de', self::ALL_CHANNELS);
+             $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_OIDIP, 'https://whois.viathinksoft.de', CodebaseInterface::ALL_CHANNELS);
 	   
-             $this->setServiceEndpoint(self::ENDPOINT_RDAP, 'https://rdap.frdl.de', self::ALL_CHANNELS);
-             $this->setServiceEndpoint(self::ENDPOINT_RDAP, 'https://rdap.frdlweb.de', self::CHANNEL_FALLBACK);  
+             $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_RDAP, 'https://rdap.frdl.de', CodebaseInterface::ALL_CHANNELS);
+             $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_RDAP, 'https://rdap.frdlweb.de', CodebaseInterface::CHANNEL_FALLBACK);  
 	   
-	     $this->setServiceEndpoint(self::ENDPOINT_WEBFAT_CENTRAL, 'https://webfan.website', self::ALL_CHANNELS);  
-	     $this->setServiceEndpoint(self::ENDPOINT_WEBFAT_CENTRAL, 'https://website.webfan3.de', self::CHANNEL_FALLBACK);  
+	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_WEBFAT_CENTRAL, 'https://webfan.website', CodebaseInterface::ALL_CHANNELS);  
+	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_WEBFAT_CENTRAL, 
+								   'https://website.webfan3.de', 
+								   CodebaseInterface::CHANNEL_FALLBACK);  
 	   
-	     $this->setServiceEndpoint(self::ENDPOINT_PROXY_OBJECT_REMOTE, 'https://website.webfan3.de/api/proxy-object/${by}/?id=${class}', self::ALL_CHANNELS);  
+	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_PROXY_OBJECT_REMOTE, 
+								   'https://website.webfan3.de/api/proxy-object/${by}/?id=${class}', 
+								   CodebaseInterface::ALL_CHANNELS);  
 	   
-	     $this->setServiceEndpoint(self::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/container/?id=StubModuleBuilder', self::ALL_CHANNELS);  
-	   $this->setServiceEndpoint(self::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/class/?id=\frdlweb\StubModuleBuilder', self::CHANNEL_FALLBACK);  
-	     $this->setServiceEndpoint(self::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', self::CHANNEL_TEST);
+	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/container/?id=StubModuleBuilder', CodebaseInterface::ALL_CHANNELS);  
+	   $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/class/?id=\frdlweb\StubModuleBuilder', CodebaseInterface::CHANNEL_FALLBACK);  
+	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', CodebaseInterface::CHANNEL_TEST);
 	   
-	   if(null !== $channel && isset(static::CHANNELS[$channel])){
-		   $this->setUpdateChannel(static::CHANNELS[$channel]);
-	   }elseif(null !== $channel && !isset(static::CHANNELS[$channel])){		  	
-		   $this->channels[$channel] =  array_merge([], $this->channels[self::CHANNEL_FALLBACK]);  
+	   if(null !== $channel && isset(CodebaseInterface::CHANNELS[$channel])){
+		   $this->setUpdateChannel(CodebaseInterface::CHANNELS[$channel]);
+	   }elseif(null !== $channel && !isset(CodebaseInterface::CHANNELS[$channel])){		  	
+		   $this->channels[$channel] =  array_merge([], $this->channels[CodebaseInterface::CHANNEL_FALLBACK]);  
 		   $this->setUpdateChannel($channel);
 	   }else{
-		   $this->setUpdateChannel(static::CHANNELS[self::CHANNEL_LATEST]);
+		   $this->setUpdateChannel(CodebaseInterface::CHANNELS[CodebaseInterface::CHANNEL_LATEST]);
 	   }
    }
 
-   public function getRemoteApiBaseUrl(?string $serviceEndpoint = self::ENDPOINT_DEFAULT) : string|bool{ 
+   public function getRemoteApiBaseUrl(?string $serviceEndpoint = CodebaseInterface::ENDPOINT_DEFAULT) : string|bool{ 
 	   $baseUrl = false;
 	   if(isset($this->channels[$this->getUpdateChannel()][$serviceEndpoint])){
               $baseUrl = $this->channels[$this->getUpdateChannel()][$serviceEndpoint];
@@ -4398,7 +4436,7 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
                   $baseUrl = \call_user_func_array($baseUrl, [$serviceEndpoint, $this->getUpdateChannel(), $this]);
 	      }
 	   }
-	   return is_string($baseUrl) ? $baseUrl : false
+	   return is_string($baseUrl) ? $baseUrl : false;
    }	 
    public function setUpdateChannel(string $channel){
 	   $this->channel = $channel;
@@ -4410,12 +4448,12 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
    }
 	  
    public function getRemotePsr4UrlTemplate() : string{
-	   return $this->getRemoteApiBaseUrl(self::ENDPOINT_AUTOLOADER_PSR4_REMOTE);
+	   return $this->getRemoteApiBaseUrl(CodebaseInterface::ENDPOINT_AUTOLOADER_PSR4_REMOTE);
 	//    return $this->channels[$this->getUpdateChannel()]['RemotePsr4UrlTemplate'];
    }
 	  
    public function getRemoteModulesBaseUrl() : string{
-	   return $this->getRemoteApiBaseUrl(self::ENDPOINT_MODULES_WEBFANSCRIPT_REMOTE);
+	   return $this->getRemoteApiBaseUrl(CodebaseInterface::ENDPOINT_MODULES_WEBFANSCRIPT_REMOTE);
 	  //  return $this->channels[$this->getUpdateChannel()]['RemoteModulesBaseUrl'];
    }
    public function getServiceEndpoints() : array {
@@ -4423,7 +4461,7 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
    }
 	 
    public function getServiceEndpointNames() : array {
-      $names = self::DEFAULT_ENDPOINT_NAMES;
+      $names = CodebaseInterface::DEFAULT_ENDPOINT_NAMES;
 	   foreach($this->channels as $channel => $endpoints){
               $names = \array_merge($names, \array_keys($endpoints));
 	   }
@@ -4440,10 +4478,12 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
      return $this;
    }
 	 
-  public function setServiceEndpoint(string $serviceEndpointName, string|\Closure|\callable $baseUrl, ?string $channel = self::ALL_CHANNELS) : CodebaseInterface {
-	  if(self::ALL_CHANNELS === $channel){
-            foreach(\array_keys(self::CHANNELS) as $_t_channel){
-		if($_t_channel === $channel || $_t_channel === self::ALL_CHANNELS){
+  public function setServiceEndpoint(string $serviceEndpointName,
+									 string|\Closure|\callable $baseUrl, 
+									 ?string $channel = CodebaseInterface::ALL_CHANNELS) : CodebaseInterface {
+	  if(CodebaseInterface::ALL_CHANNELS === $channel){
+            foreach(\array_keys(CodebaseInterface::CHANNELS) as $_t_channel){
+		if($_t_channel === $channel || $_t_channel === CodebaseInterface::ALL_CHANNELS){
                   continue;
 		}
                $this->setServiceEndpoint($serviceEndpointName, $baseUrl, $_t_channel);
@@ -4463,11 +4503,8 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 --3333EVGuDPPT
 Content-Disposition: "php" ; filename="$HOME/version_config.php" ; name="stub version_config.php"
 Content-Type: application/x-httpd-php
-Content-Md5: 9a5f164e5ab2be37dc6991a92b5baec2
-Content-Sha1: c60503faa0771b5e0f83807f020fb1642dd7833d
-Content-Length: 275
 
-
+<?php
 			    if(file_exists(__FILE__.'.version_config.php')){
 				  return require __FILE__.'.version_config.php';
 				}
@@ -4475,7 +4512,7 @@ Content-Length: 275
   'time' => 0,
   'version' => '0.0.0',
   'channel' => 'latest',
-  /****'appId'=>'@@@APPID@@@',*****/,
+  /****'appId'=>'@@@APPID@@@',*****/
 );
 			  
 --3333EVGuDPPT--

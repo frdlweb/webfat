@@ -170,23 +170,53 @@ namespace Frdlweb\Contract\Autoload{
 	
 
 if (!\interface_exists(CodebaseInterface::class, false)) {	
- interface CodebaseInterface
+  interface CodebaseInterface
  { 
+   const ALL_CHANNELS = '*';
+   const ENDPOINT_DEFAULT = 'RemoteApiBaseUrl';
+   const ENDPOINT_WEBFAT_CENTRAL = 'io4.webfat.central';
+   const ENDPOINT_WORKSPACE_REMOTE = 'io4.workspace.remote';
+   const ENDPOINT_INSTALLER_REMOTE = 'io4.installer.remote';
+   const ENDPOINT_MODULES_WEBFANSCRIPT_REMOTE = 'RemoteModulesBaseUrl';
+   const ENDPOINT_AUTOLOADER_PSR4_REMOTE = 'RemotePsr4UrlTemplate',
+   const ENDPOINT_UDAP = 'io4.udap';
+   const ENDPOINT_RDAP = 'io4.rdap';
+   const ENDPOINT_OIDIP = 'io4.rdap';
+   const ENDPOINT_PROXY_OBJECT_REMOTE = 'io4.proxy-object.remote',
+
    const CHANNEL_LATEST = 'latest';
    const CHANNEL_STABLE = 'stable';
    const CHANNEL_FALLBACK = 'fallback';
+   const CHANNEL_TEST = 'test';
    const CHANNELS =[
         self::CHANNEL_LATEST => self::CHANNEL_LATEST,
         self::CHANNEL_STABLE => self::CHANNEL_STABLE,
         self::CHANNEL_FALLBACK => self::CHANNEL_FALLBACK,
+        self::CHANNEL_TEST => self::CHANNEL_TEST,
 	];
+   const DEFAULT_ENDPOINT_NAMES =[
+        self::ENDPOINT_DEFAULT,
+        self::ENDPOINT_WORKSPACE_REMOTE,
+        self::ENDPOINT_INSTALLER_REMOTE,
+        self::ENDPOINT_MODULES_WEBFANSCRIPT_REMOTE,
+        self::ENDPOINT_AUTOLOADER_PSR4_REMOTE,
+        self::ENDPOINT_UDAP,
+        self::ENDPOINT_RDAP,
+        self::ENDPOINT_PROXY_OBJECT_REMOTE,
+        self::ENDPOINT_WEBFAT_CENTRAL,
+	self::ENDPOINT_OIDIP,
+   ];
 	 
    public function setUpdateChannel(string $channel); 
    public function getUpdateChannel() : string; 
    public function getRemotePsr4UrlTemplate() : string; 
    public function getRemoteModulesBaseUrl() : string;
    public function loadUpdateChannel(mixed $StubRunner = null) : string;    
-   public function getRemoteApiBaseUrl() : string; 	 
+   public function getRemoteApiBaseUrl(?string $serviceEndpoint = self::ENDPOINT_DEFAULT) : string|bool; 	 
+   public function getServiceEndpoints() : array; 	 	 	 
+   public function getServiceEndpointNames() : array; 	 	 	 
+   public function setServiceEndpoints(array $serviceEndpoints) : CodebaseInterface;
+   public function setServiceEndpoint(string $serviceEndpointName, string|\Closure|\callable $baseUrl, ?string $channel = self::ALL_CHANNELS) : CodebaseInterface; 	 	 
  }
 } 
 }
@@ -277,10 +307,12 @@ interface StubRunnerInterface extends StubInterface
 	public function config(?array $config = null, $trys = 0) : array;
 	public function configVersion(?array $config = null, $trys = 0) : array;		
 	public function getCodebase() :?\Frdlweb\Contract\Autoload\CodebaseInterface;
+	public function getFrdlwebWorkspaceDirectory() : string;
 	public function getWebrootConfigDirectory() : string;
 	public function getApplicationsDirectory() : string;
 	public function getRemoteAutoloader() : LoaderInterface;
 	public function autoUpdateStub(string | bool $update = null, string $newVersion = null, string $url = null);
+	
 }	
 }		
 	
@@ -3321,7 +3353,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 		
      		
 		          $loader->withWebfanWebfatDefaultSettings($cacheDir);  
-		          $loader->register(false);	
+		       //   $loader->register(false);	
 		
                  return $loader;
         }, 																				 
@@ -3352,7 +3384,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	
 	
 	protected function autoloadRemoteCodebase(){
-	  return $this->getRemoteAutoloader();
+	  return $this->getRemoteAutoloader()->register(false);
 	}	
 	
 	public function getFrdlwebWorkspaceDirectory() : string {
@@ -3906,7 +3938,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		 
 			if(!file_exists($webfatFile) 
 			   || (is_int($this->max_webfat_file_lifetime) && filemtime($webfatFile) < time() - $this->max_webfat_file_lifetime)){			
-				file_put_contents( $webfatFile, file_get_contents($source));		
+				file_put_contents( $webfatFile, trim(file_get_contents($source)));		
 			}					   
 	
 			if (!in_array($webfatFile, \get_included_files())) {		
@@ -4294,44 +4326,79 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 	
    abstract public function loadUpdateChannel(mixed $StubRunner = null) : string; 
 	 
-   public function __construct(string $channel = null){
-	   $this->channels = [];
+   public function __construct(string $channel = null, ?array $channels = []){
+	   $this->channels = $channels;
 	   
-	   $this->channels[self::CHANNEL_LATEST] = [
+	   $this->channels[self::CHANNEL_LATEST] =array_merge(isset($this->channels[self::CHANNEL_LATEST]) ? $this->channels[self::CHANNEL_LATEST] : [],
+							     [
 		     //   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
 		     // 'RemotePsr4UrlTemplate' => 'https://latest.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
 		     'RemotePsr4UrlTemplate' =>'https://startdir.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
 		   'RemoteModulesBaseUrl' => 'https://startdir.de/install/',
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 		   
-	   ];
+	   ]);
 		   
 	   
-	   $this->channels[self::CHANNEL_STABLE] = [
+	   $this->channels[self::CHANNEL_STABLE] =array_merge(isset($this->channels[self::CHANNEL_STABLE]) ? $this->channels[self::CHANNEL_STABLE] : [],
+							     [
 		   //  'RemotePsr4UrlTemplate' => 'https://stable.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
 		  // 'RemotePsr4UrlTemplate' => 'https://webfan.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
 		  'RemotePsr4UrlTemplate' =>'https://startdir.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
 		    'RemoteModulesBaseUrl' => 'https://startdir.de/install/',
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 		   
-	   ];	   
+	   ]);	   
 	   
-	   $this->channels[self::CHANNEL_FALLBACK] = [
+	   $this->channels[self::CHANNEL_FALLBACK] =array_merge(isset($this->channels[self::CHANNEL_FALLBACK]) ? $this->channels[self::CHANNEL_FALLBACK] : [],
+							     [
 		   'RemotePsr4UrlTemplate' => 'https://startdir.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
 		 // 'RemotePsr4UrlTemplate' => 'https://webfan.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
 		   'RemoteModulesBaseUrl' => 'https://startdir.de/install/',
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
-	   ];   
+	   ]);   
+	   
+	   $this->channels[self::CHANNEL_TEST] = array_merge(isset($this->channels[self::CHANNEL_TEST]) ? $this->channels[self::CHANNEL_TEST] : [],
+							     [
+		 //  'RemotePsr4UrlTemplate' => 'https://startdir.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
+		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
+		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/',
+		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
+	   ]);  
+
+             $this->setServiceEndpoint(self::ENDPOINT_OIDIP, 'https://whois.viathinksoft.de', self::ALL_CHANNELS);
+	   
+             $this->setServiceEndpoint(self::ENDPOINT_RDAP, 'https://rdap.frdl.de', self::ALL_CHANNELS);
+             $this->setServiceEndpoint(self::ENDPOINT_RDAP, 'https://rdap.frdlweb.de', self::CHANNEL_FALLBACK);  
+	   
+	     $this->setServiceEndpoint(self::ENDPOINT_WEBFAT_CENTRAL, 'https://webfan.website', self::ALL_CHANNELS);  
+	     $this->setServiceEndpoint(self::ENDPOINT_WEBFAT_CENTRAL, 'https://website.webfan3.de', self::CHANNEL_FALLBACK);  
+	   
+	     $this->setServiceEndpoint(self::ENDPOINT_PROXY_OBJECT_REMOTE, 'https://website.webfan3.de/api/proxy-object/${by}/?id=${class}', self::ALL_CHANNELS);  
+	   
+	     $this->setServiceEndpoint(self::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/container/?id=StubModuleBuilder', self::ALL_CHANNELS);  
+	   $this->setServiceEndpoint(self::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/class/?id=\frdlweb\StubModuleBuilder', self::CHANNEL_FALLBACK);  
+	     $this->setServiceEndpoint(self::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', self::CHANNEL_TEST);
 	   
 	   if(null !== $channel && isset(static::CHANNELS[$channel])){
 		   $this->setUpdateChannel(static::CHANNELS[$channel]);
+	   }elseif(null !== $channel && !isset(static::CHANNELS[$channel])){		  	
+		   $this->channels[$channel] =  array_merge([], $this->channels[self::CHANNEL_FALLBACK]);  
+		   $this->setUpdateChannel($channel);
 	   }else{
 		   $this->setUpdateChannel(static::CHANNELS[self::CHANNEL_LATEST]);
 	   }
    }
 
-   public function getRemoteApiBaseUrl() : string{ 
-	   return $this->channels[$this->getUpdateChannel()]['RemoteApiBaseUrl'];
+   public function getRemoteApiBaseUrl(?string $serviceEndpoint = self::ENDPOINT_DEFAULT) : string|bool{ 
+	   $baseUrl = false;
+	   if(isset($this->channels[$this->getUpdateChannel()][$serviceEndpoint])){
+              $baseUrl = $this->channels[$this->getUpdateChannel()][$serviceEndpoint];
+	      if(is_callable($baseUrl)){
+                  $baseUrl = \call_user_func_array($baseUrl, [$serviceEndpoint, $this->getUpdateChannel(), $this]);
+	      }
+	   }
+	   return is_string($baseUrl) ? $baseUrl : false
    }	 
    public function setUpdateChannel(string $channel){
 	   $this->channel = $channel;
@@ -4343,13 +4410,50 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
    }
 	  
    public function getRemotePsr4UrlTemplate() : string{
-	    return $this->channels[$this->getUpdateChannel()]['RemotePsr4UrlTemplate'];
+	   return $this->getRemoteApiBaseUrl(self::ENDPOINT_AUTOLOADER_PSR4_REMOTE);
+	//    return $this->channels[$this->getUpdateChannel()]['RemotePsr4UrlTemplate'];
    }
 	  
    public function getRemoteModulesBaseUrl() : string{
-	    return $this->channels[$this->getUpdateChannel()]['RemoteModulesBaseUrl'];
+	   return $this->getRemoteApiBaseUrl(self::ENDPOINT_MODULES_WEBFANSCRIPT_REMOTE);
+	  //  return $this->channels[$this->getUpdateChannel()]['RemoteModulesBaseUrl'];
    }
-	  	 
+   public function getServiceEndpoints() : array {
+     return $this->channels;
+   }
+	 
+   public function getServiceEndpointNames() : array {
+      $names = self::DEFAULT_ENDPOINT_NAMES;
+	   foreach($this->channels as $channel => $endpoints){
+              $names = \array_merge($names, \array_keys($endpoints));
+	   }
+      return \array_unique($names);
+   }
+	  	 	 	 
+   public function setServiceEndpoints(array $serviceEndpoints) : CodebaseInterface {
+      foreach($serviceEndpoints as $endpointInfo){
+            $this->setServiceEndpoint(isset($endpointInfo['name']) ? $endpointInfo['name'] : $endpointInfo['id'], 
+				     isset($endpointInfo['baseUrl']) ? $endpointInfo['baseUrl'] :  $endpointInfo['endpoint'],
+				      isset($endpointInfo['channel']) ? $endpointInfo['channel'] : '*'
+				     );
+      }
+     return $this;
+   }
+	 
+  public function setServiceEndpoint(string $serviceEndpointName, string|\Closure|\callable $baseUrl, ?string $channel = self::ALL_CHANNELS) : CodebaseInterface {
+	  if(self::ALL_CHANNELS === $channel){
+            foreach(\array_keys(self::CHANNELS) as $_t_channel){
+		if($_t_channel === $channel || $_t_channel === self::ALL_CHANNELS){
+                  continue;
+		}
+               $this->setServiceEndpoint($serviceEndpointName, $baseUrl, $_t_channel);
+	    }
+	  }else{
+                $this->channels[$channel][$serviceEndpointName] = $baseUrl;
+	  }
+      return $this;
+   }
+	  	  	 
  }
 
 
@@ -4371,7 +4475,7 @@ Content-Length: 275
   'time' => 0,
   'version' => '0.0.0',
   'channel' => 'latest',
-  'appId' => 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1',
+  /****'appId'=>'@@@APPID@@@',*****/,
 );
 			  
 --3333EVGuDPPT--

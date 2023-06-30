@@ -4076,7 +4076,8 @@ $module['exports']['util']['path']['relative']=function ($from, $to, $separator 
 
 	
 namespace{
-   $module['exports']->runAsIndex(true);	
+   $module['exports']->runAsIndex(true);
+   $StubRunner = $module['exports'];
    return $module['exports'];
 } 
 

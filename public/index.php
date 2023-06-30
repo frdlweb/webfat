@@ -216,7 +216,7 @@ if (!\interface_exists(StubHelperInterface::class, false)) {
   public function __toString();	
   public function __invoke(); 	
   public function __call($name, $arguments);
-  public function getFileAttachment($file = null, $offset = null);	
+  public function getFileAttachment($file = null, $offset = null, ?bool $throw = true);	
   public function hugRunner(mixed $runner);
   public function getRunner();
  }
@@ -226,9 +226,9 @@ if (!\interface_exists(StubHelperInterface::class, false)) {
 	
 if (!\interface_exists(StubItemInterface::class, false)) { 	
 interface StubItemInterface
-{	
-	    public function getMimeType();	  
-	    public function getName() ;
+{		  
+	public function getMimeType();	 	
+	public function getName() ;
         public function getFileName();
         public function isFile();
         public function getParts();
@@ -248,17 +248,15 @@ if (!\interface_exists(StubInterface::class, false)) {
    public function init () : void;  
    public function moduleLocation(?string $location = null);
    public function installTo(string $location, bool $forceCreateDirectory = false, $mod = 0755) : object;	 
-   public function isIndex(bool $onlyIfFirstFileCall = true) : bool; 
-	 
-	public function install(?array $params = [] )  : bool|array;
-	public function uninstall(?array $params = []  )  : bool|array;
-	public function setDownloadSource(string $source);	 
-	 
-	public function get(string $id) : object|bool;
-	 
-	public function setStubIndexPhp(string $id, string $code, ?string $toFile = null)  : bool;
-	
-	public function load(string $file, ?string $as = null) : object;	 
+   public function isIndex(bool $onlyIfFirstFileCall = true) : bool;  
+   public function install(?array $params = [] )  : bool|array;
+   public function uninstall(?array $params = []  )  : bool|array;
+   public function setDownloadSource(string $source);	 
+   public function get(string $id) : object|bool;
+   public function setStubIndexPhp(string $id, string $code, ?string $toFile = null)  : bool;
+   public function load(string $file, ?string $as = null) : object;	 
+   public function isIndexRequest() : bool; 
+   public function runAsIndex(?bool $showErrorPageReturnBoolean = true) : bool|object;	
  }
 } 	
 	
@@ -1926,7 +1924,7 @@ use Frdlweb\Contract\Autoload\LoaderInterface;
 	
  
 
-    public function getFileAttachment($file = null, $offset = null){
+    public function getFileAttachment($file = null, $offset = null, ?bool $throw = true){
     	if(null === $file)$file = &$this->file;
     	if(null === $offset)$offset = $this->offset;
     	
@@ -1934,12 +1932,16 @@ use Frdlweb\Contract\Autoload\LoaderInterface;
 		
         fseek($IO, $offset);
         try{
-			$buf =  stream_get_contents($IO);
+			$buf =  \stream_get_contents($IO);
 			if(is_resource($IO))fclose($IO);
 		}catch(\Exception $e){
 			$buf = '';
 			if(is_resource($IO))fclose($IO);
-			trigger_error($e->getMessage(),  $this->e_level);
+			//trigger_error($e->getMessage(),  $this->e_level);
+			if($throw){
+				throw $e;
+			}
+			return '';
 		}
         
         return $buf;
@@ -3097,7 +3099,9 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 		return [$this, '__invoke']; 
 	}
 	public function autoloading() : void{
-		\spl_autoload_register([$this->getStubVM(),'Autoload'], true, true);
+		if(!empty($this->getStubVM()->getFileAttachment(null, null, false)){
+			\spl_autoload_register([$this->getStubVM(),'Autoload'], $this->isIndexRequest(), $this->isIndexRequest());
+		}
 		 $this->autoloadRemoteCodebase();
 		 $this->getStubVM()->_run_php_1( $this->getStubVM()->get_file($this->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
 		 $this->getStubVM()->_run_php_1( $this->getStubVM()->get_file($this->getStub(), '$HOME/detect.php', 'stub detect.php')); 
@@ -3993,6 +3997,35 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		return $runStubOnInclude && (!$onlyIfFirstFileCall || count($included_files) === 1 );
 	}
 
+	public function isIndexRequest() : bool{
+		$included_files = \get_included_files();  
+		return count($included_files) === 1 && __FILE__===$included_files[0];
+	}
+
+      /**
+      * @ var $showErrorPageReturnBoolean bool - if false returns the object! 
+      */
+      public function runAsIndex(?bool $showErrorPageReturnBoolean = true) : bool|object{
+	if(true===$this->isIndex(true)){
+		$this();
+	   return $showErrorPageReturnBoolean ? true : $this;
+	}elseif(true===$showErrorPageReturnBoolean && $this->isIndexRequest()){
+		   $html='';			   		    
+			$html .= '<h1 style="color:red;">';
+			   $html .= 'Error: This is not a valid index/server file ('.basename(__FILE__).')!'
+			   ;
+		       $html .= '</h1>';      		      	
+		          
+		echo  \frdl\booting\getFormFromRequestHelper( (new \Webfan\Webfat\App\ResolvableException(
+                      'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.3.1=Invalid index file'
+					 
+				   	 .'@'.$html
+             ))->html(), false);
+	   return false;
+	}else{
+          return $showErrorPageReturnBoolean ? false : $this;
+	} 
+     }
 }
 	
 //\class_alias('\\'.__NAMESPACE__.'\\MimeStub5', '\\'.__NAMESPACE__.'\\MimeStubIndex');
@@ -4025,27 +4058,6 @@ namespace{
  };
  
  
-$_NotIsTemplateContext =	(
-		!defined($ns.'\___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') || false === ___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___
-	)
-	&& (
-		!defined('\___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') || false === \___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___
-	) ? true : false;
-
-
-
-$included_files = \get_included_files();  
-if(//('cli'===substr(strtolower(\PHP_SAPI), 0, 3)) ||
-   (
-	 (!in_array(__FILE__, $included_files) || __FILE__===$included_files[0])
-  
-	)
-    && $_NotIsTemplateContext
-  ) { 
-	$runStubOnInclude = true;
-}else{	
-	$runStubOnInclude = false;
-}
 	
 	 $MimeVM = $run(__FILE__, false);			
 	$StubRunner = new StubRunner($MimeVM);  
@@ -4059,38 +4071,14 @@ $module['exports']['util']['path']['relative']=function ($from, $to, $separator 
  }
 ;	
 	
-  $module['exports']['run']	= $run;
+ $module['exports']['run']	= $run;
 }//ns
-
-
-
-
-
-
 
 	
 namespace{
-	if(true===$runStubOnInclude){
-		$StubRunner();
-	}elseif(count($included_files) === 1 && __FILE__===$included_files[0]){
-		   $html='';			   		    
-			$html .= '<h1 style="color:red;">';
-			   $html .= 'Error: This is not a valid index/server file ('.basename(__FILE__).')!'
-			   ;
-		       $html .= '</h1>';      
-		      //echo  \frdl\booting\getFormFromRequestHelper($html, false);		
-		            echo  \frdl\booting\getFormFromRequestHelper( (new \Webfan\Webfat\App\ResolvableException(
-                      'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.3.1=Invalid index file'
-					 
-				   	 .'@'.$html
-             ))->html(), false);		
-	}
-	
- return $module['exports'];
+   $module['exports']->runAsIndex(true);	
+   return $module['exports'];
 } 
-
-
-
 
 __halt_compiler();Mime-Version: 1.0
 Content-Type: multipart/mixed;boundary=hoHoBundary12344dh

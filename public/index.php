@@ -155,9 +155,24 @@ if ( !function_exists('sys_get_temp_dir')) {
  
 
 
+namespace Webfan {
+ if (!interface_exists(Wayneable::class)) {	
+	 interface Wayneable {				
+		 
+	}	
+  }	  
+}
+
+namespace Webfan\Wayne {
+ if (!interface_exists(Unsaneable::class)) {	
+	 interface Unsaneable extends \Webfan\Wayneable {				
+		 
+	}	
+  }	  
+}
 namespace Webfan\Wayne {
  if (!interface_exists(Insaneable::class)) {	
-	 interface Insaneable {				
+	 interface Insaneable  extends \Webfan\Wayneable {				
 		 
 	}	
   }	  

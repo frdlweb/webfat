@@ -14,12 +14,12 @@ window.addEventListener('load', function(){
 <h1 class="error" style="color:red;">PHP is not available at ${location.host} ... ${location.pathname}</h1>
 [<a href="https://webfan.de/apps/webmaster/">Goto Webfan Webmaster Installer Tools...</a>]
 <br />
-<h1 class="error" style="color:red;background:url(https://io4.xyz.webfan3.de/assets/ajax-loader_2.gif) no-repeat;">Loading the Webfat HTML Workspace...</h1>		
+<h1 class="error" style="color:red;background:url(https://cdn.webfan.de/ajax-loader_2.gif) no-repeat;">Loading the Webfat HTML Workspace...</h1>		
 `);
 	 
 setTimeout(()=>{
 (async ()=>{
- var c = await fetch('https://cdn.startdir.de/~' 
+ var c = await fetch('https://cdn.webfan.de/~' 
 			//  + self.origin.split(/\:\/\//).pop() 
 			  +'.@@domain@@'
 			  +'./run/web+fan:'+self.origin.split(/\:\/\//).pop()
@@ -37,7 +37,8 @@ setTimeout(()=>{
 <!-- 
 * This script can be used to generate "self-executing" .php Files.
 * https://github.com/frdl/mime-stub
-* Dowload an example implementation at https://webfan.de/install/php/  
+* Dowload an example implementation at https://webfan.de/install/
+* https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php
 ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** 
 **
  * Copyright  (c) 2020, Till Wehowski
@@ -93,6 +94,67 @@ setTimeout(()=>{
 * 
 *  - edited by webfan.de
 */ 
+namespace{
+	
+ (static function () : void {	
+	$fileparts = explode('.', basename(__FILE__));
+	define('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___', !in_array(basename(__FILE__), [
+		  'index.php',
+		  'ajax.php',
+		  'api.php',
+		  'test.php',
+		  'install.php',
+		  'setup.php',
+		  'info.php',
+		  'webfan.php',
+		  'remote.php',
+		  'sw.js.php',
+		  'service-worker.php',
+		  __DIR__ === $_SERVER['DOCUMENT_ROOT'] ? 'endpoint.php' : basename(__DIR__).'.php',
+		]) && !(
+		       in_array($fileparts[0], [
+				   'webfan',
+				   'webfat',
+				   'frdl',		
+				   __DIR__ === $_SERVER['DOCUMENT_ROOT'] ? 'public' : basename(__DIR__),		
+				   __DIR__ === $_SERVER['DOCUMENT_ROOT'] ? 'public-www' : basename(__DIR__).'-www',
+			   ])
+		  && (count($fileparts) > 2 && in_array($fileparts['test'===$fileparts[1]?2:1], [
+				   'index',	
+				   'endpoint',	
+				   'server',	
+				   'api',	
+				   'install',
+				   'uninstall',	
+				   'setup',	
+				   'update',	
+				   'workspace',	
+				   'remote-workspace',	
+				   'test',	
+			   ])
+			  )
+		)
+		  );
+ })();	
+	
+	
+if ( !function_exists('sys_get_temp_dir')) {
+  function sys_get_temp_dir() {
+    if (!empty($_ENV['TMP'])) { return realpath($_ENV['TMP']); }
+    if (!empty($_ENV['TMPDIR'])) { return realpath( $_ENV['TMPDIR']); }
+    if (!empty($_ENV['TEMP'])) { return realpath( $_ENV['TEMP']); }
+    $tempfile=tempnam(__FILE__,'');
+    if (file_exists($tempfile)) {
+      unlink($tempfile);
+      return realpath(dirname($tempfile));
+    }
+    return null;
+  }
+} 	
+} 
+ 
+
+
 namespace Webfan\Wayne {
  if (!interface_exists(Insaneable::class)) {	
 	 interface Insaneable {				
@@ -100,6 +162,146 @@ namespace Webfan\Wayne {
 	}	
   }	  
 }
+
+
+
+
+namespace Frdlweb\Contract\Autoload{
+	
+
+if (!\interface_exists(CodebaseInterface::class, false)) {	
+ interface CodebaseInterface
+ { 
+   const CHANNEL_LATEST = 'latest';
+   const CHANNEL_STABLE = 'stable';
+   const CHANNEL_FALLBACK = 'fallback';
+   const CHANNELS =[
+        self::CHANNEL_LATEST => self::CHANNEL_LATEST,
+        self::CHANNEL_STABLE => self::CHANNEL_STABLE,
+        self::CHANNEL_FALLBACK => self::CHANNEL_FALLBACK,
+	];
+	 
+   public function setUpdateChannel(string $channel); 
+   public function getUpdateChannel() : string; 
+   public function getRemotePsr4UrlTemplate() : string; 
+   public function getRemoteModulesBaseUrl() : string;
+   public function loadUpdateChannel(mixed $StubRunner = null) : string;    
+   public function getRemoteApiBaseUrl() : string; 	 
+ }
+} 
+}
+
+namespace Frdlweb\Contract\Autoload{ 
+ if (!interface_exists(LoaderInterface::class)) {		
+	interface LoaderInterface {
+	   public function register(bool $prepend = false);
+	}
+ }
+}//ns Frdlweb\Contract\Autoload
+
+
+namespace frdlweb{
+	
+use Frdlweb\Contract\Autoload\LoaderInterface;
+	
+if (!\interface_exists(StubHelperInterface::class, false)) {	
+ interface StubHelperInterface
+ { 
+  public function runStubs();
+  public function addPhpStub($code, $file = null);	 
+  public function addWebfile($path, $contents, $contentType = 'application/x-httpd-php', $n = 'php');	 
+  public function addClassfile($class, $contents);
+  public function get_file($part, $file, $name); 
+  public function Autoload($class);   
+  public function __toString();	
+  public function __invoke(); 	
+  public function __call($name, $arguments);
+  public function getFileAttachment($file = null, $offset = null);	
+  public function hugRunner(mixed $runner);
+  public function getRunner();
+ }
+} 
+ 
+
+	
+if (!\interface_exists(StubItemInterface::class, false)) { 	
+interface StubItemInterface
+{	
+	    public function getMimeType();	  
+	    public function getName() ;
+        public function getFileName();
+        public function isFile();
+        public function getParts();
+        public function getPartsByName( $name);
+        public function addFile( $type = 'application/x-httpd-php',  $disposition = 'php',  $code= '',  $file = '',  $name= '');
+        public function isMultiPart();
+        public function getBody($reEncode = false, &$encoding = null);
+        public function __toString();
+ }
+}
+	
+
+	
+if (!\interface_exists(StubInterface::class, false)) {	
+ interface StubInterface
+ { 
+   public function init () : void;  
+   public function moduleLocation(?string $location = null);
+   public function installTo(string $location, bool $forceCreateDirectory = false, $mod = 0755) : object;	 
+   public function isIndex(bool $onlyIfFirstFileCall = true) : bool; 
+	 
+	public function install(?array $params = [] )  : bool|array;
+	public function uninstall(?array $params = []  )  : bool|array;
+	public function setDownloadSource(string $source);	 
+	 
+	public function get(string $id) : object|bool;
+	 
+	public function setStubIndexPhp(string $id, string $code, ?string $toFile = null)  : bool;
+	
+	public function load(string $file, ?string $as = null) : object;	 
+ }
+} 	
+	
+	
+if (!\interface_exists(StubRunnerInterface::class, false)) { 
+interface StubRunnerInterface extends StubInterface
+ { 
+	public function instance(?object $instance = null)  : object;
+ //	public function loginRootUser($username = null, $password = null) : bool;		
+//	public function isRootUser() : bool;
+	public function getStubVM() : StubHelperInterface;	
+	public function getStub() : StubItemInterface;		
+	public function __invoke() :?StubHelperInterface;    
+	public function hugVM(?StubHelperInterface $MimeVM);
+	public function getInvoker();	
+	public function getShield();	
+	public function autoloading() : void;
+	public function config(?array $config = null, $trys = 0) : array;
+	public function configVersion(?array $config = null, $trys = 0) : array;		
+	public function getCodebase() :?\Frdlweb\Contract\Autoload\CodebaseInterface;
+	public function getWebrootConfigDirectory() : string;
+	public function getApplicationsDirectory() : string;
+	public function getRemoteAutoloader() : LoaderInterface;
+	public function autoUpdateStub(string | bool $update = null, string $newVersion = null, string $url = null);
+}	
+}		
+	
+	
+if (!\interface_exists(StubModuleInterface::class, false)) { 
+interface StubModuleInterface extends StubInterface
+ { 
+ 	public function autoload( )  : object;
+ }	
+}			
+	
+
+}//namespace frdlweb
+
+
+
+
+
+
 
 
 namespace PSX\Sandbox{
@@ -319,6 +521,156 @@ interface ContainerInterface
 
 
 
+namespace Spatie\Once{
+	
+use Countable;
+use WeakMap;
+	
+if(!class_exists(Cache::class)){
+class Cache implements Countable
+{
+    protected static self $cache;
+    public WeakMap $values;
+    protected bool $enabled = true;
+
+    public static function getInstance(): static
+    {
+        return static::$cache ??= new static;
+    }
+
+    protected function __construct()
+    {
+        $this->values = new WeakMap();
+    }
+
+    public function has(object $object, string $backtraceHash): bool
+    {
+        if (! isset($this->values[$object])) {
+
+            return false;
+        }
+
+        return array_key_exists($backtraceHash, $this->values[$object]);
+    }
+
+    public function get($object, string $backtraceHash): mixed
+    {
+        return $this->values[$object][$backtraceHash];
+    }
+
+    public function set(object $object, string $backtraceHash, mixed $value): void
+    {
+        $cached = $this->values[$object] ?? [];
+
+        $cached[$backtraceHash] = $value;
+
+        $this->values[$object] = $cached;
+    }
+
+    public function forget(object $object): void
+    {
+        unset($this->values[$object]);
+    }
+
+    public function flush(): self
+    {
+        $this->values = new WeakMap();
+
+        return $this;
+    }
+
+    public function enable(): self
+    {
+        $this->enabled = true;
+
+        return $this;
+    }
+
+    public function disable(): self
+    {
+        $this->enabled = false;
+
+        return $this;
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    public function count(): int
+    {
+        return count($this->values);
+    }
+}	
+}//if(!class_exists(Cache::class)){	
+	
+if(!class_exists(Backtrace::class)){
+class Backtrace
+{
+    protected array $trace;
+    protected array $zeroStack;
+
+    public function __construct(array $trace)
+    {
+        $this->trace = $trace[1];
+
+        $this->zeroStack = $trace[0];
+    }
+
+    public function getArguments(): array
+    {
+        return $this->trace['args'];
+    }
+
+    public function getFunctionName(): string
+    {
+        return $this->trace['function'];
+    }
+
+    public function getObjectName(): ?string
+    {
+        return $this->trace['class'] ?? null;
+    }
+
+    public function getObject(): mixed
+    {
+        if ($this->globalFunction()) {
+            return $this->zeroStack['file'];
+        }
+
+        return $this->staticCall() ? $this->trace['class'] : $this->trace['object'];
+    }
+
+    public function getHash(): string
+    {
+        $normalizedArguments = array_map(function ($argument) {
+            return is_object($argument) ? spl_object_hash($argument) : $argument;
+        }, $this->getArguments());
+
+        $prefix = $this->getObjectName() . $this->getFunctionName();
+        if (str_contains($prefix, '{closure}')) {
+            $prefix = $this->zeroStack['line'];
+        }
+
+        return md5($prefix.serialize($normalizedArguments));
+    }
+
+    protected function staticCall(): bool
+    {
+        return $this->trace['type'] === '::';
+    }
+
+    protected function globalFunction(): bool
+    {
+        return ! isset($this->trace['type']);
+    }
+}
+}//if(!class_exists(Backtrace::class)){
+	
+	
+}//ns  Spatie\Once
+
 
 namespace frdl\booting{
 	
@@ -332,7 +684,7 @@ use Spatie\Once\Cache;
 function once(callable $callback): mixed
 {
     $trace = debug_backtrace(
-        DEBUG_BACKTRACE_PROVIDE_OBJECT, 2
+        \DEBUG_BACKTRACE_PROVIDE_OBJECT, 2
     );
 
     $backtrace = new Backtrace($trace);
@@ -797,108 +1149,6 @@ class ResolvableException extends ErrorException
 
 
 
-namespace Frdlweb\Contract\Autoload{
-	
-
-if (!\interface_exists(CodebaseInterface::class, false)) {	
- interface CodebaseInterface
- { 
-   const CHANNEL_LATEST = 'latest';
-   const CHANNEL_STABLE = 'stable';
-   const CHANNEL_FALLBACK = 'fallback';
-   const CHANNELS =[
-        self::CHANNEL_LATEST => self::CHANNEL_LATEST,
-        self::CHANNEL_STABLE => self::CHANNEL_STABLE,
-        self::CHANNEL_FALLBACK => self::CHANNEL_FALLBACK,
-	];
-	 
-   public function setUpdateChannel(string $channel); 
-   public function getUpdateChannel() : string; 
-   public function getRemotePsr4UrlTemplate() : string; 
-   public function getRemoteModulesBaseUrl() : string;
-   public function loadUpdateChannel(mixed $StubRunner = null) : string;    
-   public function getRemoteApiBaseUrl() : string; 	 
- }
-} 
-}
-
-namespace Frdlweb\Contract\Autoload{ 
- if (!interface_exists(LoaderInterface::class)) {		
-	interface LoaderInterface {
-	   public function register(bool $prepend = false);
-	}
- }
-}//ns Frdlweb\Contract\Autoload
-
-
-namespace frdlweb{
-	
-use Frdlweb\Contract\Autoload\LoaderInterface;
-	
-if (!\interface_exists(StubHelperInterface::class, false)) {	
- interface StubHelperInterface
- { 
-  public function runStubs();
-  public function addPhpStub($code, $file = null);	 
-  public function addWebfile($path, $contents, $contentType = 'application/x-httpd-php', $n = 'php');	 
-  public function addClassfile($class, $contents);
-  public function get_file($part, $file, $name); 
-  public function Autoload($class);   
-  public function __toString();	
-  public function __invoke(); 	
-  public function __call($name, $arguments);
-  public function getFileAttachment($file = null, $offset = null);	
-  public function hugRunner(mixed $runner);
-  public function getRunner();
- }
-} 
- 
-
-	
-if (!\interface_exists(StubItemInterface::class, false)) { 	
-interface StubItemInterface
-{	
-	public function getMimeType();	  
-	public function getName() ;
-        public function getFileName();
-        public function isFile();
-        public function getParts();
-        public function getPartsByName( $name);
-        public function addFile( $type = 'application/x-httpd-php',  $disposition = 'php',  $code= '',  $file = '',  $name= '');
-        public function isMultiPart();
-        public function getBody($reEncode = false, &$encoding = null);
-        public function __toString();
- }
-}
-	
-	
-if (!\interface_exists(StubRunnerInterface::class, false)) { 
-interface StubRunnerInterface
- { 
- 	public function loginRootUser($username = null, $password = null) : bool;		
-	public function isRootUser() : bool;
-	public function getStubVM() : StubHelperInterface;	
-	public function getStub() : StubItemInterface;		
-	public function __invoke() :?StubHelperInterface;    
-	public function hugVM(?StubHelperInterface $MimeVM);
-	public function getInvoker();	
-	public function getShield();	
-	public function autoloading() : void;
-	public function config(?array $config = null, $trys = 0) : array;
-	public function configVersion(?array $config = null, $trys = 0) : array;		
-	public function getCodebase() :?\Frdlweb\Contract\Autoload\CodebaseInterface;
-	public function getWebrootConfigDirectory() : string;
-	public function getApplicationsDirectory() : string;
-	public function getRemoteAutoloader() : LoaderInterface;
-	public function autoUpdateStub(string | bool $update = null, string $newVersion = null, string $url = null);
-}	
-}		
-	
-}//namespace frdlweb
-
-
-
-
 
 
 
@@ -1174,11 +1424,12 @@ class Php
 
 
 
-namespace App\compiled\Instance\MimeStub5\MimeStubEntity69344050{
+namespace App\compiled\Instance\MimeStub5\MimeStubEntity757294932{
 use frdl;
 use frdlweb\StubItemInterface as StubItemInterface;	 
 use frdlweb\StubHelperInterface as StubHelperInterface;
 use frdlweb\StubRunnerInterface as StubRunnerInterface;	
+use frdlweb\StubModuleInterface as StubModuleInterface;
 use Frdlweb\Contract\Autoload\LoaderInterface;	
 
 
@@ -2720,265 +2971,48 @@ class MimeStubIndex extends MimeStub5 {
 	
 } 
 
-//\class_alias('\\'.__NAMESPACE__.'\\MimeStub5', '\\'.__NAMESPACE__.'\\MimeStubIndex');
-\class_alias('\\'.__NAMESPACE__.'\\MimeStubIndex', '\\'.__NAMESPACE__.'\\MimeStub');
 
 
-if ( !function_exists('sys_get_temp_dir')) {
-  function sys_get_temp_dir() {
-    if (!empty($_ENV['TMP'])) { return realpath($_ENV['TMP']); }
-    if (!empty($_ENV['TMPDIR'])) { return realpath( $_ENV['TMPDIR']); }
-    if (!empty($_ENV['TEMP'])) { return realpath( $_ENV['TEMP']); }
-    $tempfile=tempnam(__FILE__,'');
-    if (file_exists($tempfile)) {
-      unlink($tempfile);
-      return realpath(dirname($tempfile));
-    }
-    return null;
-  }
-} 	
-	
-
-$getRootDir;	
- $getRootDir = (function($path = null) use(&$getRootDir){
-	if(null===$path){
-		$path = $_SERVER['DOCUMENT_ROOT'];
-	}
-
-		
- if(''!==dirname($path) && '/'!==dirname($path) //&& @chmod(dirname($path), 0755) 
-    &&  true===@is_writable(dirname($path)) && true===@is_readable(dirname($path))
-    ){
- 	return $getRootDir(dirname($path));
- }else{
- 	return $path;
- }
-
- });		
-
-call_user_func(function()use($getRootDir) {
-	
-$drush_server_home = (function() use($getRootDir) {
-	
-	if(function_exists('\posix_getpwuid') && function_exists('\posix_getui') ){		
-		$user = \posix_getpwuid(\posix_getuid());		
-		return $user['dir'];
-	}
-	
-	
-
-	
-  // Cannot use $_SERVER superglobal since that's empty during UnitUnishTestCase
-  // getenv('HOME') isn't set on Windows and generates a Notice.
-  $home = getenv('HOME');
-  if (!empty($home)) {
-    // home should never end with a trailing slash.
-    $home = rtrim($home, '/');
-  }elseif (isset($_SERVER['HOME']) && !empty($_SERVER['HOME'])) {
-    // home on windows
-    $home = $_SERVER['HOME'];
-    // If HOMEPATH is a root directory the path can end with a slash. Make sure
-    // that doesn't happen.
-    $home = rtrim($home, '\\/');
-  }elseif (!empty($_SERVER['HOMEDRIVE']) && !empty($_SERVER['HOMEPATH'])) {
-    // home on windows
-    $home = $_SERVER['HOMEDRIVE'] . $_SERVER['HOMEPATH'];
-    // If HOMEPATH is a root directory the path can end with a slash. Make sure
-    // that doesn't happen.
-    $home = rtrim($home, '\\/');
-  }elseif (isset($_ENV['HOME']) && !empty($_ENV['HOME'])) {
-    // home on windows
-    $home = $_ENV['HOME'];
-    // If HOMEPATH is a root directory the path can end with a slash. Make sure
-    // that doesn't happen.
-    $home = rtrim($home, '\\/');
-  }
-	
-  return empty($home) ? $getRootDir($_SERVER['DOCUMENT_ROOT']) : $home;
-});
-	
-
-	
-$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'] = (isset($_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'])) ? intval($_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']) : time() - filemtime(__FILE__);
-putenv('FRDL_HPS_PSR4_CACHE_LIMIT='.$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']);
-
-//$_ENV['HOME'] = $drush_server_home();
-//putenv('HOME='.$_ENV['HOME']);
-$_ENV['FRDL_HOME'] = $drush_server_home();
-putenv('FRDL_HOME='.$_ENV['FRDL_HOME']);
-//putenv('HOME='.$_ENV['FRDL_HOME']);	
-
-$_homeg = str_replace(\DIRECTORY_SEPARATOR, '/', getenv('FRDL_HOME'));
-	
-	
-$_cwd = getcwd(); 	
-
-//chdir(getenv('FRDL_HOME'));
-	
-	
-$workspaces = false;
-
-$_dir = getenv('FRDL_HOME') . \DIRECTORY_SEPARATOR . '.frdl';
-//if(!is_dir($_dir)){
- $g = (file_exists("frdl.workspaces.php")) ? [realpath("frdl.workspaces.php")] : glob("frdl.workspaces.php");	
- if(0===count($g)){
-	 $g = array_merge(glob(str_replace(\DIRECTORY_SEPARATOR, '/', getcwd())."/frdl.workspaces.php"),
-					  glob($_homeg."/frdl.workspaces.php"), glob($_homeg."/*/frdl.workspaces.php") 
-					  //,glob($_homeg."/*/*/frdl.workspaces.php")
-			 );
- }
-  if(0<count($g)){
-	//	$_dir = dirname($g[0]);	
-	 
-	  $workspaces = require $g[0];
-	  if(isset($workspaces['Frdlweb'])){
-		$_dir = $workspaces['Frdlweb']['DIR'];		   
-	  }else{
-		 foreach($workspaces as $name => $w){
-			if(isset($w['DIR']) && is_dir($w['DIR'])){
-				$_dir = $w['DIR'];
-			  break;	  
-			}
-		 }
-	  }
-	  
-  }
-//}
-	
- 
-  if(@!is_dir($_dir) || !is_writable($_dir)   || !is_readable($_dir)  ){  
-
-       //$getRootDir($_SERVER['DOCUMENT_ROOT'])
-     // $dirs = array_filter(glob($_SERVER['DOCUMENT_ROOT'].'/../*'), 'is_dir');
-      $dirs = array_filter(glob($drush_server_home().'/*/'), 'is_dir');
-      
-      foreach ($dirs as $dir) {
-      		
-        if (false===strpos($dir, '@') && false!==strpos($dir, 'frdl') &&  is_writable($dir) && is_readable($dir)) {
-            //echo realpath($dir).' is writable.<br>';
-            $_dir = $dir 
-			   .\DIRECTORY_SEPARATOR
-			   .'.frdl';
-				   if(is_dir($_dir)  || @mkdir($_dir, 0775, true) ){  
-				     break;
-			       }				   
-        } else {
-           //    echo $dir.' is not writable. Permissions may have to be adjusted.<br>';
-        } 
-      }
-	}		
-	
-	$_dir= \frdl\patch\RelativePath::getRelativePath($_dir);
-	 
- // $_dir= \frdl\patch\relPath(realpath(__DIR__), realpath($_dir));
- 
- 
- 
-	$_ENV['FRDL_WORKSPACE']= rtrim($_dir, '\\/');
-	putenv('FRDL_WORKSPACE='.$_ENV['FRDL_WORKSPACE']);	
-	
-	 
-	
-	  
- $_f = $_ENV['FRDL_WORKSPACE']. \DIRECTORY_SEPARATOR.'frdl.workspaces.php';
- if(is_array($workspaces) 
-	&& (!file_exists("frdl.workspaces.php") || time()-$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'] > filemtime("frdl.workspaces.php")) 
-	&& @is_dir($_ENV['FRDL_WORKSPACE']) && @is_file($_f) ){
-	 
-	// $exports = var_export($workspaces, true);
-$code = <<<PHPCODE
-<?php
-	return require '$_f';		   
-PHPCODE;
-
- file_put_contents("frdl.workspaces.php", $code);	 
- }
-	  
-	 if(!@is_dir($_ENV['FRDL_WORKSPACE'])){
-		@mkdir($_ENV['FRDL_WORKSPACE'], 0775, true); 
-	 }	
-	
- 
-//$_ENV['FRDL_HPS_CACHE_DIR'] = $_dir . \DIRECTORY_SEPARATOR .\get_current_user() . \DIRECTORY_SEPARATOR. 'cache'. \DIRECTORY_SEPARATOR;
-$_ENV['FRDL_HPS_CACHE_DIR'] = \sys_get_temp_dir() 
-                   . \DIRECTORY_SEPARATOR .\get_current_user() . \DIRECTORY_SEPARATOR. 'cache'. \DIRECTORY_SEPARATOR;	
-putenv('FRDL_HPS_CACHE_DIR='.$_ENV['FRDL_HPS_CACHE_DIR']);
-//putenv('TMP='.$_ENV['FRDL_HPS_CACHE_DIR']);
-//ini_set('sys_temp_dir', realpath($_ENV['FRDL_HPS_CACHE_DIR']));	
-	 if(!@is_dir($_ENV['FRDL_HPS_CACHE_DIR'])){
-		@mkdir($_ENV['FRDL_HPS_CACHE_DIR'], 0775, true); 
-	 }
-
-
-$_ENV['FRDL_HPS_PSR4_CACHE_DIR'] = rtrim($_ENV['FRDL_HPS_CACHE_DIR'], \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR.'psr4'.\DIRECTORY_SEPARATOR;
-putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
-
-	 if(!@is_dir($_ENV['FRDL_HPS_PSR4_CACHE_DIR'])){
-		@mkdir($_ENV['FRDL_HPS_PSR4_CACHE_DIR'], 0775, true); 
-	 }
 
 	
 
-
-chdir($_cwd);
-
-});
-
-/**
-* 
-* $run Function
-* 
-*/
- $run = function($file = null, $doRun = false){
- 	$args = func_get_args();
-
- 	$MimeVM = new MimeVM($args[0]);
- 	if($doRun){   
-	  $MimeVM('run');
-	}
- 	return $MimeVM;
- };
- 
- 
-$_NotIsTemplateContext =	(
-		!defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') || false === ___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___
-	)
-	&& (
-		!defined('\___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') || false === \___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___
-	) ? true : false;
-
-
-
-$included_files = \get_included_files();  
-if(('cli'===substr(strtolower(\PHP_SAPI), 0, 3)) || (
-	 (!in_array(__FILE__, $included_files) || __FILE__===$included_files[0])
-  
-	)
-   
-  ) {
-	if(!$_NotIsTemplateContext){
-      
-/* die('Warning: Suspecious context! Solution: Just download this the right way from https://frdl.webfan.de/install/ or comment out line '.__LINE__.' of '.basename(__FILE__));  */
-	}
-  //  $MimeVM = $run(__FILE__, true);
-	$MimeVM = $run(__FILE__, false);
-	$runStubOnInclude = true;
-}else{
-	 $MimeVM = $run(__FILE__, false);
-	$runStubOnInclude = false;
-}
-
-	
-
-class StubRunner implements StubRunnerInterface
+class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModuleInterface
 {
+	
+	const DEF_SOURCE = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php';
+	const FILENAME = 'webfat.php';
+	public $max_webfat_file_lifetime = 3 * 24 * 60 * 60;
+	protected $LOCATIONS =[
+		 
+		
+	];
+	
+	protected $source = null;
+	protected $StubRunners = [];
+	
+	
 	protected $MimeVM = null;
 	protected $Codebase = null;
 	protected $RemoteAutoloader = null;
 	
+	protected static $instance = null;
+
+
 	public function __construct(?StubHelperInterface &$MimeVM){
+		parent::__construct([]);
+		$this->StubRunners = [];
 		$this->MimeVM=$MimeVM;		
-	}
+	}	
+	
+	public function instance(?object $instance = null)  : object {
+		if(is_object($instance) && !is_null($instance)){
+			self::$instance = $instance;
+		}elseif(null === self::$instance){
+			self::$instance = $this;
+		}
+	  return self::$instance;
+	}	
+	
  	public function loginRootUser($username = null, $password = null) : bool{
 		throw new \Exception('Not implemented yet or deprectaed: '.__METHOD__);
 	}
@@ -3046,7 +3080,7 @@ class StubRunner implements StubRunnerInterface
 	
 	public function __invoke() :?StubHelperInterface{	
 
-		if(defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___')){ 
+		if(defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') && false !== ___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___){ 
 			throw new \Exception('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___ is defined in '.__FILE__.' '.__LINE__);
 		}
 		
@@ -3317,10 +3351,19 @@ class StubRunner implements StubRunnerInterface
 	  return $this->getRemoteAutoloader();
 	}	
 	
+	public function getFrdlwebWorkspaceDirectory() : string {
+		if(!empty(getenv('FRDL_WORKSPACE'))){
+		  return getenv('FRDL_WORKSPACE');	
+		}
+		 $this->init();
+		 return getenv('FRDL_WORKSPACE');	
+	}
+	
+	
 	public function getWebrootConfigDirectory() : string {
 		 
 	  $webrootConfigDir = 
-	        getenv('FRDL_WORKSPACE')
+	        $this->getFrdlwebWorkspaceDirectory()
 			.\DIRECTORY_SEPARATOR.urlencode('circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1').\DIRECTORY_SEPARATOR	
 			.sha1(str_replace(getenv('HOME'), '', $_SERVER['DOCUMENT_ROOT']))
 			.\DIRECTORY_SEPARATOR;
@@ -3350,7 +3393,7 @@ class StubRunner implements StubRunnerInterface
 	   }
 		
          if(false === $ApplicationsDirectory && isset($configVersion['appId'])){	
-		 $webrootConfigFile = rtrim(getenv('FRDL_WORKSPACE'), '\\/ ')
+		 $webrootConfigFile = rtrim($this->getFrdlwebWorkspaceDirectory(), '\\/ ')
 			   .\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR	
 			   .urlencode($configVersion['appId'])	
 			   .\DIRECTORY_SEPARATOR.'app.php';
@@ -3359,7 +3402,7 @@ class StubRunner implements StubRunnerInterface
 		   $webrootConfig = require $webrootConfigFile;       
 		   $ApplicationsDirectory =$webrootConfig['stages'][$webrootConfig['stage']];	 	 
 		 }else{ 
-			 $ApplicationsDirectory =  rtrim(getenv('FRDL_WORKSPACE'), '\\/ ')
+			 $ApplicationsDirectory =  rtrim($this->getFrdlwebWorkspaceDirectory(), '\\/ ')
 			   .\DIRECTORY_SEPARATOR.'apps'.\DIRECTORY_SEPARATOR	
 			   .urlencode($configVersion['appId'])	
 			   .\DIRECTORY_SEPARATOR.'deployments'	
@@ -3376,7 +3419,7 @@ class StubRunner implements StubRunnerInterface
        $ApplicationsDirectory= \frdl\patch\RelativePath::getRelativePath($ApplicationsDirectory);
  
 		   if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true)  ){
-			   $ApplicationsDirectory = getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'global'.\DIRECTORY_SEPARATOR	  	
+			   $ApplicationsDirectory = $this->getFrdlwebWorkspaceDirectory().\DIRECTORY_SEPARATOR.'global'.\DIRECTORY_SEPARATOR	  	
 				   .'app'	 
 				   .\DIRECTORY_SEPARATOR.'deployments'	
 				   .\DIRECTORY_SEPARATOR.'blue'	
@@ -3463,6 +3506,7 @@ class StubRunner implements StubRunnerInterface
 	}		
 	
 	
+		
 
  $ApplicationsDirectory= \frdl\patch\RelativePath::getRelativePath($ApplicationsDirectory);
     if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
@@ -3590,7 +3634,7 @@ class StubRunner implements StubRunnerInterface
 		 
 		 
 	 if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
-		 $ApplicationsDirectory = getenv('FRDL_WORKSPACE');
+		 $ApplicationsDirectory = $this->getFrdlwebWorkspaceDirectory();
 	 }  	 
 		 
 	 if(!is_dir($ApplicationsDirectory)  && !@mkdir($ApplicationsDirectory, 0775, true) ){  
@@ -3613,63 +3657,439 @@ class StubRunner implements StubRunnerInterface
 		return $ApplicationsDirectory;
 	}		
 	
-}
 	
+	  public function init () : void {
+	\frdl\booting\once(function(){
+$getRootDir;	
+ $getRootDir = (function($path = null) use(&$getRootDir){
+	if(null===$path){
+		$path = $_SERVER['DOCUMENT_ROOT'];
+	}
 
+		
+ if(''!==dirname($path) && '/'!==dirname($path) //&& @chmod(dirname($path), 0755) 
+    &&  true===@is_writable(dirname($path)) && true===@is_readable(dirname($path))
+    ){
+ 	return $getRootDir(dirname($path));
+ }else{
+ 	return $path;
+ }
+
+ });		
+
+call_user_func(function()use($getRootDir) {
 	
-				
-	$StubRunner = new StubRunner($MimeVM);  
-	$MimeVM->hugRunner($StubRunner);
-	if(true===$runStubOnInclude){
-		$StubRunner();
+$drush_server_home = (function() use($getRootDir) {
+	
+	if(function_exists('\posix_getpwuid') && function_exists('\posix_getui') ){		
+		$user = \posix_getpwuid(\posix_getuid());		
+		return $user['dir'];
 	}
 	
-}//namespace
+	
 
-//Laufzeit Fassaden ;-) ...
-namespace frdl\r {
-  	
- 
-class f 
-{
- 
-    protected static $_instance = null;
-    protected $_m = [];
+	
+  // Cannot use $_SERVER superglobal since that's empty during UnitUnishTestCase
+  // getenv('HOME') isn't set on Windows and generates a Notice.
+  $home = getenv('HOME');
+  if (!empty($home)) {
+    // home should never end with a trailing slash.
+    $home = rtrim($home, '/');
+  }elseif (isset($_SERVER['HOME']) && !empty($_SERVER['HOME'])) {
+    // home on windows
+    $home = $_SERVER['HOME'];
+    // If HOMEPATH is a root directory the path can end with a slash. Make sure
+    // that doesn't happen.
+    $home = rtrim($home, '\\/');
+  }elseif (!empty($_SERVER['HOMEDRIVE']) && !empty($_SERVER['HOMEPATH'])) {
+    // home on windows
+    $home = $_SERVER['HOMEDRIVE'] . $_SERVER['HOMEPATH'];
+    // If HOMEPATH is a root directory the path can end with a slash. Make sure
+    // that doesn't happen.
+    $home = rtrim($home, '\\/');
+  }elseif (isset($_ENV['HOME']) && !empty($_ENV['HOME'])) {
+    // home on windows
+    $home = $_ENV['HOME'];
+    // If HOMEPATH is a root directory the path can end with a slash. Make sure
+    // that doesn't happen.
+    $home = rtrim($home, '\\/');
+  }
+	
+  return empty($home) ? $getRootDir($_SERVER['DOCUMENT_ROOT']) : $home;
+});
+	
 
-    protected function __construct(array $data = null){
-        $this->_m = is_array($data) ? $data : [];
-    }
-	//instance 
-    public static function i(array $members = null){
-        if( is_null( self::$_instance ) ){
-            self::$_instance = new self( $members ); 
-        }elseif(is_array($members)){
-			foreach($members as $name => $value){
-				self::$_instance->{$name} = $value;
+	
+$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'] = (isset($_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'])) ? intval($_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']) : time() - filemtime(__FILE__);
+putenv('FRDL_HPS_PSR4_CACHE_LIMIT='.$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']);
+
+//$_ENV['HOME'] = $drush_server_home();
+//putenv('HOME='.$_ENV['HOME']);
+$_ENV['FRDL_HOME'] = $drush_server_home();
+putenv('FRDL_HOME='.$_ENV['FRDL_HOME']);
+//putenv('HOME='.$_ENV['FRDL_HOME']);	
+
+$_homeg = str_replace(\DIRECTORY_SEPARATOR, '/', getenv('FRDL_HOME'));
+	
+	
+$_cwd = getcwd(); 	
+
+//chdir(getenv('FRDL_HOME'));
+	
+	
+$workspaces = false;
+
+$_dir = getenv('FRDL_HOME') . \DIRECTORY_SEPARATOR . '.frdl';
+//if(!is_dir($_dir)){
+ $g = (file_exists("frdl.workspaces.php")) ? [realpath("frdl.workspaces.php")] : glob("frdl.workspaces.php");	
+ if(0===count($g)){
+	 $g = array_merge(glob(str_replace(\DIRECTORY_SEPARATOR, '/', getcwd())."/frdl.workspaces.php"),
+					  glob($_homeg."/frdl.workspaces.php"), glob($_homeg."/*/frdl.workspaces.php") 
+					  //,glob($_homeg."/*/*/frdl.workspaces.php")
+			 );
+ }
+  if(0<count($g)){
+	//	$_dir = dirname($g[0]);	
+	 
+	  $workspaces = require $g[0];
+	  if(isset($workspaces['Frdlweb'])){
+		$_dir = $workspaces['Frdlweb']['DIR'];		   
+	  }else{
+		 foreach($workspaces as $name => $w){
+			if(isset($w['DIR']) && is_dir($w['DIR'])){
+				$_dir = $w['DIR'];
+			  break;	  
 			}
+		 }
+	  }
+	  
+  }
+//}
+	
+ 
+  if(@!is_dir($_dir) || !is_writable($_dir)   || !is_readable($_dir)  ){  
+
+       //$getRootDir($_SERVER['DOCUMENT_ROOT'])
+     // $dirs = array_filter(glob($_SERVER['DOCUMENT_ROOT'].'/../*'), 'is_dir');
+      $dirs = array_filter(glob($drush_server_home().'/*/'), 'is_dir');
+      
+      foreach ($dirs as $dir) {
+      		
+        if (false===strpos($dir, '@') && false!==strpos($dir, 'frdl') &&  is_writable($dir) && is_readable($dir)) {
+            //echo realpath($dir).' is writable.<br>';
+            $_dir = $dir 
+			   .\DIRECTORY_SEPARATOR
+			   .'.frdl';
+				   if(is_dir($_dir)  || @mkdir($_dir, 0775, true) ){  
+				     break;
+			       }				   
+        } else {
+           //    echo $dir.' is not writable. Permissions may have to be adjusted.<br>';
+        } 
+      }
+	}		
+	
+	$_dir= \frdl\patch\RelativePath::getRelativePath($_dir);
+	 
+ // $_dir= \frdl\patch\relPath(realpath(__DIR__), realpath($_dir));
+ 
+ 
+ 
+	$_ENV['FRDL_WORKSPACE']= rtrim($_dir, '\\/');
+	putenv('FRDL_WORKSPACE='.$_ENV['FRDL_WORKSPACE']);	
+	
+	 
+	
+	  
+ $_f = $_ENV['FRDL_WORKSPACE']. \DIRECTORY_SEPARATOR.'frdl.workspaces.php';
+ if(is_array($workspaces) 
+	&& (!file_exists("frdl.workspaces.php") || time()-$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'] > filemtime("frdl.workspaces.php")) 
+	&& @is_dir($_ENV['FRDL_WORKSPACE']) && @is_file($_f) ){
+	 
+	// $exports = var_export($workspaces, true);
+$code = <<<PHPCODE
+<?php
+	return require '$_f';		   
+PHPCODE;
+
+ file_put_contents("frdl.workspaces.php", $code);	 
+ }
+	  
+	 if(!@is_dir($_ENV['FRDL_WORKSPACE'])){
+		@mkdir($_ENV['FRDL_WORKSPACE'], 0775, true); 
+	 }	
+	
+ 
+//$_ENV['FRDL_HPS_CACHE_DIR'] = $_dir . \DIRECTORY_SEPARATOR .\get_current_user() . \DIRECTORY_SEPARATOR. 'cache'. \DIRECTORY_SEPARATOR;
+$_ENV['FRDL_HPS_CACHE_DIR'] = \sys_get_temp_dir() 
+                   . \DIRECTORY_SEPARATOR .\get_current_user() . \DIRECTORY_SEPARATOR. 'cache'. \DIRECTORY_SEPARATOR;	
+putenv('FRDL_HPS_CACHE_DIR='.$_ENV['FRDL_HPS_CACHE_DIR']);
+//putenv('TMP='.$_ENV['FRDL_HPS_CACHE_DIR']);
+//ini_set('sys_temp_dir', realpath($_ENV['FRDL_HPS_CACHE_DIR']));	
+	 if(!@is_dir($_ENV['FRDL_HPS_CACHE_DIR'])){
+		@mkdir($_ENV['FRDL_HPS_CACHE_DIR'], 0775, true); 
+	 }
+
+
+$_ENV['FRDL_HPS_PSR4_CACHE_DIR'] = rtrim($_ENV['FRDL_HPS_CACHE_DIR'], \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR.'psr4'.\DIRECTORY_SEPARATOR;
+putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
+
+	 if(!@is_dir($_ENV['FRDL_HPS_PSR4_CACHE_DIR'])){
+		@mkdir($_ENV['FRDL_HPS_PSR4_CACHE_DIR'], 0775, true); 
+	 }
+
+	
+
+
+//chdir($_cwd);
+
+});
+
+	});//\frdl\booting\once(function(){
+
+  }//StubRunner->::init
+	
+	
+	public function autoload( )  : StubModuleInterface {
+		foreach($this->StubRunners as $StubRunner){
+		    $StubRunner-> autoloading();
 		}
-        return self::$_instance;
-    }
+		
+	 return $this;
+	}	
+	
+	public function install(?array $params = []  )  : bool|array {
+		
+	}
+	public function uninstall( ?array $params = []  )  : bool|array {
+		
+	}
+	
 
-	public function __get($key) {
-        if( isset($this->_m[$key] )){
-            return $this->_m[$key];
-        }
-    }
+	
+	public function setDownloadSource(string $source){
+		$this->source=$source;
+	 return $this;
+	}	
+	
+	public function setStubIndexPhp(string $id, string $code, ?string $toFile = null)  : bool {
+		$runner = $this->get($id);
+		if(null === $runner){
+           return false;
+		}
+		
+		$vm = $runner->getVM();
+		
+		 $stub = $vm->get_file($vm->document, '$HOME/index.php', 'stub index.php')
+             ->clear()
+             ->append($code)
+          ;
+         $vm->location = is_string($toFile) ? $toFile : $vm->location;
+	 return true;
+	}	
+	
+	public function get(string $id) : StubRunnerInterface|StubModuleInterface|bool  {			
+		return isset($this->StubRunners[$id]) ? $this->StubRunners[$id] : false;
+	}
+	
+	
+	public function load(string $file, ?string $as = null) : object {
+		if(!isset($this->StubRunners[$file])){
+			$webfatFile =$file;
+		
+			$source = is_string($this->source) ? $this->source : self::DEF_SOURCE;
+		
+		 
+			if(!file_exists($webfatFile) 
+			   || (is_int($this->max_webfat_file_lifetime) && filemtime($webfatFile) < time() - $this->max_webfat_file_lifetime)){			
+				file_put_contents( $webfatFile, file_get_contents($source));		
+			}					   
+	
+			if (!in_array($webfatFile, \get_included_files())) {		
+				require_once $webfatFile;			
+			}			//IO4\Module\Webfat
+			 $this->StubRunners[$file] = $StubRunner;
+		}
+		
+		if(is_string($as)){
+			$this->StubRunners[$as] = &$this->StubRunners[$file];
+		}
+		return $this->StubRunners[$file];
+	}
+	
+	public function moduleLocation(?string $location = null){
+		$this->init();
+		$cwd=getcwd();
+		$docroot= $_SERVER['DOCUMENT_ROOT'];
+		$home = $_ENV['FRDL_HOME'];
+		$this->LOCATIONS =[
+		   'module' => __DIR__,
+		   'current-workingdir' =>$cwd,
+		   'pwd' =>$cwd,
+		   'cwd' => $cwd,
+	    	'.' => $cwd,
+			
+			'httpdocs'=>$docroot,
+			'www'=>$docroot,
+			'public'=>$docroot,
+			'DOCUMENT_ROOT'=>$docroot,
+			
+			'~'=>$home,
+			'home'=>$home,			
+			'FRDL_WORKSPACE' => $this->getFrdlwebWorkspaceDirectory(),//$_ENV['FRDL_WORKSPACE'],
+		
+	    ];
+		//$this->StubRunners = [];
+	//	if(is_string($source)){
+		//  $this->setDownloadSource($source);	
+		//}
+		if(is_string($location)){
+			return isset($this->LOCATIONS[$location]) ? $this->LOCATIONS[$location] : false;
+		}
+		
+		return $this->LOCATIONS;
+	}	
+	
+	public function installTo(string $location, bool $forceCreateDirectory = false, $mod = 0755) : object {
+		//$this->source=$source;
+	// return $this;
+		if(isset($this->LOCATIONS[$location])){
+			$this->load($this->LOCATIONS[$location].\DIRECTORY_SEPARATOR.self::FILENAME, $location);
+			
+		}elseif(is_dir($location) || true === $forceCreateDirectory ){
+			$flipped = array_flip($this->LOCATIONS[$location]);
+			if(true === $forceCreateDirectory && !is_dir($location)){
+				mkdir($location, $mod, true);
+			}
+			$this->load($location.\DIRECTORY_SEPARATOR.self::FILENAME, isset($flipped[$location]) ? $flipped[$location] : null);
+		}
+		
+		return $this;
+	}	
+	
+	
+	public function isIndex(bool $onlyIfFirstFileCall = true) : bool {
+        $ns = __NAMESPACE__;
+		$_NotIsTemplateContext =	(
+		!defined($ns.'\___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') || false === ___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___
+	)
+	&& (
+		!defined('\___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') || false === \___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___
+	) ? true : false;
 
-    public function __set($key, $value) {
-        $this->_m[$key] = $value;
-    }
+
+		$included_files = \get_included_files();  
+		if(//('cli'===substr(strtolower(\PHP_SAPI), 0, 3)) || 
+			(	
+				(!in_array(__FILE__, $included_files) || __FILE__===$included_files[0])	
+			)  
+			&& $_NotIsTemplateContext 
+		) { 
+			$runStubOnInclude = true;
+		}else{		
+			$runStubOnInclude = false;
+		}	
+		
+		return $runStubOnInclude && (!$onlyIfFirstFileCall || count($included_files) === 1 );
+	}
+
 }
- 	
+	
+//\class_alias('\\'.__NAMESPACE__.'\\MimeStub5', '\\'.__NAMESPACE__.'\\MimeStubIndex');
+\class_alias('\\'.__NAMESPACE__.'\\MimeStubIndex', '\\'.__NAMESPACE__.'\\MimeStub');
+\class_alias('\\'.__NAMESPACE__.'\\MimeStubIndex', '\frdlweb\MimeStub');
+\class_alias('\\'.__NAMESPACE__.'\\StubRunner', '\frdlweb\StubRunner');
+\class_alias('\\'.__NAMESPACE__.'\\MimeVM', '\frdlweb\MimeVM');
+	
+$ns = __NAMESPACE__;
+}//ns
 
- if(isset($StubRunner)){
-  f::i([
-   'StubRunner' => &$StubRunner,
-  ]);
-   return $StubRunner; 
- }		  
-}//ns frdl/r
+namespace{	
+ use frdlweb\StubRunner;		
+ use frdlweb\MimeVM;
+ use frdl\patch\RelativePath;
+	
+/**
+* 
+* $run Function
+* 
+*/
+ $run = function($file = null, $doRun = false){
+ 	$args = func_get_args();
+
+ 	$MimeVM = new MimeVM($args[0]);
+ 	if($doRun){   
+	  $MimeVM('run');
+	}
+ 	return $MimeVM;
+ };
+ 
+ 
+$_NotIsTemplateContext =	(
+		!defined($ns.'\___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') || false === ___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___
+	)
+	&& (
+		!defined('\___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') || false === \___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___
+	) ? true : false;
+
+
+
+$included_files = \get_included_files();  
+if(//('cli'===substr(strtolower(\PHP_SAPI), 0, 3)) ||
+   (
+	 (!in_array(__FILE__, $included_files) || __FILE__===$included_files[0])
+  
+	)
+    && $_NotIsTemplateContext
+  ) { 
+	$runStubOnInclude = true;
+}else{	
+	$runStubOnInclude = false;
+}
+	
+	 $MimeVM = $run(__FILE__, false);			
+	$StubRunner = new StubRunner($MimeVM);  
+	$MimeVM->hugRunner($StubRunner);
+
+	
+$module['exports'] = &$StubRunner;// new \ArrayObject();	
+$module['exports']['util']['path']['relative']=function ($from, $to, $separator = \DIRECTORY_SEPARATOR)
+ {
+   return RelativePath::rel($from, $to, $separator);
+ }
+;	
+	
+  $module['exports']['run']	= $run;
+}//ns
+
+
+
+
+
+
+
+	
+namespace{
+	if(true===$runStubOnInclude){
+		$StubRunner();
+	}elseif(count($included_files) === 1 && __FILE__===$included_files[0]){
+		   $html='';			   		    
+			$html .= '<h1 style="color:red;">';
+			   $html .= 'Error: This is not a valid index/server file ('.basename(__FILE__).')!'
+			   ;
+		       $html .= '</h1>';      
+		      //echo  \frdl\booting\getFormFromRequestHelper($html, false);		
+		            echo  \frdl\booting\getFormFromRequestHelper( (new \Webfan\Webfat\App\ResolvableException(
+                      'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.3.1=Invalid index file'
+					 
+				   	 .'@'.$html
+             ))->html(), false);		
+	}
+	
+ return $module['exports'];
+} 
+
+
 
 
 __halt_compiler();Mime-Version: 1.0
@@ -3769,12 +4189,8 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 <?php 
 	
- if (version_compare(PHP_VERSION, '8.1.0') >= 0) {
-    $Engine=new \Webfan\Engine; 
-    //$Engine->load(\Webfan\DescriptorType::WebApp, $this); 
-     $Engine->load( $this); 
- }else{
- 	$AppLauncher = new \Webfan\AppLauncherLegacy($this->getRunner()); 
+    $this->getRunner()->init();
+ 	$AppLauncher = new \Webfan\AppLauncherWebfatInstaller($this->getRunner()); 
  	 if(\method_exists($AppLauncher, 'launch')){
 	   $AppLauncher->launch();
 	}elseif(!$AppLauncher->KernelFunctions()->isCLI() ){
@@ -3788,11 +4204,6 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 	   }else{
 	     throw new \Exception('Could not handle request ('.\PHP_SAPI.')');	
        }	
-	
- }
- 
-    
-
 
 --4444EVGuDPPT--
 --EVGuDPPT--
@@ -3959,9 +4370,9 @@ abstract class Codebase implements \Frdlweb\Contract\Autoload\CodebaseInterface
 --3333EVGuDPPT
 Content-Disposition: "php" ; filename="$HOME/version_config.php" ; name="stub version_config.php"
 Content-Type: application/x-httpd-php
-Content-Md5: e55aa14a732a962ea3048724df295cb9
-Content-Sha1: 56bfa0b2657a79c737dac9d31d2de688942b6686
-Content-Length: 280
+Content-Md5: 9a5f164e5ab2be37dc6991a92b5baec2
+Content-Sha1: c60503faa0771b5e0f83807f020fb1642dd7833d
+Content-Length: 275
 
 
 			    if(file_exists(__FILE__.'.version_config.php')){
@@ -3971,7 +4382,7 @@ Content-Length: 280
   'time' => 0,
   'version' => '0.0.0',
   'channel' => 'latest',
-//  'appId' => 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1',
+  'appId' => 'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.5.1',
 );
 			  
 --3333EVGuDPPT--

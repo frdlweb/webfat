@@ -178,11 +178,11 @@ if (!\interface_exists(CodebaseInterface::class, false)) {
    const ENDPOINT_WORKSPACE_REMOTE = 'io4.workspace.remote';
    const ENDPOINT_INSTALLER_REMOTE = 'io4.installer.remote';
    const ENDPOINT_MODULES_WEBFANSCRIPT_REMOTE = 'RemoteModulesBaseUrl';
-   const ENDPOINT_AUTOLOADER_PSR4_REMOTE = 'RemotePsr4UrlTemplate',
+   const ENDPOINT_AUTOLOADER_PSR4_REMOTE = 'RemotePsr4UrlTemplate';
    const ENDPOINT_UDAP = 'io4.udap';
    const ENDPOINT_RDAP = 'io4.rdap';
    const ENDPOINT_OIDIP = 'io4.rdap';
-   const ENDPOINT_PROXY_OBJECT_REMOTE = 'io4.proxy-object.remote',
+   const ENDPOINT_PROXY_OBJECT_REMOTE = 'io4.proxy-object.remote';
 
    const CHANNEL_LATEST = 'latest';
    const CHANNEL_STABLE = 'stable';

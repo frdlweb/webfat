@@ -1927,7 +1927,7 @@ use Frdlweb\Contract\Autoload\LoaderInterface;
     public function getFileAttachment($file = null, $offset = null, ?bool $throw = true){
     	if(null === $file)$file = &$this->file;
     	if(null === $offset)$offset = $this->offset;
-    	
+    	if(null === $file || empty($file))$file = $this->__FILE__;
 		$IO = fopen($file, 'r');
 		
         fseek($IO, $offset);
@@ -3099,7 +3099,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 		return [$this, '__invoke']; 
 	}
 	public function autoloading() : void{
-		if(!empty($this->getStubVM()->getFileAttachment(null, null, false)){
+		if(!empty($this->getStubVM()->getFileAttachment(null, null, false))){
 			\spl_autoload_register([$this->getStubVM(),'Autoload'], $this->isIndexRequest(), $this->isIndexRequest());
 		}
 		 $this->autoloadRemoteCodebase();

@@ -152,7 +152,74 @@ if ( !function_exists('sys_get_temp_dir')) {
   }
 } 	
 } 
+
+
+
+
+namespace frdl\patch{
+ if (!\interface_exists(IContainer::class, false)) {		
+   interface IContainer {
+	//public function get($id);
+	//public function has($id);	   
+   }
+ }
+}
+
+//Psr\Container\ContainerInterface
+// Patch Version 1 | 2 incompatibillity
+namespace Psr\Container{
+   use frdl\patch\IContainer;
+
+	if (false) {	
+		interface ContainerInterface extends IContainer	
+		{
+	
+		}
+	} elseif(!interface_exists(ContainerInterface::class, false)) {  
+	    \class_alias(IContainer::class, ContainerInterface::class);
+	}	
+}
  
+ 
+
+namespace Psr\Container{
+
+/**
+ * Describes the interface of a container that exposes methods to read its entries.
+ */
+if (!\interface_exists(ContainerInterface::class, false)) {	
+interface ContainerInterface
+{
+	/**
+	 * Finds an entry of the container by its identifier and returns it.
+	 *
+	 * @param string $id Identifier of the entry to look for.
+	 *
+	 * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
+	 * @throws ContainerExceptionInterface Error while retrieving the entry.
+	 *
+	 * @return mixed Entry.
+	 */
+	public function get($id);
+
+
+	/**
+	 * Returns true if the container can return an entry for the given identifier.
+	 * Returns false otherwise.
+	 *
+	 * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
+	 * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
+	 *
+	 * @param string $id Identifier of the entry to look for.
+	 *
+	 * @return bool
+	 */
+	public function has($id);
+}
+}
+}
+
+
 
 
 namespace Webfan {
@@ -260,7 +327,7 @@ namespace Frdlweb\Contract\Autoload{
 namespace frdlweb{
 	
 use Frdlweb\Contract\Autoload\LoaderInterface;
-	
+use Psr\Container\ContainerInterface;	
 
 
 	
@@ -292,7 +359,8 @@ if (!\interface_exists(StubInterface::class, false)) {
    public function install(?array $params = [] )  : bool|array;
    public function uninstall(?array $params = []  )  : bool|array;
    public function setDownloadSource(string $source);	 
-   public function get(string $id) : object|bool;
+   public function getAsContainer(?string $factoryId=null) : \Psr\Container\ContainerInterface;
+   public function getAsStub(string $id) : object|bool;
    public function setStubIndexPhp(string $id, string $code, ?string $toFile = null)  : bool;
    public function load(string $file, ?string $as = null) : object;	 
    public function isIndexRequest() : bool; 
@@ -513,68 +581,6 @@ namespace frdl\patch{
 }
 
 
-namespace frdl\patch{
- if (!\interface_exists(IContainer::class, false)) {		
-   interface IContainer {
-	//public function get($id);
-	//public function has($id);	   
-   }
- }
-}
-
-//Psr\Container\ContainerInterface
-// Patch Version 1 | 2 incompatibillity
-namespace Psr\Container{
-   use frdl\patch\IContainer;
-
-	if (false) {	
-		interface ContainerInterface extends IContainer	
-		{
-	
-		}
-	} elseif(!interface_exists(ContainerInterface::class, false)) {  
-	    \class_alias(IContainer::class, ContainerInterface::class);
-	}	
-}
- 
- 
-
-namespace Psr\Container{
-
-/**
- * Describes the interface of a container that exposes methods to read its entries.
- */
-if (!\interface_exists(ContainerInterface::class, false)) {	
-interface ContainerInterface
-{
-	/**
-	 * Finds an entry of the container by its identifier and returns it.
-	 *
-	 * @param string $id Identifier of the entry to look for.
-	 *
-	 * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
-	 * @throws ContainerExceptionInterface Error while retrieving the entry.
-	 *
-	 * @return mixed Entry.
-	 */
-	public function get($id);
-
-
-	/**
-	 * Returns true if the container can return an entry for the given identifier.
-	 * Returns false otherwise.
-	 *
-	 * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
-	 * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
-	 *
-	 * @param string $id Identifier of the entry to look for.
-	 *
-	 * @return bool
-	 */
-	public function has($id);
-}
-}
-}
 
 
 
@@ -3968,7 +3974,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	 return true;
 	}	
 	
-	public function get(string $id) : StubRunnerInterface|StubModuleInterface|bool  {			
+	public function getAsStub(string $id) : StubRunnerInterface|StubModuleInterface|bool  {			
 		return isset($this->StubRunners[$id]) ? $this->StubRunners[$id] : false;
 	}
 	
@@ -4115,6 +4121,21 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		$this->autoloading();	
 		$this->MimeVM->runStubs();
 		return $this->MimeVM;
+	}
+
+
+	public function getAsContainer(?string $factoryId=null) : \Psr\Container\ContainerInterface {
+            switch($factoryId){
+
+		    case null :
+		    case 'StubContainer' :
+		    case 'StubContainerFactory' :
+		    default :
+                       return new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter($this);
+		    break;
+	    }
+          
+		
 	}
 }
 	

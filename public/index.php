@@ -4132,6 +4132,63 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	}
 
 
+    /*				
+    //addProxyService($alias, $proxy, $container, $id, $namespace)							
+	$this->c()->get('FacadesAliasManager')->addProxyService('Tester',//$alias \FrdlTest::class,																	
+		  \FrdlTestTesterFascadeProxyObject::class, //$proxy																		
+		  $this->c(),  //$container																		
+		  'service.id.tester', //$id																		
+		  '*' // $namespace								
+	);		
+    $this->c()->get('FacadesAliasManager')->enable();
+    */
+	public function getAsFacade($alias, $proxy, ?string $id = null, $namespace
+				    ,?\Psr\Container\ContainerInterface $container = null
+				   , ?bool $throw = false) : bool {
+		 if(is_null($container)){
+                    $container = $this->getAsContainer(null);
+		 }
+		
+              $Manager = $container->has( 'FacadesAliasManager' ) 
+	          ? $container->get( 'FacadesAliasManager' ) 
+		  :  (function ($container, $throw) {	
+	                $Manager = new \Webfan\FacadesManager() ;
+                            if(is_callable([$container, 'set'])){
+			      try{	    
+                                 $container->set('FacadesAliasManager');
+			      }catch(\Exception $e){
+                                 if($throw){
+                                   throw $e;
+				 }else{
+                                    return false;
+				 }
+			      }
+			    }
+			  return $Manager;
+		  })($container, $throw);	
+		
+		 if(is_bool($Manager) && false === $Manager){
+                   return false;
+		 }
+              try{	   
+		$Manager->addProxyService($alias,//$alias \FrdlTest::class,																	
+		  $proxy, //$proxy \FrdlTestTesterFascadeProxyObject::class																		
+		  $container,  //$container																		
+		  $id, //$id																		
+		 $namespace // $namespace								
+	     );		
+		      $Manager->enable();
+	      }catch(\Exception $e){
+                                 if($throw){
+                                   throw $e;
+				 }else{
+                                    return false;
+				 }			     
+	      }
+
+	   return true;
+	}
+	
 	public function getAsContainer(?string $factoryId=null, ?array $definitions = [], ?array $options = []) : \Psr\Container\ContainerInterface {
 		$this->autoloading();
             switch($factoryId){ 

@@ -219,7 +219,7 @@ if (!\interface_exists(CodebaseInterface::class, false)) {
 	self::ENDPOINT_PROVIDER_IDENTITY_CENTRAL,
         self::ENDPOINT_WEBFAT_CENTRAL,
 	self::ENDPOINT_REMOTE_PUBLIC,
-	self::ENDPOINT_REMOTE_PRIVATE, 
+	//self::ENDPOINT_REMOTE_PRIVATE, 
         self::ENDPOINT_WORKSPACE_REMOTE,
         self::ENDPOINT_INSTALLER_REMOTE,
         self::ENDPOINT_MODULES_WEBFANSCRIPT_REMOTE,
@@ -4463,6 +4463,12 @@ abstract class Codebase
 
             //ENDPOINT_CONFIG_REMOTE
 	   $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_CONFIG_REMOTE, 'https://website.webfan3.de/webfan.endpoint.config-remote.php', CodebaseInterface::ALL_CHANNELS);  
+
+	   //ENDPOINT_REMOTE_PUBLIC
+           $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_REMOTE_PUBLIC, 'https://website.webfan3.de/webfan.endpoint.workspace-remote-public.php', CodebaseInterface::ALL_CHANNELS);  
+
+           //ENDPOINT_WORKSPACE_REMOTE
+	   $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_REMOTE_PUBLIC, 'https://website.webfan3.de/webfan.endpoint.workspace-remote.php', CodebaseInterface::ALL_CHANNELS);  
 	   
 	   if(null !== $channel && isset(CodebaseInterface::CHANNELS[$channel])){
 		   $this->setUpdateChannel(CodebaseInterface::CHANNELS[$channel]);

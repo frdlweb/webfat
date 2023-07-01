@@ -3106,6 +3106,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	
 	
 	public function autoUpdateStub(string | bool $update = null, string $newVersion = null, string $url = null){
+	  $this->init();	
 	  if(null === $url){
 	     $url = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time();	  
 	  }
@@ -3164,6 +3165,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 		return [$this, '__invoke']; 
 	}
 	public function autoloading() : void{
+	   $this->init();
 	   $StubRunner = $this;
 	   $StubVM = $StubRunner->getStubVM();
 	  \frdl\booting\once(function() use(&$StubVM) {
@@ -4131,9 +4133,14 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 
 	public function getAsContainer(?string $factoryId=null, ?array $definitions = [], ?array $options = []) : \Psr\Container\ContainerInterface {
-		 $this->init();	
 		$this->autoloading();
             switch($factoryId){ 
+
+		    case 'StubContainer' :
+		    case 'StubContainerFactory' :
+                       return new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter($this);
+		    break;
+		    
 	//\Webfan\FacadesManager::CONTAINER_TYPE_ROOT
 	//\Webfan\FacadesManager::CONTAINER_TYPE_ROOT_CLASS
 		    case \Webfan\FacadesManager::CONTAINER_TYPE_ROOT :
@@ -4152,14 +4159,33 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		    break;
 		    
 		    case null :
-		    case 'StubContainer' :
-		    case 'StubContainerFactory' :
 		    default :
-                       return new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter($this);
+                        if(!isset($this['Container'])){
+                           $this['Container'] = $this->_bootMainRootContainer();
+			}
+		     return $this['Container'];
 		    break;
-	    }
-          
-		
+	    }		
+	}
+
+	protected function _bootMainRootContainer(){                  
+		if(isset($this['Container']) && is_object($this['Container']) && $this['Container'] instanceof \Psr\Container\ContainerInterface){                    
+			return $this['Container'];			
+		}
+
+		$this['Container'] = $this->getAsContainer('root',[
+                        		 
+		  'FacadesAliasManager'=>  (function(\Psr\Container\ContainerInterface $container){		   
+			  return new \Webfan\FacadesManager();
+		  }),	
+							   
+		], [
+			'onFalseGet'=>\IO4\Container\ContainerCollectionInterface::NULL_ONERROR,				   
+			'callId'=>\IO4\Container\ContainerCollectionInterface::CALL_ID,				   
+		]);
+
+		//$this['Container']->setFinalFallbackContainer(ContainerInterface $container)
+	  return $this['Container'];	
 	}
 }
 	

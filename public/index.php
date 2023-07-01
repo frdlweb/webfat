@@ -1495,7 +1495,7 @@ use frdlweb\StubHelperInterface as StubHelperInterface;
 use frdlweb\StubRunnerInterface as StubRunnerInterface;	
 use frdlweb\StubModuleInterface as StubModuleInterface;
 use Frdlweb\Contract\Autoload\LoaderInterface;	
-
+use Psr\Container\ContainerInterface;
 
 
  class MimeVM implements StubHelperInterface
@@ -4173,12 +4173,25 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 			return $this['Container'];			
 		}
 
+		$Stubrunner = $this;
+
 		$this['Container'] = $this->getAsContainer('root',[
-                        		 
+	
+		  'app.runtime.stubrunner'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) use(&$Stubrunner){
+			return $Stubrunner;			
+		  }, 'factory'],	                        		 
 		  'FacadesAliasManager'=>  (function(\Psr\Container\ContainerInterface $container){		   
 			  return new \Webfan\FacadesManager();
 		  }),	
-							   
+		  'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getStub();			
+		  }, 'factory'],   
+		  'app.runtime.codebase'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getCodebase();	
+		  }, 'factory'],    
+		  'app.runtime.autoloader.remote'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getRemoteAutoloader();	
+		  }, 'factory'],   					   
 		], [
 			'onFalseGet'=>\IO4\Container\ContainerCollectionInterface::NULL_ONERROR,				   
 			'callId'=>\IO4\Container\ContainerCollectionInterface::CALL_ID,				   

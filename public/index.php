@@ -4451,9 +4451,18 @@ abstract class Codebase
 								   'https://website.webfan3.de/api/proxy-object/${by}/?id=${class}', 
 								   CodebaseInterface::ALL_CHANNELS);  
 	   
-	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/container/?id=StubModuleBuilder', CodebaseInterface::ALL_CHANNELS);  
-	   $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/class/?id=\frdlweb\StubModuleBuilder', CodebaseInterface::CHANNEL_FALLBACK);  
-	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', CodebaseInterface::CHANNEL_TEST);
+	  //   $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/container/?id=StubModuleBuilder', CodebaseInterface::ALL_CHANNELS);  
+	//    $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/class/?id=\frdlweb\StubModuleBuilder', CodebaseInterface::CHANNEL_FALLBACK);  
+	 //     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', CodebaseInterface::CHANNEL_TEST);
+	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', CodebaseInterface::ALL_CHANNELS);
+
+
+            //ENDPOINT_CONTAINER_REMOTE
+	    $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_CONTAINER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.container-remote.php', CodebaseInterface::ALL_CHANNELS);  
+
+
+            //ENDPOINT_CONFIG_REMOTE
+	   $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_CONFIG_REMOTE, 'https://website.webfan3.de/webfan.endpoint.config-remote.php', CodebaseInterface::ALL_CHANNELS);  
 	   
 	   if(null !== $channel && isset(CodebaseInterface::CHANNELS[$channel])){
 		   $this->setUpdateChannel(CodebaseInterface::CHANNELS[$channel]);
@@ -4486,12 +4495,10 @@ abstract class Codebase
 	  
    public function getRemotePsr4UrlTemplate() : string{
 	   return $this->getRemoteApiBaseUrl(CodebaseInterface::ENDPOINT_AUTOLOADER_PSR4_REMOTE);
-	//    return $this->channels[$this->getUpdateChannel()]['RemotePsr4UrlTemplate'];
    }
 	  
    public function getRemoteModulesBaseUrl() : string{
 	   return $this->getRemoteApiBaseUrl(CodebaseInterface::ENDPOINT_MODULES_WEBFANSCRIPT_REMOTE);
-	  //  return $this->channels[$this->getUpdateChannel()]['RemoteModulesBaseUrl'];
    }
    public function getServiceEndpoints() : array {
      return $this->channels;

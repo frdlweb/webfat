@@ -3193,22 +3193,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	public function getInvoker(){
 		return [$this, '__invoke']; 
 	}
-	public function autoloading() : void{
-	   $this->init();
-	   $StubRunner = $this;
-	   $StubVM = $StubRunner->getStubVM();
-	  \frdl\booting\once(function() use(&$StubVM) {
-		if(!empty($StubVM->getFileAttachment(null, null, false))){
-			\spl_autoload_register([$StubVM,'Autoload'], true, true);
-		}
-	  });
-		 $this->autoloadRemoteCodebase();
 
-	     \frdl\booting\once(function() use(&$StubRunner) {	
-		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
-		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$HOME/detect.php', 'stub detect.php')); 
-	      });     
-	}
 	
 	public function getShield(){
 		throw new \Exception('Not implemented yet or deprectaed: '.__METHOD__);
@@ -3473,6 +3458,25 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 		$loader->register(false);
 		return $loader;
 	}	
+
+
+	public function autoloading() : void{
+	   $this->init();
+	   $StubRunner = $this;
+	   $StubVM = $StubRunner->getStubVM();
+	  \frdl\booting\once(function() use(&$StubVM) {
+		if(!empty($StubVM->getFileAttachment(null, null, false))){
+			\spl_autoload_register([$StubVM,'Autoload'], true, true);
+		}
+	  });
+		 $this->autoloadRemoteCodebase();
+
+	     \frdl\booting\once(function() use(&$StubRunner) {	
+		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
+		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$HOME/detect.php', 'stub detect.php')); 
+	      });     
+	}
+
 	
 	public function getFrdlwebWorkspaceDirectory() : string {
 		if(!empty(getenv('FRDL_WORKSPACE'))){

@@ -3164,13 +3164,19 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 		return [$this, '__invoke']; 
 	}
 	public function autoloading() : void{
-		if(!empty($this->getStubVM()->getFileAttachment(null, null, false))){
-		//	\spl_autoload_register([$this->getStubVM(),'Autoload'], $this->isIndexRequest(), $this->isIndexRequest());
-			\spl_autoload_register([$this->getStubVM(),'Autoload'], true, true);
+	   $StubRunner = $this;
+	   $StubVM = $StubRunner->getStubVM();
+	  \frdl\booting\once(function() use(&$StubVM) {
+		if(!empty($StubVM->getFileAttachment(null, null, false))){
+			\spl_autoload_register([$StubVM,'Autoload'], true, true);
 		}
+	  });
 		 $this->autoloadRemoteCodebase();
-		 $this->getStubVM()->_run_php_1( $this->getStubVM()->get_file($this->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
-		 $this->getStubVM()->_run_php_1( $this->getStubVM()->get_file($this->getStub(), '$HOME/detect.php', 'stub detect.php')); 
+
+	     \frdl\booting\once(function() use(&$StubRunner) {	
+		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
+		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$HOME/detect.php', 'stub detect.php')); 
+	      });     
 	}
 	
 	public function getShield(){
@@ -3431,7 +3437,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	}	
 	
 	
-	protected function autoloadRemoteCodebase(){ 
+	public function autoloadRemoteCodebase(){ 
 	  $loader = $this->getRemoteAutoloader();
 		$loader->register(false);
 		return $loader;

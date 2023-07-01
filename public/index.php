@@ -4154,7 +4154,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		       $class = \Webfan\FacadesManager::CONTAINER_TYPE_ROOT_CLASS;		    
                        return $class(array_merge([], $definitions),
 				    array_merge(['onFalseGet'=>\IO4\Container\ContainerCollectionInterface::NULL_ONERROR,], $options)['onFalseGet'],
-				    array_merge(['callId'=>isset($class::CALL_ID) ? $class::CALL_ID : \IO4\Container\ContainerCollectionInterface::CALL_ID,],
+				    array_merge(['callId'=>\IO4\Container\ContainerCollectionInterface::CALL_ID,],
 						$options)['callId']);
 		    break;
 		    

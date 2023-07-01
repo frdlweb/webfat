@@ -328,8 +328,12 @@ namespace frdlweb{
 	
 use Frdlweb\Contract\Autoload\LoaderInterface;
 use Psr\Container\ContainerInterface;	
-
-
+use Laminas\Json\Server\Server;
+use ProxyManager\Factory\RemoteObject\Adapter\JsonRpc;
+use ProxyManager\Factory\RemoteObjectFactory;
+use Laminas\Http\Client\Adapter\Exception\RuntimeException;
+use Laminas\Json\Server\Client;
+	
 	
 if (!\interface_exists(StubItemInterface::class, false)) { 	
 interface StubItemInterface
@@ -359,14 +363,38 @@ if (!\interface_exists(StubInterface::class, false)) {
    public function install(?array $params = [] )  : bool|array;
    public function uninstall(?array $params = []  )  : bool|array;
    public function setDownloadSource(string $source);	 
-   public function getAsContainer(?string $factoryId=null, ?array $definitions = [], ?array $options = []) : \Psr\Container\ContainerInterface;
-   public function getAsStub(string $id) : object|bool;
-   public function setStubIndexPhp(string $id, string $code, ?string $toFile = null)  : bool;
-   public function load(string $file, ?string $as = null) : object;	 
    public function isIndexRequest() : bool; 
    public function runAsIndex(?bool $showErrorPageReturnBoolean = true) : bool|object;	
  }
 } 	
+	
+if (!\interface_exists(StubAsFactoryInterface::class, false)) {	
+ interface StubAsFactoryInterface
+ { 
+
+    //nette/php-generatror 
+   public function getAsGeneratedPhpSource($id=null, $classes=[], $params = []
+					   , $options = [] //autoloader,cache,.... e.g.
+					   , $generator=null
+					  ,?\Psr\Container\ContainerInterface $container = null
+				   , ?bool $throw = false);
+	 
+   public function load(string $file, ?string $as = null) : object;	
+   public function getAsContainer(?string $factoryId=null, ?array $definitions = [], ?array $options = []) : \Psr\Container\ContainerInterface;
+   public function getAsStub(string $id) : object|bool;
+   public function setStubIndexPhp(string $id, string $code, ?string $toFile = null)  : bool;
+	 
+   public function getAsFacade($alias, $proxy, ?string $id = null, $namespace
+				    ,?\Psr\Container\ContainerInterface $container = null
+				   , ?bool $throw = false) : bool;	
+
+
+	 public function getAsRemoteObjectProxy(string $class, ?string $url = null);
+	 public function getAsLazyLoadingValueHolderProxy(string $class, $initializer);
+ }
+} 	
+
+	
 	
 	
 if (!\interface_exists(StubRunnerInterface::class, false)) { 
@@ -1494,6 +1522,7 @@ use frdlweb\StubItemInterface as StubItemInterface;
 use frdlweb\StubHelperInterface as StubHelperInterface;
 use frdlweb\StubRunnerInterface as StubRunnerInterface;	
 use frdlweb\StubModuleInterface as StubModuleInterface;
+use frdlweb\StubAsFactoryInterface as StubAsFactoryInterface;
 use Frdlweb\Contract\Autoload\LoaderInterface;	
 use Psr\Container\ContainerInterface;
 
@@ -3053,7 +3082,7 @@ class MimeStubIndex extends MimeStub5 {
 
 	
 
-class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModuleInterface
+class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModuleInterface, StubAsFactoryInterface
 {
 	
 	const DEF_SOURCE = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php';
@@ -3967,9 +3996,9 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	}	
 	
 	public function setStubIndexPhp(string $id, string $code, ?string $toFile = null)  : bool {
-		$runner = $this->get($id);
+		$runner = $this->getAsStub($id);
 		if(null === $runner){
-           return false;
+                   return false;
 		}
 		
 		$vm = $runner->getVM();
@@ -4132,7 +4161,18 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	}
 
 
-    /*				
+	public function getAsGeneratedPhpSource($id=null, $classes=[], $params = []
+					   , $options = [] //autoloader,cache,.... e.g.
+					   , $generator=null
+					  ,?\Psr\Container\ContainerInterface $container = null
+				   , ?bool $throw = false){
+            throw new \Exception(sprintf('Not implemented yet: %s', __METHOD__));
+	}
+    /*		
+    	class IO4FacadeProxy extends \Statical\BaseProxy
+	{
+	   
+	}
     //addProxyService($alias, $proxy, $container, $id, $namespace)							
 	$this->c()->get('FacadesAliasManager')->addProxyService('Tester',//$alias \FrdlTest::class,																	
 		  \FrdlTestTesterFascadeProxyObject::class, //$proxy																		
@@ -4225,15 +4265,129 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	    }		
 	}
 
+
+
+	public function getAsRemoteObjectProxy(string $class, ?string $url = null){
+             $container  = $this->getAsContainer(null);
+            $config = $container->get('proxy-object-factory.cache-configuration');
+	           $registered = false;
+	          if ($funcs = \spl_autoload_functions()) {
+                      $index = array_search($config->getProxyAutoloader(), $funcs, true);
+                       if (false !== $index) {
+		         
+	                     if(0!==$index){
+                                \spl_autoload_unregister($config->getProxyAutoloader());
+				 $registered = false;
+	                     }else{
+                                $registered = true;
+	                    }
+                          
+	               }
+                  }
+		  if(true!==$registered){
+                       \spl_autoload_register($config->getProxyAutoloader(), true, true);
+                  }
+
+                       if(!is_string($url)){
+                          $url =  $container->get('app.runtime.codebase')
+			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_PROXY_OBJECT_REMOTE)
+	                     .'/?class='.urlencode($class)
+	                   ;
+	               }
+    
+                     $factory = new RemoteObjectFactory(
+                           new JsonRpc(new Client($url)),
+		              $config
+                   );
+
+                $proxy   = $factory->createProxy($class);
+		return $proxy;
+	 }
+
+
+	public function getAsLazyLoadingValueHolderProxy(string $class, $initializer){
+             $container  = $this->getAsContainer(null);
+            $config = $container->get('proxy-object-factory.cache-configuration');
+	           $registered = false;
+	          if ($funcs = \spl_autoload_functions()) {
+                      $index = array_search($config->getProxyAutoloader(), $funcs, true);
+                       if (false !== $index) {
+		         
+	                     if(0!==$index){
+                                \spl_autoload_unregister($config->getProxyAutoloader());
+				 $registered = false;
+	                     }else{
+                                $registered = true;
+	                    }
+                          
+	               }
+                  }
+		  if(true!==$registered){
+                       \spl_autoload_register($config->getProxyAutoloader(), true, true);
+                  }
+
+                  $factory = new \ProxyManager\Factory\LazyLoadingValueHolderFactory($config);
+		 $proxy = $factory->createProxy($class, $initializer);
+	   return $proxy;	
+	}
+	 	 
+	
 	protected function _bootMainRootContainer(){                  
 		if(isset($this['Container']) && is_object($this['Container']) && $this['Container'] instanceof \Psr\Container\ContainerInterface){                    
 			return $this['Container'];			
 		}
 
 		$Stubrunner = $this;
-
+ 
 		$this['Container'] = $this->getAsContainer('root',[
+		  'config.params.app.dir'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
+			return $container->get('app.runtime.stubrunner')->getApplicationsDirectory();			
+		  }, 'factory'],							   
+		  'config.params.dirs.runtime'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
+			return rtrim($container->get('config.params.app.dir'), \DIRECTORY_SEPARATOR)
+				.\DIRECTORY_SEPARATOR
+				.'runtime'
+				;			
+		  }, 'factory'],								   
+		  'config.params.dirs.runtime.cache'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
+			return rtrim($container->get('config.params.dirs.runtime'), \DIRECTORY_SEPARATOR)
+				.\DIRECTORY_SEPARATOR
+				.'cache'
+				;			
+		  }, 'factory'],	
+
+		
+							   
+		  'proxy-object-factory.cache-configuration'=> (function(ContainerInterface $container){	
+			 $config = new \ProxyManager\Configuration();
 	
+			  $proxyCacheDir = rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR)
+				.\DIRECTORY_SEPARATOR
+				  .'proxy-objects'
+				  .\DIRECTORY_SEPARATOR
+				  .'remote-api' 
+				  .\DIRECTORY_SEPARATOR 
+				  .'generated-classes';
+	
+			  if(!is_dir($proxyCacheDir)){	
+			    @mkdir($proxyCacheDir, 0755, true);		
+			  }
+		
+			  // generate the proxies and store them as files
+	
+			  $fileLocator = new \ProxyManager\FileLocator\FileLocator($proxyCacheDir);
+	
+			  $config->setGeneratorStrategy(new \ProxyManager\GeneratorStrategy\FileWriterGeneratorStrategy($fileLocator));
+	
+			  // set the directory to read the generated proxies from
+	
+			  $config->setProxiesTargetDir($proxyCacheDir);
+
+			  // then register the autoloader   
+			   \spl_autoload_register($config->getProxyAutoloader(), true, true);
+
+			  return $config;
+		  }),	
 		  'app.runtime.stubrunner'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) use(&$Stubrunner){
 			return $Stubrunner;			
 		  }, 'factory'],	                        		 
@@ -4595,7 +4749,7 @@ abstract class Codebase
 	  //   $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/container/?id=StubModuleBuilder', CodebaseInterface::ALL_CHANNELS);  
 	//    $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/class/?id=\frdlweb\StubModuleBuilder', CodebaseInterface::CHANNEL_FALLBACK);  
 	 //     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', CodebaseInterface::CHANNEL_TEST);
-	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', CodebaseInterface::ALL_CHANNELS);
+	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', CodebaseInterface::CHANNEL_TEST);
 
 
             //ENDPOINT_CONTAINER_REMOTE

@@ -359,7 +359,7 @@ if (!\interface_exists(StubInterface::class, false)) {
    public function install(?array $params = [] )  : bool|array;
    public function uninstall(?array $params = []  )  : bool|array;
    public function setDownloadSource(string $source);	 
-   public function getAsContainer(?string $factoryId=null) : \Psr\Container\ContainerInterface;
+   public function getAsContainer(?string $factoryId=null, ?array $definitions = [], ?array $options = []) : \Psr\Container\ContainerInterface;
    public function getAsStub(string $id) : object|bool;
    public function setStubIndexPhp(string $id, string $code, ?string $toFile = null)  : bool;
    public function load(string $file, ?string $as = null) : object;	 
@@ -4124,9 +4124,27 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	}
 
 
-	public function getAsContainer(?string $factoryId=null) : \Psr\Container\ContainerInterface {
-            switch($factoryId){
-
+	public function getAsContainer(?string $factoryId=null, ?array $definitions = [], ?array $options = []) : \Psr\Container\ContainerInterface {
+		 $this->init();	
+		$this->autoloading();
+            switch($factoryId){ 
+	//\Webfan\FacadesManager::CONTAINER_TYPE_ROOT
+	//\Webfan\FacadesManager::CONTAINER_TYPE_ROOT_CLASS
+		    case \Webfan\FacadesManager::CONTAINER_TYPE_ROOT :
+		    case \Webfan\FacadesManager::CONTAINER_TYPE_ROOT_CLASS :
+		    case 'root' :
+		    case 'collection' :
+		    case 'ContainerCollection' :
+		    case \IO4\Container\ContainerCollectionInterface::class :
+		   // case \Webfan\Webfat\App\ContainerCollection::class :
+		    //__construct(array $entries = null, int $onFalseGet = 0 NULL_ONERROR, string $callId = null)
+		       $class = \Webfan\FacadesManager::CONTAINER_TYPE_ROOT_CLASS;		    
+                       return $class(array_merge([], $definitions),
+				    array_merge(['onFalseGet'=>\IO4\Container\ContainerCollectionInterface::NULL_ONERROR,], $options)['onFalseGet'],
+				    array_merge(['callId'=>isset($class::CALL_ID) ? $class::CALL_ID : \IO4\Container\ContainerCollectionInterface::CALL_ID,],
+						$options)['callId']);
+		    break;
+		    
 		    case null :
 		    case 'StubContainer' :
 		    case 'StubContainerFactory' :

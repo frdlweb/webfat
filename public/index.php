@@ -3106,9 +3106,19 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 
 	public function __construct(?StubHelperInterface &$MimeVM){
 		parent::__construct([]);
-		$this->StubRunners = [];
-		$this->MimeVM=$MimeVM;		
+                $this->StubRunners[$this->_oid()] = $this->StubRunners[__FILE__] =  &$this; 
+		$this->MimeVM=$MimeVM;	
+
+		if(null === self::$instance){
+		   self::$instance = $this;
+		}		
 	}	
+
+	protected _oid(){
+          return sprintf('@spl_object_id(%s)@', spl_object_id($this) );
+       }
+
+	
 	
 	public function instance(?object $instance = null)  : object {
 		if(is_object($instance) && !is_null($instance)){
@@ -3447,35 +3457,13 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 		}	
 		
 		
-		//$this->RemoteAutoloader = &$loader;
+		 
 		
 	   return $this->RemoteAutoloader;
 	}	
 	
 	
-	public function autoloadRemoteCodebase(){ 
-	  $loader = $this->getRemoteAutoloader();
-		$loader->register(false);
-		return $loader;
-	}	
 
-
-	public function autoloading() : void{
-	   $this->init();
-	   $StubRunner = $this;
-	   $StubVM = $StubRunner->getStubVM();
-	  \frdl\booting\once(function() use(&$StubVM) {
-		if(!empty($StubVM->getFileAttachment(null, null, false))){
-			\spl_autoload_register([$StubVM,'Autoload'], true, true);
-		}
-	  });
-		 $this->autoloadRemoteCodebase();
-
-	     \frdl\booting\once(function() use(&$StubRunner) {	
-		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
-		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$HOME/detect.php', 'stub detect.php')); 
-	      });     
-	}
 
 	
 	public function getFrdlwebWorkspaceDirectory() : string {
@@ -4335,6 +4323,30 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	   return $proxy;	
 	}
 	 	 
+	public function autoloadRemoteCodebase(){ 
+	  $loader = $this->getRemoteAutoloader();
+		$loader->register(false);
+		return $loader;
+	}	
+
+
+	public function autoloading() : void{
+	   $this->init();
+	   $StubRunner = $this;
+	   $StubVM = $StubRunner->getStubVM();
+	  \frdl\booting\once(function() use(&$StubVM) {
+		if(!empty($StubVM->getFileAttachment(null, null, false))){
+			\spl_autoload_register([$StubVM,'Autoload'], true, true);
+		}
+	  });
+		 $this->autoloadRemoteCodebase();
+
+	     \frdl\booting\once(function() use(&$StubRunner) {	
+		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
+		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$HOME/detect.php', 'stub detect.php')); 
+	      });     
+	}	
+ 
 	
 	protected function _bootMainRootContainer(){                  
 		if(isset($this['Container']) && is_object($this['Container']) && $this['Container'] instanceof \Psr\Container\ContainerInterface){                    

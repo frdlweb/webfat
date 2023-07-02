@@ -3114,7 +3114,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 		}		
 	}	
 
-	protected _oid(){
+	protected function _oid(){
           return sprintf('@spl_object_id(%s)@', spl_object_id($this) );
        }
 

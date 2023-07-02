@@ -4184,7 +4184,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
               $Manager = $container->has( 'FacadesAliasManager' ) 
 	          ? $container->get( 'FacadesAliasManager' ) 
 		  :  (function ($container, $throw) {	
-	                $Manager = new \Webfan\FacadesManager() ;
+	                $Manager = new \Statical\Manager();
                             if(is_callable([$container, 'set'])){
 			      try{	    
                                  $container->set('FacadesAliasManager');
@@ -4221,41 +4221,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	   return true;
 	}
 	
-	public function getAsContainer(?string $factoryId=null, ?array $definitions = [], ?array $options = []) : \Psr\Container\ContainerInterface {
-		$this->autoloading();
-            switch($factoryId){ 
 
-		    case 'StubContainer' :
-		    case 'StubContainerFactory' :
-                       return new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter($this);
-		    break;
-		    
-	//\Webfan\FacadesManager::CONTAINER_TYPE_ROOT
-	//\Webfan\FacadesManager::CONTAINER_TYPE_ROOT_CLASS
-		    case \Webfan\FacadesManager::CONTAINER_TYPE_ROOT :
-		    case \Webfan\FacadesManager::CONTAINER_TYPE_ROOT_CLASS :
-		    case 'root' :
-		    case 'collection' :
-		    case 'ContainerCollection' :
-		    case \IO4\Container\ContainerCollectionInterface::class :
-		   // case \Webfan\Webfat\App\ContainerCollection::class :
-		    //__construct(array $entries = null, int $onFalseGet = 0 NULL_ONERROR, string $callId = null)
-		       $class = \Webfan\FacadesManager::CONTAINER_TYPE_ROOT_CLASS;		    
-                       return $class(array_merge([], $definitions),
-				    array_merge(['onFalseGet'=>\IO4\Container\ContainerCollectionInterface::NULL_ONERROR,], $options)['onFalseGet'],
-				    array_merge(['callId'=>\IO4\Container\ContainerCollectionInterface::CALL_ID,],
-						$options)['callId']);
-		    break;
-		    
-		    case null :
-		    default :
-                        if(!isset($this['Container'])){
-                           $this['Container'] = $this->_bootMainRootContainer();
-			}
-		     return $this['Container'];
-		    break;
-	    }		
-	}
 
 
 
@@ -4408,7 +4374,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 			return $Stubrunner;			
 		  }, 'factory'],	                        		 
 		  'FacadesAliasManager'=>  (function(\Psr\Container\ContainerInterface $container){		   
-			  return new \Webfan\FacadesManager();
+			  return new \Statical\Manager();
 		  }),	
 		  'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
 			return $container->get('app.runtime.stubrunner')->getStub();			
@@ -4426,6 +4392,39 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 		//$this['Container']->setFinalFallbackContainer(ContainerInterface $container)
 	  return $this['Container'];	
+	}
+
+		
+	public function getAsContainer(?string $factoryId=null, ?array $definitions = [], ?array $options = []) : \Psr\Container\ContainerInterface {
+		$this->autoloading();
+            switch($factoryId){ 
+
+		    case 'StubContainer' :
+		    case 'StubContainerFactory' :
+                       return new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter($this);
+		    break;
+
+		    case 'root' :
+		    case 'collection' :
+		    case 'ContainerCollection' :
+		    case \IO4\Container\ContainerCollectionInterface::class :
+		    case \Webfan\Webfat\App\ContainerCollection::class :
+		    //__construct(array $entries = null, int $onFalseGet = 0 NULL_ONERROR, string $callId = null)
+		       $class = \Webfan\Webfat\App\ContainerCollection::class;		    
+                       return new $class(array_merge([], $definitions),
+				    array_merge(['onFalseGet'=>\IO4\Container\ContainerCollectionInterface::NULL_ONERROR,], $options)['onFalseGet'],
+				    array_merge(['callId'=>\IO4\Container\ContainerCollectionInterface::CALL_ID,],
+						$options)['callId']);
+		    break;
+		    
+		    case null :
+		    default :
+                        if(!isset($this['Container'])){
+                           $this['Container'] = $this->_bootMainRootContainer();
+			}
+		     return $this['Container'];
+		    break;
+	    }		
 	}
 }
 	

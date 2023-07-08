@@ -4715,7 +4715,7 @@ abstract class Codebase
 		     //   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
 		     // 'RemotePsr4UrlTemplate' => 'https://latest.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
 		     'RemotePsr4UrlTemplate' =>'https://startdir.de/install/latest/?source=${class}&salt=${salt}&source-encoding=b64',
-		   'RemoteModulesBaseUrl' => 'https://startdir.de/install/',
+		   'RemoteModulesBaseUrl' => 'https://startdir.de/install',
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 		   
 	   ]);
@@ -4726,7 +4726,7 @@ abstract class Codebase
 		   //  'RemotePsr4UrlTemplate' => 'https://stable.software-download.frdlweb.de/?source=${class}&salt=${salt}&source-encoding=b64',
 		  // 'RemotePsr4UrlTemplate' => 'https://webfan.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
 		  'RemotePsr4UrlTemplate' =>'https://startdir.de/install/stable/?source=${class}&salt=${salt}&source-encoding=b64',
-		    'RemoteModulesBaseUrl' => 'https://startdir.de/install/',
+		    'RemoteModulesBaseUrl' => 'https://startdir.de/install',
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 		   
 	   ]);	   
@@ -4735,7 +4735,7 @@ abstract class Codebase
 							     [
 		   'RemotePsr4UrlTemplate' => 'https://startdir.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
 		 // 'RemotePsr4UrlTemplate' => 'https://webfan.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
-		   'RemoteModulesBaseUrl' => 'https://startdir.de/install/',
+		   'RemoteModulesBaseUrl' => 'https://startdir.de/install',
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 	   ]);   
 	   
@@ -4743,7 +4743,7 @@ abstract class Codebase
 							     [
 		 //  'RemotePsr4UrlTemplate' => 'https://startdir.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
 		   'RemotePsr4UrlTemplate' => 'https://webfan.de/install/?source=${class}&salt=${salt}&source-encoding=b64',
-		   'RemoteModulesBaseUrl' => 'https://webfan.de/install/',
+		   'RemoteModulesBaseUrl' => 'https://webfan.de/install',
 		   'RemoteApiBaseUrl' => 'https://api.webfan.de/',
 	   ]);  
 

@@ -384,7 +384,7 @@ if (!\interface_exists(StubAsFactoryInterface::class, false)) {
    public function getAsStub(string $id) : object|bool;
    public function setStubIndexPhp(string $id, string $code, ?string $toFile = null)  : bool;
 	 
-   public function getAsFacade($alias, $proxy, ?string $id = null, $namespace
+   public function getAsFacade($alias, $proxy, string $id = null, $namespace
 				    ,?\Psr\Container\ContainerInterface $container = null
 				   , ?bool $throw = false) : bool;	
 
@@ -4174,7 +4174,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	);		
     $this->c()->get('FacadesAliasManager')->enable();
     */
-	public function getAsFacade($alias, $proxy, ?string $id = null, $namespace
+	public function getAsFacade($alias, $proxy, string $id = null, $namespace
 				    ,?\Psr\Container\ContainerInterface $container = null
 				   , ?bool $throw = false) : bool {
 		 if(is_null($container)){

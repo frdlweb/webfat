@@ -4627,8 +4627,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 			$this->getAsRemoteObjectProxy(
 				\IO4FallbackContainer::class, 
 				$this['Container']->get('app.runtime.codebase')
-			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE)
-	                   ;
+			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE)	                  
 			)		
 		);
 	  return $this['Container'];	

@@ -3152,6 +3152,9 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	
 	   $config=$this->config();	
 	   $configVersion = $this->configVersion();
+
+		$cacheDirLint = (!empty($_ENV['FRDL_HPS_CACHE_DIR'])) ? rtrim($_ENV['FRDL_HPS_CACHE_DIR'], \DIRECTORY_SEPARATOR.'/\\').\DIRECTORY_SEPARATOR.'temp-lint' 
+						: rtrim( \sys_get_temp_dir(), \DIRECTORY_SEPARATOR.'/\\').\DIRECTORY_SEPARATOR.'temp-lint';
 		
            $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
            $ShutdownTasks(function($update, $newVersion, $config, $configVersion, $url, $file, &$me){

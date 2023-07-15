@@ -4256,8 +4256,8 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	                   ;
 	               }
     
-                     $factory = new RemoteObjectFactory(
-                           new JsonRpc(new Client($url)),
+                     $factory = new \ProxyManager\Factory\RemoteObjectFactory(
+                           new \ProxyManager\Factory\RemoteObject\Adapter\JsonRpc(new \Laminas\Json\Server\Client($url)),
 		              $config
                    );
 

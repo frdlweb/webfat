@@ -4623,7 +4623,11 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		]);
 
  
-	  $this['Container']->setFinalFallbackContainer(new \IO4FallbackContainerClient ($this['Container']) );
+	  		   $this['Container']->setFinalFallbackContainer(new \IO4FallbackContainerClient (
+		             $this['Container']->get('proxy-object-factory.cache-configuration'),
+			         $this['Container']->get('app.runtime.codebase')
+			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE)
+		   ) );
 		
 	  return $this['Container'];	
 	}

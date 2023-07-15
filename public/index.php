@@ -389,7 +389,7 @@ if (!\interface_exists(StubAsFactoryInterface::class, false)) {
 				   , ?bool $throw = false) : bool;	
 
 
-	 public function getAsRemoteObjectProxy(string $class, ?string $url = null);
+	 public function getAsRemoteObjectProxy(string $class, ?string $url = null, ?ContainerInterface $container=null);
 	 public function getAsLazyLoadingValueHolderProxy(string $class, $initializer);
  }
 } 	
@@ -4228,9 +4228,9 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 
 
-	public function getAsRemoteObjectProxy(string $class, ?string $url = null){
-             $container  = $this->getAsContainer(null);
-            $config = $container->get('proxy-object-factory.cache-configuration');
+	public function getAsRemoteObjectProxy(string $class, ?string $url = null, ?ContainerInterface $container=null){
+             $cont  = null!==$container ? $container : $this->getAsContainer(null);
+            $config = $cont->get('proxy-object-factory.cache-configuration');
 	           $registered = false;
 	          if ($funcs = \spl_autoload_functions()) {
                       $index = array_search($config->getProxyAutoloader(), $funcs, true);
@@ -4250,7 +4250,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
                   }
 
                        if(!is_string($url)){
-                          $url =  $container->get('app.runtime.codebase')
+                          $url =  $cont->get('app.runtime.codebase')
 			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_PROXY_OBJECT_REMOTE)
 	                     .'/?class='.urlencode($class)
 	                   ;
@@ -4623,13 +4623,8 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		]);
 
  
-                $this['Container']->setFinalFallbackContainer(
-			$this->getAsRemoteObjectProxy(
-				\IO4FallbackContainer::class, 
-				$this['Container']->get('app.runtime.codebase')
-			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE)	                  
-			)		
-		);
+	  $this['Container']->setFinalFallbackContainer(new \IO4FallbackContainerClient ($this['Container']) );
+		
 	  return $this['Container'];	
 	}
 

@@ -3157,7 +3157,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 						: rtrim( \sys_get_temp_dir(), \DIRECTORY_SEPARATOR.'/\\').\DIRECTORY_SEPARATOR.'temp-lint';
 		
            $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
-           $ShutdownTasks(function($update, $newVersion, $config, $configVersion, $url, $file, &$me){
+           $ShutdownTasks(function($update, $newVersion, $config, $configVersion, $url, $file, $me){
 		 if((is_string($update) && 'auto' === $update) || (is_null($update) && !is_string($newVersion))  ){
 			 $update =  true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'];
 		 }elseif( is_string($update) && 'auto' !== $update  ){
@@ -3189,7 +3189,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 				 ]);			    
 				 $varExports = var_export($export, true);
 				 
-			     file_put_contents($this->getStubVM()->location.'.version_config.php', '<?php
+			     file_put_contents($me->getStubVM()->location.'.version_config.php', '<?php
 			        return '.$varExports.';             
 	                    ');
 

@@ -3153,11 +3153,19 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	   $config=$this->config();	
 	   $configVersion = $this->configVersion();
 
+		/*
 		$cacheDirLint = (!empty($_ENV['FRDL_HPS_CACHE_DIR'])) ? rtrim($_ENV['FRDL_HPS_CACHE_DIR'], \DIRECTORY_SEPARATOR.'/\\').\DIRECTORY_SEPARATOR.'temp-lint' 
 						: rtrim( \sys_get_temp_dir(), \DIRECTORY_SEPARATOR.'/\\').\DIRECTORY_SEPARATOR.'temp-lint';
+*/
+		           $ContainerBuilder = isset($this['Container']) ? $this['Container'] : false;
+			   $cacheDirLint = rtrim((false !== $ContainerBuilder && $ContainerBuilder->has('app.runtime.dir')
+								 ? $ContainerBuilder->get('app.runtime.dir') 
+								 : getenv('FRDL_WORKSPACE') ) , \DIRECTORY_SEPARATOR.'/\\ )
+						              .\DIRECTORY_SEPARATOR. 'runtime' .\DIRECTORY_SEPARATOR
+				                              . 'tmp' .\DIRECTORY_SEPARATOR. 'temp-lint' .\DIRECTORY_SEPARATOR;
 		
            $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
-           $ShutdownTasks(function($update, $newVersion, $config, $configVersion, $url, $file, $me){
+           $ShutdownTasks(function($update, $newVersion, $config, $configVersion, $url, $file, $cacheDirLint, $me){
 		 if((is_string($update) && 'auto' === $update) || (is_null($update) && !is_string($newVersion))  ){
 			 $update =  true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'];
 		 }elseif( is_string($update) && 'auto' !== $update  ){
@@ -3178,11 +3186,13 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 			 }
 			 if(false!==$thisCode && true === (new \frdl\Lint\Php($cacheDirLint) )->lintString($thisCode) ){	   
 				 file_put_contents($file, trim($thisCode));	  
-			 }	
+			 }else{
+                            throw new \Exception(sprintf('Ivalid updated stub-code for %s %s in %s.',$configVersion['appId'], $newVersion,  __METHOD__));
+	                   return;
+                         }
 			 
 			 if(is_string($newVersion)){
 			          $configVersion['version'] = $newVersion;
-			     //   $me->configVersion($configVersion);	
 				
 				 $export = array_merge($configVersion, [
 					 'version' => $newVersion,
@@ -3195,7 +3205,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 
 			 }
 		 }																 
-             }, $update, $newVersion, $config, $configVersion, $url, __FILE__ , $this);  	
+             }, $update, $newVersion, $config, $configVersion, $url, __FILE__ , $cacheDirLint, $this);  	
 	}
 	
 	

@@ -4561,129 +4561,55 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 		$Stubrunner = $this;
  
-		$this['Container'] = $this->getAsContainer('root',[
-		  'config.params.app.dir'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
-			return $container->get('app.runtime.stubrunner')->getApplicationsDirectory();			
-		  }, 'factory'],							   
-		  'config.params.dirs.runtime'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
-			return rtrim($container->get('config.params.app.dir'), \DIRECTORY_SEPARATOR)
-				.\DIRECTORY_SEPARATOR
-				.'runtime'
-				;			
-		  }, 'factory'],								   
-		  'config.params.dirs.runtime.cache'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
-			return rtrim($container->get('config.params.dirs.runtime'), \DIRECTORY_SEPARATOR)
-				.\DIRECTORY_SEPARATOR
-				.'cache'
-				;			
-		  }, 'factory'],	
-
-		
-							   
-		  'proxy-object-factory.cache-configuration'=> (function(ContainerInterface $container){	
-			 $config = new \ProxyManager\Configuration();
-	
-			  $proxyCacheDir = rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR)
-				.\DIRECTORY_SEPARATOR
-				  .'proxy-objects'
-				  .\DIRECTORY_SEPARATOR
-				  .'remote-api' 
-				  .\DIRECTORY_SEPARATOR 
-				  .'generated-classes';
-	
-			  if(!is_dir($proxyCacheDir)){	
-			    @mkdir($proxyCacheDir, 0755, true);		
-			  }
-		
-			  // generate the proxies and store them as files
-	
-			  $fileLocator = new \ProxyManager\FileLocator\FileLocator($proxyCacheDir);
-	
-			  $config->setGeneratorStrategy(new \ProxyManager\GeneratorStrategy\FileWriterGeneratorStrategy($fileLocator));
-	
-			  // set the directory to read the generated proxies from
-	
-			  $config->setProxiesTargetDir($proxyCacheDir);
-
-			  // then register the autoloader   
-			   \spl_autoload_register($config->getProxyAutoloader(), true, true);
-
-			  return $config;
-		  }),	
-
-	 			
+		$this['Container'] = $this->getAsContainer('root', 
+		   array_merge([
+		 		
 		  'container'=> [function(ContainerInterface $container, $previous = null) use(&$Stubrunner) {				
 			  return $Stubrunner['Container'];
 		  }, 'factory'],	 								   
 		  'app.runtime.stubrunner'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) use(&$Stubrunner){
 			return $Stubrunner;			
-		  }, 'factory'],	                        		 
-		  'FacadesAliasManager'=>  (function(\Psr\Container\ContainerInterface $container){		   
-			  return new \Statical\Manager();
-		  }),	
-		  'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-			return $container->get('app.runtime.stubrunner')->getStub();			
-		  }, 'factory'],   
-		  'app.runtime.codebase'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-			return $container->get('app.runtime.stubrunner')->getCodebase();	
-		  }, 'factory'],    
-		  'app.runtime.autoloader.remote'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-			return $container->get('app.runtime.stubrunner')->getRemoteAutoloader();	
-		  }, 'factory'],   	
+		  }, 'factory'],	
 
-
-
-			\Invoker\InvokerInterface::class =>  (function(ContainerInterface $container){	
-				 return $container->get('invoker');
-			}),
-		  
-			'invoker' =>(function(ContainerInterface $container){			  		
-				$invoker =  (new \Invoker\Invoker(null, $container->has('container') ? $container->get('container') : $container )); 
-				$invoker->getParameterResolver()->prependResolver(						
-					new \Invoker\ParameterResolver\Container\ParameterNameContainerResolver($container->has('container') ? $container->get('container') : $container) 
-				);
-				$invoker->getParameterResolver()->prependResolver(
-					new \Invoker\ParameterResolver\Container\TypeHintContainerResolver($container->has('container') ? $container->get('container') : $container)
-				); 
-				return $invoker;
-		        }),	
-
-
-		   'module.loader.CommonJS' => $this->_getCommonJSDefinition(), 				
-		
-		   'define' => (function(ContainerInterface $container){
-				 $commonJS = $container->get('module.loader.CommonJS');
-		       return $commonJS['define'];
-		    }),
-	
-		  'defined' =>(function(ContainerInterface $container){
-				 $commonJS = $container->get('module.loader.CommonJS');
-		       return $commonJS['defined'];
-		   }),
-			
-		   'require' => (function(ContainerInterface $container){
-				 $commonJS = $container->get('module.loader.CommonJS');
-		       return $commonJS['require'];
-		   }),		
+                   'module.loader.CommonJS' => $this->_getCommonJSDefinition(), 
 							   
-
-							   
-		], [
+		   ],
+		   $this->getStubVM()->_run_php_1( 
+			   $this->getStubVM()
+			   ->get_file($this->getStub(), '$HOME/container_default_definitions.php', 'stub container_default_definitions.php')									   
+		   )
+		 ),//array_merge default definitions
+		 [
 			'onFalseGet'=>\IO4\Container\ContainerCollectionInterface::NULL_ONERROR,				   
 			'callId'=>\IO4\Container\ContainerCollectionInterface::CALL_ID,				   
 		]);
  
 
-	  	$stubContainerId = 'stub';		   
-		$this['Container']->addContainer($this->getAsContainer('stub'), $stubContainerId);
-
-		
-		 $this['Container']->setFinalFallbackContainer(new \IO4FallbackContainerClient (
+     	         $this['Container']->setFinalFallbackContainer(new \IO4FallbackContainerClient (
 		             $this['Container']->get('proxy-object-factory.cache-configuration'),
 			         $this['Container']->get('app.runtime.codebase')
 			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE),
 			      $this['Container']
 		   ) );
+
+
+		  $this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, function(ContainerInterface $container)  {                 
+			     $invoker = $container->get('invoker');
+			      $call = (function(array | \callable | \closure $callback, array $params = []) use(&$invoker){	           
+				 	if(is_array($callback)){
+			                    $fn = (\Closure::fromCallable($callback))->bindTo($callback[0], \get_class($callback[0]));
+			                    $callback = $fn;		           
+				 	}		                                     
+					 
+					return $invoker->call($callback, $params);		           
+				  });
+                   
+			   return $call;
+		     });	
+
+
+	  	$stubContainerId = 'stub';		   
+		$this['Container']->addContainer($this->getAsContainer('stub'), $stubContainerId);		
 		
 	  return $this['Container'];	
 	}
@@ -5153,7 +5079,125 @@ abstract class Codebase
 
 
 
+--3333EVGuDPPT
+Content-Disposition: "php" ; filename="$HOME/container_default_definitions.php" ; name="stub container_default_definitions.php"
+Content-Type: application/x-httpd-php
 
+<?php
+ 
+   return [
+		  'config.params.app.dir'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
+			return $container->get('app.runtime.stubrunner')->getApplicationsDirectory();			
+		  }, 'factory'],							   
+		  'config.params.dirs.runtime'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
+			return rtrim($container->get('config.params.app.dir'), \DIRECTORY_SEPARATOR)
+				.\DIRECTORY_SEPARATOR
+				.'runtime'
+				;			
+		  }, 'factory'],								   
+		  'config.params.dirs.runtime.cache'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
+			return rtrim($container->get('config.params.dirs.runtime'), \DIRECTORY_SEPARATOR)
+				.\DIRECTORY_SEPARATOR
+				.'cache'
+				;			
+		  }, 'factory'],	
+
+		
+							   
+		  'proxy-object-factory.cache-configuration'=> (function(ContainerInterface $container){	
+			 $config = new \ProxyManager\Configuration();
+	
+			  $proxyCacheDir = rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR)
+				.\DIRECTORY_SEPARATOR
+				  .'proxy-objects'
+				  .\DIRECTORY_SEPARATOR
+				  .'remote-api' 
+				  .\DIRECTORY_SEPARATOR 
+				  .'generated-classes';
+	
+			  if(!is_dir($proxyCacheDir)){	
+			    @mkdir($proxyCacheDir, 0755, true);		
+			  }
+		
+			  // generate the proxies and store them as files
+	
+			  $fileLocator = new \ProxyManager\FileLocator\FileLocator($proxyCacheDir);
+	
+			  $config->setGeneratorStrategy(new \ProxyManager\GeneratorStrategy\FileWriterGeneratorStrategy($fileLocator));
+	
+			  // set the directory to read the generated proxies from
+	
+			  $config->setProxiesTargetDir($proxyCacheDir);
+
+			  // then register the autoloader   
+			   \spl_autoload_register($config->getProxyAutoloader(), true, true);
+
+			  return $config;
+		  }),	
+
+	 			
+
+	
+		  'FacadesAliasManager'=>  (function(\Psr\Container\ContainerInterface $container){		   
+			  return new \Statical\Manager();
+		  }),	
+		  'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getStub();			
+		  }, 'factory'],   
+		  'app.runtime.codebase'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getCodebase();	
+		  }, 'factory'],    
+		  'app.runtime.autoloader.remote'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getRemoteAutoloader();	
+		  }, 'factory'],   	
+
+
+
+			\Invoker\InvokerInterface::class =>  (function(ContainerInterface $container){	
+				 return $container->get('invoker');
+			}),
+		  
+			'invoker' =>(function(ContainerInterface $container){			  		
+				$invoker =  (new \Invoker\Invoker(null, $container->has('container') ? $container->get('container') : $container )); 
+				$invoker->getParameterResolver()->prependResolver(						
+					new \Invoker\ParameterResolver\Container\ParameterNameContainerResolver($container->has('container') ? $container->get('container') : $container) 
+				);
+				$invoker->getParameterResolver()->prependResolver(
+					new \Invoker\ParameterResolver\Container\TypeHintContainerResolver($container->has('container') ? $container->get('container') : $container)
+				); 
+				return $invoker;
+		        }),	
+
+
+		  				
+		
+		   'define' => (function(ContainerInterface $container){
+				 $commonJS = $container->get('module.loader.CommonJS');
+		       return $commonJS['define'];
+		    }),
+	
+		  'defined' =>(function(ContainerInterface $container){
+				 $commonJS = $container->get('module.loader.CommonJS');
+		       return $commonJS['defined'];
+		   }),
+			
+		   'require' => (function(ContainerInterface $container){
+				 $commonJS = $container->get('module.loader.CommonJS');
+		       return $commonJS['require'];
+		   }),		
+							   
+                    \Webfan\InstallerClient::class => (function(ContainerInterface $container){
+			return new \Webfan\InstallerClient(
+                              $container->get('proxy-object-factory.cache-configuration'),
+			      $container->get('app.runtime.codebase')
+			        ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_INSTALLER_REMOTE),
+			      $container
+			);	 
+		   }),		
+							   
+		];
+ 
+		
 --3333EVGuDPPT
 Content-Disposition: "php" ; filename="$HOME/version_config.php" ; name="stub version_config.php"
 Content-Type: application/x-httpd-php

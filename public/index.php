@@ -3146,28 +3146,40 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	
 	public function autoUpdateStub(string | bool $update = null, string $newVersion = null, string $url = null){
 	  $this->init();	
-	  if(null === $url){
-	     $url = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time();	  
-	  }
 	
 	   $config=$this->config();	
 	   $configVersion = $this->configVersion();
+	   $configVersionOld = array_merge([], $configVersion);	
 
-		/*
-		$cacheDirLint = (!empty($_ENV['FRDL_HPS_CACHE_DIR'])) ? rtrim($_ENV['FRDL_HPS_CACHE_DIR'], \DIRECTORY_SEPARATOR.'/\\').\DIRECTORY_SEPARATOR.'temp-lint' 
-						: rtrim( \sys_get_temp_dir(), \DIRECTORY_SEPARATOR.'/\\').\DIRECTORY_SEPARATOR.'temp-lint';
-*/
-		           $ContainerBuilder = isset($this['Container']) ? $this['Container'] : false;
-			   $cacheDirLint = rtrim((false !== $ContainerBuilder && $ContainerBuilder->has('app.runtime.dir')
+		           $ContainerBuilder = isset($this['Container']) ? $this['Container'] : $this->getAsContainer(null);
+			   $cacheDirLint = rtrim(($ContainerBuilder && $ContainerBuilder->has('app.runtime.dir')
 								 ? $ContainerBuilder->get('app.runtime.dir') 
 								 : getenv('FRDL_WORKSPACE') ) , \DIRECTORY_SEPARATOR.'/\\ ')
 						              .\DIRECTORY_SEPARATOR. 'runtime' .\DIRECTORY_SEPARATOR
 				                              . 'tmp' .\DIRECTORY_SEPARATOR. 'temp-lint' .\DIRECTORY_SEPARATOR;
 		
            $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
-           $ShutdownTasks(function($update, $newVersion, $config, $configVersion, $url, $file, $cacheDirLint, $me){
+           $ShutdownTasks(function($update, $newVersion, $config, $configVersion, $url, $file, $cacheDirLint, $configVersionOld, $me){
+
+                  if(!sset($configVersion['last_time_update_check'])){
+                      $configVersion['last_time_update_check'] = 0;//filemtime($file);
+		  }
+		   
+                  if(!sset($configVersion['last_time_update_stub'])){
+                      $configVersion['last_time_update_stub'] = 0;
+		  }
+
+		   
 		 if((is_string($update) && 'auto' === $update) || (is_null($update) && !is_string($newVersion))  ){
-			 $update =  true === $config['autoupdate'] && filemtime($file) < time() - $config['AUTOUPDATE_INTERVAL'];
+			 $update =  true === $config['autoupdate']
+				 && max($configVersion['last_time_update_stub'], $configVersion['last_time_update_check'])
+				 < time() - $config['AUTOUPDATE_INTERVAL'];
+
+			 /**
+                          @todo: get newversion and url from api...
+			 **/
+                         
+			 
 		 }elseif( is_string($update) && 'auto' !== $update  ){
 			$update =  false;
 		 }elseif( is_bool($update) ){
@@ -3178,22 +3190,27 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 			$update =  $update || !version_compare($configVersion['version'], $newVersion, '==');
 		   }
 		   
-		 if(true === $update){	  
+		 if(true === $update){	 
+			 
+			 if(null === $url){	     
+			     $url = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time();	  	 
+			 }
+
+			 
 			 $thisCode = file_get_contents($url);	
 			 if(isset($configVersion['appId'])){
 			   $thisCode = str_replace("/****'appId'=>'@@@APPID@@@',*****/", '\'appId\'=>\''.$configVersion['appId'].'\',', $thisCode);	
                            $thisCode = str_replace('/****$configVersion[\'appId\']=\'@@@APPID@@@\';*****/', '$configVersion[\'appId\']=\''.$configVersion['appId'].'\';', $thisCode);
 			 }
 			 if(false!==$thisCode && true === (new \frdl\Lint\Php($cacheDirLint) )->lintString($thisCode) ){	   
-				 file_put_contents($file, trim($thisCode));	  
-			 }else{
-                            throw new \Exception(sprintf('Ivalid updated stub-code for %s %s in %s.',$configVersion['appId'], $newVersion,  __METHOD__));
-	                   return;
-                         }
+				 file_put_contents($file, trim($thisCode));	 
+				 $configVersion['last_time_update_stub'] = time();
+			
 			 
-			 if(is_string($newVersion)){
+			    if(is_string($newVersion)){
 			          $configVersion['version'] = $newVersion;
-				
+
+				 /*
 				 $export = array_merge($configVersion, [
 					 'version' => $newVersion,
 				 ]);			    
@@ -3202,10 +3219,23 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 			     file_put_contents($me->getStubVM()->location.'.version_config.php', '<?php
 			        return '.$varExports.';             
 	                    ');
+                              */
+			   }
 
-			 }
-		 }																 
-             }, $update, $newVersion, $config, $configVersion, $url, __FILE__ , $cacheDirLint, $this);  	
+			 }else{
+			     // $this->configVersion($configVersion);	 
+                          //  throw new \Exception(sprintf('Ivalid updated stub-code for %s %s in %s.',$configVersion['appId'], $newVersion,  __METHOD__));
+	                   //return;
+				 $configVersion['last_time_update_check'] = time();
+                         } 
+			
+		 }			
+
+		   if(0 < count( array_diff_assoc($configVersion, $configVersionOld) )){
+                       $this->configVersion($configVersion);
+		   }
+		   
+             }, $update, $newVersion, $config, $configVersion, $url, __FILE__ , $cacheDirLint, $configVersionOld, $this);  	
 	}
 	
 	
@@ -3786,9 +3816,9 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	}		
 	
 	
-	  public function init () : void {
+public function init () : void {
 	\frdl\booting\once(function(){
-$getRootDir;	
+ $getRootDir;	
  $getRootDir = (function($path = null) use(&$getRootDir){
 	if(null===$path){
 		$path = $_SERVER['DOCUMENT_ROOT'];
@@ -3851,11 +3881,9 @@ $drush_server_home = (function() use($getRootDir) {
 $_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'] = (isset($_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'])) ? intval($_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']) : time() - filemtime(__FILE__);
 putenv('FRDL_HPS_PSR4_CACHE_LIMIT='.$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']);
 
-//$_ENV['HOME'] = $drush_server_home();
-//putenv('HOME='.$_ENV['HOME']);
-$_ENV['FRDL_HOME'] = $drush_server_home();
+$__home = $drush_server_home();
+$_ENV['FRDL_HOME'] = @is_readable($__home) && @is_writable($__home) ? $__home : $getRootDir($_SERVER['DOCUMENT_ROOT']);
 putenv('FRDL_HOME='.$_ENV['FRDL_HOME']);
-//putenv('HOME='.$_ENV['FRDL_HOME']);	
 
 $_homeg = str_replace(\DIRECTORY_SEPARATOR, '/', getenv('FRDL_HOME'));
 	
@@ -3899,7 +3927,8 @@ $_dir = getenv('FRDL_HOME') . \DIRECTORY_SEPARATOR . '.frdl';
 
        //$getRootDir($_SERVER['DOCUMENT_ROOT'])
      // $dirs = array_filter(glob($_SERVER['DOCUMENT_ROOT'].'/../*'), 'is_dir');
-      $dirs = array_filter(glob($drush_server_home().'/*/'), 'is_dir');
+      $possibleFiles = glob($drush_server_home().'/*/');
+      $dirs = array_filter(is_array($possibleFiles) ? $possibleFiles : [], 'is_dir');
       
       foreach ($dirs as $dir) {
       		

@@ -1516,7 +1516,7 @@ class Php
 
 
 
-namespace App\compiled\Instance\MimeStub5\MimeStubEntity305344575{
+namespace App\compiled\Instance\MimeStub5\MimeStubEntity{
 use frdl;
 use frdlweb\StubItemInterface as StubItemInterface;	 
 use frdlweb\StubHelperInterface as StubHelperInterface;

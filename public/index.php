@@ -3160,7 +3160,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 		           $ContainerBuilder = isset($this['Container']) ? $this['Container'] : false;
 			   $cacheDirLint = rtrim((false !== $ContainerBuilder && $ContainerBuilder->has('app.runtime.dir')
 								 ? $ContainerBuilder->get('app.runtime.dir') 
-								 : getenv('FRDL_WORKSPACE') ) , \DIRECTORY_SEPARATOR.'/\\ )
+								 : getenv('FRDL_WORKSPACE') ) , \DIRECTORY_SEPARATOR.'/\\ ')
 						              .\DIRECTORY_SEPARATOR. 'runtime' .\DIRECTORY_SEPARATOR
 				                              . 'tmp' .\DIRECTORY_SEPARATOR. 'temp-lint' .\DIRECTORY_SEPARATOR;
 		

@@ -3160,11 +3160,9 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 			   if (strtolower(\php_sapi_name()) !== 'cli') {	  
 				   @set_time_limit(180);
 			   }
-			   @ini_set('display_errors','On');
-			   error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);		
-	
-
-   
+			  // @ini_set('display_errors','On');
+			  // error_reporting(\E_ERROR | \E_WARNING | \E_PARSE);		
+	  
 			   $configVersion['last_time_update_check'] = time();
 			   $configVersion['last_time_update_stub']  = time();
  
@@ -3188,28 +3186,23 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	                    ');   
 			   }
 		   }
-		   
-		   
-		 if((is_string($update) && 'auto' === $update) || (is_null($update) && !is_string($newVersion))  ){
-			 $update =  true === $config['autoupdate']
-				 && max($configVersion['last_time_update_stub'], $configVersion['last_time_update_check'])
-				 < time() - $config['AUTOUPDATE_INTERVAL'];
-
-			 /**
-                          @todo: get newversion and url from api...
-			 **/
-                         
-			 
-		 }elseif( is_string($update) && 'auto' !== $update  ){
-			$update =  false;
-		 }elseif( is_bool($update) ){
-			$update =  (bool)$update;
-		 }
-
-
-                   if(!is_string($newVersion) ){
+             
+		   if(!is_string($newVersion) && isset($configVersion['update_stub_latest_version']) ){
                       $newVersion =  $configVersion['update_stub_latest_version'];
 		   }
+		   
+		   
+		 if((is_string($update) && 'auto' === $update) ){
+			 $update =  true === $config['autoupdate']
+				 && max($configVersion['last_time_update_stub'], $configVersion['last_time_update_check'])
+				 < time() - $config['AUTOUPDATE_INTERVAL']
+				  && !version_compare($configVersion['version'], $newVersion, '==');
+	 
+		 }elseif( is_bool($update) ){
+			$update =  (bool)$update;
+		 }else{
+			$update =  false;
+		 }
 		   
 		   if( is_string($newVersion) ){
                        	$configVersion['update_stub_download_url']=isset($configVersion['versions'][$newVersion]) && isset($configVersion['versions'][$newVersion]['update_stub_download_url'])

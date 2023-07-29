@@ -3208,9 +3208,10 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 			
 			 
 			    if(is_string($newVersion)){
-			          $configVersion['version'] = $newVersion;
+			        /* 
+	                        $configVersion['version'] = $newVersion;
 
-				 /*
+				
 				 $export = array_merge($configVersion, [
 					 'version' => $newVersion,
 				 ]);			    
@@ -3231,8 +3232,16 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 			
 		 }			
 
-		   if(0 < count( array_diff_assoc($configVersion, $configVersionOld) )){
-                       $this->configVersion($configVersion);
+		   if(0 < count( array_diff_assoc($configVersion, $configVersionOld) )){                                         
+			   //  $this->configVersion($configVersion);			   			
+			      $export = array_merge($configVersion, [
+					 'version' => is_string($newVersion) ? $newVersion : $configVersion['version'],
+				 ]);			    
+				 $varExports = var_export($export, true);
+				 
+			     file_put_contents($me->getStubVM()->location.'.version_config.php', '<?php
+			        return '.$varExports.';             
+	                    ');
 		   }
 		   
              }, $update, $newVersion, $config, $configVersion, $url, __FILE__ , $cacheDirLint, $configVersionOld, $this);  	

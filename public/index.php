@@ -3161,11 +3161,11 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
            $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
            $ShutdownTasks(function($update, $newVersion, $config, $configVersion, $url, $file, $cacheDirLint, $configVersionOld, $me){
 
-                  if(!sset($configVersion['last_time_update_check'])){
+                  if(!isset($configVersion['last_time_update_check'])){
                       $configVersion['last_time_update_check'] = 0;//filemtime($file);
 		  }
 		   
-                  if(!sset($configVersion['last_time_update_stub'])){
+                  if(!isset($configVersion['last_time_update_stub'])){
                       $configVersion['last_time_update_stub'] = 0;
 		  }
 

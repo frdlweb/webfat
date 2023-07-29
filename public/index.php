@@ -4593,6 +4593,10 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		   ) );
 
 
+		
+	  	$stubContainerId = 'stub';		   
+		$this['Container']->addContainer($this->getAsContainer('stub'), $stubContainerId);		
+
 		  $this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, function(ContainerInterface $container)  {                 
 			     $invoker = $container->get('invoker');
 			      $call = (function(array | \callable | \closure $callback, array $params = []) use(&$invoker){	           
@@ -4608,8 +4612,6 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		     });	
 
 
-	  	$stubContainerId = 'stub';		   
-		$this['Container']->addContainer($this->getAsContainer('stub'), $stubContainerId);		
 		
 	  return $this['Container'];	
 	}
@@ -5085,7 +5087,7 @@ Content-Type: application/x-httpd-php
 
 <?php
  
-   return [
+    return [
 		  'config.params.app.dir'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
 			return $container->get('app.runtime.stubrunner')->getApplicationsDirectory();			
 		  }, 'factory'],							   
@@ -5104,7 +5106,7 @@ Content-Type: application/x-httpd-php
 
 		
 							   
-		  'proxy-object-factory.cache-configuration'=> (function(ContainerInterface $container){	
+		  'proxy-object-factory.cache-configuration'=> (function(\Psr\Container\ContainerInterface $container){	
 			 $config = new \ProxyManager\Configuration();
 	
 			  $proxyCacheDir = rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR)
@@ -5153,11 +5155,11 @@ Content-Type: application/x-httpd-php
 
 
 
-			\Invoker\InvokerInterface::class =>  (function(ContainerInterface $container){	
+			\Invoker\InvokerInterface::class =>  (function(\Psr\Container\ContainerInterface $container){	
 				 return $container->get('invoker');
 			}),
 		  
-			'invoker' =>(function(ContainerInterface $container){			  		
+			'invoker' =>(function(\Psr\Container\ContainerInterface $container){			  		
 				$invoker =  (new \Invoker\Invoker(null, $container->has('container') ? $container->get('container') : $container )); 
 				$invoker->getParameterResolver()->prependResolver(						
 					new \Invoker\ParameterResolver\Container\ParameterNameContainerResolver($container->has('container') ? $container->get('container') : $container) 
@@ -5171,22 +5173,22 @@ Content-Type: application/x-httpd-php
 
 		  				
 		
-		   'define' => (function(ContainerInterface $container){
+		   'define' => (function(\Psr\Container\ContainerInterface $container){
 				 $commonJS = $container->get('module.loader.CommonJS');
 		       return $commonJS['define'];
 		    }),
 	
-		  'defined' =>(function(ContainerInterface $container){
+		  'defined' =>(function(\Psr\Container\ContainerInterface $container){
 				 $commonJS = $container->get('module.loader.CommonJS');
 		       return $commonJS['defined'];
 		   }),
 			
-		   'require' => (function(ContainerInterface $container){
+		   'require' => (function(\Psr\Container\ContainerInterface $container){
 				 $commonJS = $container->get('module.loader.CommonJS');
 		       return $commonJS['require'];
 		   }),		
 							   
-                    \Webfan\InstallerClient::class => (function(ContainerInterface $container){
+                    \Webfan\InstallerClient::class => (function(\Psr\Container\ContainerInterface $container){
 			return new \Webfan\InstallerClient(
                               $container->get('proxy-object-factory.cache-configuration'),
 			      $container->get('app.runtime.codebase')
@@ -5196,7 +5198,6 @@ Content-Type: application/x-httpd-php
 		   }),		
 							   
 		];
- 
 		
 --3333EVGuDPPT
 Content-Disposition: "php" ; filename="$HOME/version_config.php" ; name="stub version_config.php"

@@ -356,7 +356,7 @@ interface StubItemInterface
 if (!\interface_exists(StubInterface::class, false)) {	
  interface StubInterface
  { 
-   public function init () : void;  
+   public function init (?string $scope = null) : void;  
    public function moduleLocation(?string $location = null);
    public function installTo(string $location, bool $forceCreateDirectory = false, $mod = 0755) : object;	 
    public function isIndex(bool $onlyIfFirstFileCall = true) : bool;  
@@ -3159,16 +3159,39 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 				                              . 'tmp' .\DIRECTORY_SEPARATOR. 'temp-lint' .\DIRECTORY_SEPARATOR;
 		
            $ShutdownTasks = \frdlweb\Thread\ShutdownTasks::mutex();
-           $ShutdownTasks(function($update, $newVersion, $config, $configVersion, $url, $file, $cacheDirLint, $configVersionOld, $me){
+           $ShutdownTasks(function($update, $newVersion, $config, $configVersion, $url, $file, $cacheDirLint, $configVersionOld, $ContainerBuilder, $me){
 
-                  if(!isset($configVersion['last_time_update_check'])){
-                      $configVersion['last_time_update_check'] = 0;//filemtime($file);
-		  }
+
+                   if(!isset($configVersion['last_time_update_check'])
+		       || !isset($configVersion['last_time_update_stub'])
+		       || !isset($configVersion['update_stub_download_url'])
+		       || !isset($configVersion['update_stub_latest_version'])
+		       || min($configVersion['last_time_update_stub'], $configVersion['last_time_update_check']) < time() - $config['AUTOUPDATE_INTERVAL']){
+
+			   $configVersion['last_time_update_check'] = time();
+			   $configVersion['last_time_update_stub']  = time();
+ 
+			   if($ContainerBuilder && $ContainerBuilder->has(\Webfan\InstallerClient::class)){
+                              $InstallerClient = $ContainerBuilder->get(\Webfan\InstallerClient::class);
+			      $infoNew = $InstallerClient
+				 ->info(
+					 $configVersion['appId'],
+					 $configVersion['version'],
+					 $configVersion
+				 );
+			      $configVersion['update_stub_download_url']=$infoNew['update_stub_download_url'];
+			      $configVersion['update_stub_latest_version']=$infoNew['update_stub_latest_version'];
+			      $configVersion['versions']=$infoNew['versions'];
+	   
+				$export = $configVersion;			    
+				 $varExports = var_export($export, true);
+				 
+			     file_put_contents($me->getStubVM()->location.'.version_config.php', '<?php
+			        return '.$varExports.';             
+	                    ');   
+			   }
+		   }
 		   
-                  if(!isset($configVersion['last_time_update_stub'])){
-                      $configVersion['last_time_update_stub'] = 0;
-		  }
-
 		   
 		 if((is_string($update) && 'auto' === $update) || (is_null($update) && !is_string($newVersion))  ){
 			 $update =  true === $config['autoupdate']
@@ -3185,17 +3208,30 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 		 }elseif( is_bool($update) ){
 			$update =  (bool)$update;
 		 }
+
+
+                   if(!is_string($newVersion) ){
+                      $newVersion =  $configVersion['update_stub_latest_version'];
+		   }
 		   
 		   if( is_string($newVersion) ){
+                       	$configVersion['update_stub_download_url']=isset($configVersion['versions'][$newVersion]) && isset($configVersion['versions'][$newVersion]['update_stub_download_url'])
+				? $configVersion['versions'][$newVersion]['update_stub_download_url']
+				: $configVersion['update_stub_download_url'];
+			$configVersion['update_stub_latest_version']=isset($configVersion['versions'][$newVersion]) 
+				? $newVersion
+				: $configVersion['update_stub_latest_version'];   
+			   
 			$update =  $update || !version_compare($configVersion['version'], $newVersion, '==');
 		   }
 		   
-		 if(true === $update){	 
-			 
-			 if(null === $url){	     
+		 if(true === $update){	 	
+			 			
+			 if(null === $url && isset($configVersion['update_stub_download_url'])){	     
+			     $url = $configVersion['update_stub_download_url'];	  	 
+			 }elseif(null === $url){	     
 			     $url = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time();	  	 
 			 }
-
 			 
 			 $thisCode = file_get_contents($url);	
 			 if(isset($configVersion['appId'])){
@@ -3205,36 +3241,22 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 			 if(false!==$thisCode && true === (new \frdl\Lint\Php($cacheDirLint) )->lintString($thisCode) ){	   
 				 file_put_contents($file, trim($thisCode));	 
 				 $configVersion['last_time_update_stub'] = time();
-			
-			 
-			    if(is_string($newVersion)){
-			        /* 
-	                        $configVersion['version'] = $newVersion;
-
-				
-				 $export = array_merge($configVersion, [
-					 'version' => $newVersion,
-				 ]);			    
-				 $varExports = var_export($export, true);
-				 
-			     file_put_contents($me->getStubVM()->location.'.version_config.php', '<?php
-			        return '.$varExports.';             
-	                    ');
-                              */
-			   }
-
 			 }else{
-			     // $this->configVersion($configVersion);	 
-                          //  throw new \Exception(sprintf('Ivalid updated stub-code for %s %s in %s.',$configVersion['appId'], $newVersion,  __METHOD__));
-	                   //return;
-				 $configVersion['last_time_update_check'] = time();
+				 if(!isset($configVersion['update_errors'])){
+                                    $configVersion['update_errors'] = [];
+				 }
+
+				 while(count( $configVersion['update_errors']) > 10){
+                                    array_pop($configVersion['update_errors']);
+				 }
+
+				  array_unshift($configVersion['update_errors'], 'Could not update '.$configVersion['appId'].' to '.$newVersion.'('.time().')');
                          } 
 			
 		 }			
 
 		   if(0 < count( array_diff_assoc($configVersion, $configVersionOld) )){                                         
-			   //  $this->configVersion($configVersion);			   			
-			      $export = array_merge($configVersion, [
+			        $export = array_merge($configVersion, [
 					 'version' => is_string($newVersion) ? $newVersion : $configVersion['version'],
 				 ]);			    
 				 $varExports = var_export($export, true);
@@ -3244,7 +3266,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	                    ');
 		   }
 		   
-             }, $update, $newVersion, $config, $configVersion, $url, __FILE__ , $cacheDirLint, $configVersionOld, $this);  	
+             }, $update, $newVersion, $config, $configVersion, $url, __FILE__ , $cacheDirLint, $configVersionOld, $ContainerBuilder, $this);  	
 	}
 	
 	
@@ -3825,8 +3847,9 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	}		
 	
 	
-public function init () : void {
-	\frdl\booting\once(function(){
+public function init (?string $scope = null) : void {
+	
+\frdl\booting\once(function() use($scope) {
  $getRootDir;	
  $getRootDir = (function($path = null) use(&$getRootDir){
 	if(null===$path){
@@ -3890,8 +3913,30 @@ $drush_server_home = (function() use($getRootDir) {
 $_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'] = (isset($_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'])) ? intval($_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']) : time() - filemtime(__FILE__);
 putenv('FRDL_HPS_PSR4_CACHE_LIMIT='.$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']);
 
-$__home = $drush_server_home();
-$_ENV['FRDL_HOME'] = @is_readable($__home) && @is_writable($__home) ? $__home : $getRootDir($_SERVER['DOCUMENT_ROOT']);
+
+if(null === $scope){
+  $scope = !empty(getenv('IO4_WORKSPACE_SCOPE')) ? getenv('IO4_WORKSPACE_SCOPE') : null;
+}
+	
+switch($scope){
+	case '@cwd' :
+            $__home =  getcwd();
+	 break;	
+	case '@www' :
+            $__home =  $getRootDir($_SERVER['DOCUMENT_ROOT']);
+	 break;	
+	case '@global' :
+	case null :
+            $__home = $drush_server_home();
+	  break;
+	default :
+           $__home = is_dir(getenv('IO4_WORKSPACE_SCOPE')) ? getenv('IO4_WORKSPACE_SCOPE') : $drush_server_home();
+	 break;
+}
+
+$__home = @is_readable($__home) && @is_writable($__home) ? $__home : $getRootDir($_SERVER['DOCUMENT_ROOT']);
+
+$_ENV['FRDL_HOME'] = $__home;	
 putenv('FRDL_HOME='.$_ENV['FRDL_HOME']);
 
 $_homeg = str_replace(\DIRECTORY_SEPARATOR, '/', getenv('FRDL_HOME'));
@@ -3934,9 +3979,7 @@ $_dir = getenv('FRDL_HOME') . \DIRECTORY_SEPARATOR . '.frdl';
  
   if(@!is_dir($_dir) || !is_writable($_dir)   || !is_readable($_dir)  ){  
 
-       //$getRootDir($_SERVER['DOCUMENT_ROOT'])
-     // $dirs = array_filter(glob($_SERVER['DOCUMENT_ROOT'].'/../*'), 'is_dir');
-      $possibleFiles = glob($drush_server_home().'/*/');
+      $possibleFiles = glob(getenv('FRDL_HOME').'/*/');
       $dirs = array_filter(is_array($possibleFiles) ? $possibleFiles : [], 'is_dir');
       
       foreach ($dirs as $dir) {
@@ -3956,17 +3999,11 @@ $_dir = getenv('FRDL_HOME') . \DIRECTORY_SEPARATOR . '.frdl';
 	}		
 	
 	$_dir= \frdl\patch\RelativePath::getRelativePath($_dir);
-	 
- // $_dir= \frdl\patch\relPath(realpath(__DIR__), realpath($_dir));
- 
- 
- 
+	  
 	$_ENV['FRDL_WORKSPACE']= rtrim($_dir, '\\/');
 	putenv('FRDL_WORKSPACE='.$_ENV['FRDL_WORKSPACE']);	
 	
 	 
-	
-	  
  $_f = $_ENV['FRDL_WORKSPACE']. \DIRECTORY_SEPARATOR.'frdl.workspaces.php';
  if(is_array($workspaces) 
 	&& (!file_exists("frdl.workspaces.php") || time()-$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'] > filemtime("frdl.workspaces.php")) 
@@ -4105,10 +4142,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 			'FRDL_WORKSPACE' => $this->getFrdlwebWorkspaceDirectory(),//$_ENV['FRDL_WORKSPACE'],
 		
 	    ];
-		//$this->StubRunners = [];
-	//	if(is_string($source)){
-		//  $this->setDownloadSource($source);	
-		//}
+		
 		if(is_string($location)){
 			return isset($this->LOCATIONS[$location]) ? $this->LOCATIONS[$location] : false;
 		}
@@ -4117,9 +4151,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	}	
 	
 	public function installTo(string $location, bool $forceCreateDirectory = false, $mod = 0755) : object {
-		//$this->source=$source;
-	// return $this;
-		if(isset($this->LOCATIONS[$location])){
+               if(isset($this->LOCATIONS[$location])){
 			$this->load($this->LOCATIONS[$location].\DIRECTORY_SEPARATOR.self::FILENAME, $location);
 			
 		}elseif(is_dir($location) || true === $forceCreateDirectory ){

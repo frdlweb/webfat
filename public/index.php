@@ -3252,7 +3252,15 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 
 				  array_unshift($configVersion['update_errors'], 'Could not update '.$configVersion['appId'].' to '.$newVersion.'('.time().')');
                          } 
-			
+
+			 if(getenv('FRDL_WORKSPACE') !== $_SERVER['DOCUMENT_ROOT'] 
+			    && !file_exists(getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'.htaccess') ){
+                                file_put_contents(getenv('FRDL_WORKSPACE').\DIRECTORY_SEPARATOR.'.htaccess', <<<HTACCESSCONTENT
+Deny from all
+Allow from localhost						  
+HTACCESSCONTENT);					
+					
+			 }
 		 }			
 
 		   if(0 < count( array_diff_assoc($configVersion, $configVersionOld) )){                                         

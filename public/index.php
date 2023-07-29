@@ -4292,8 +4292,11 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	   return $proxy;	
 	}
 	 	 
-	public function autoloadRemoteCodebase(){ 
-	  $loader = $this->getRemoteAutoloader();
+	public function autoloadRemoteCodebase(?bool $unregister = true){ 
+	       $loader = $this->getRemoteAutoloader();
+		 if(true===$unregister){
+		    $loader->unregister();
+		 }
 		$loader->register(false);
 		return $loader;
 	}	
@@ -4308,13 +4311,14 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 			\spl_autoload_register([$StubVM,'Autoload'], true, true);
 		}
 	  });
-		 $this->autoloadRemoteCodebase();
+		
+	     $this->autoloadRemoteCodebase(true);
 
 	     \frdl\booting\once(function() use(&$StubRunner) {	
 		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
 		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$HOME/detect.php', 'stub detect.php')); 
 	      });     
-	}	
+	}			
  
 	protected function _getCommonJSDefinition(){
 	  return (function(ContainerInterface $container){
@@ -4466,9 +4470,8 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 					   'https://startdir.de/install',
 		               'https://webfan.de/install/stable',
 		               'https://webfan.de/install/latest',
-		           //    'https://webfan.de/install/modules',
-                      'https://stable.software-download.frdlweb.de',
-					   'https://latest.software-download.frdlweb.de',
+                               'https://stable.software-download.frdlweb.de',
+			       'https://latest.software-download.frdlweb.de',
 		               $ContainerBuilder->get('app.runtime.dir'),
 		           ],
 		           'modulesExt' => '.php',
@@ -4622,7 +4625,11 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 			'callId'=>\IO4\Container\ContainerCollectionInterface::CALL_ID,				   
 		]);
  
-	  			   
+
+	  	$stubContainerId = 'stub';		   
+		$this['Container']->addContainer($this->getAsContainer('stub'), $stubContainerId);
+
+		
 		 $this['Container']->setFinalFallbackContainer(new \IO4FallbackContainerClient (
 		             $this['Container']->get('proxy-object-factory.cache-configuration'),
 			         $this['Container']->get('app.runtime.codebase')
@@ -4637,7 +4644,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	public function getAsContainer(?string $factoryId=null, ?array $definitions = [], ?array $options = []) : \Psr\Container\ContainerInterface {
 		$this->autoloading();
             switch($factoryId){ 
-
+		    case 'stub' :
 		    case 'StubContainer' :
 		    case 'StubContainerFactory' :
                        return new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter($this);
@@ -4648,7 +4655,6 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		    case 'ContainerCollection' :
 		    case \IO4\Container\ContainerCollectionInterface::class :
 		    case \Webfan\Webfat\App\ContainerCollection::class :
-		    //__construct(array $entries = null, int $onFalseGet = 0 NULL_ONERROR, string $callId = null)
 		       $class = \Webfan\Webfat\App\ContainerCollection::class;		    
                        return new $class(array_merge([], $definitions),
 				    array_merge(['onFalseGet'=>\IO4\Container\ContainerCollectionInterface::NULL_ONERROR,], $options)['onFalseGet'],
@@ -5003,6 +5009,7 @@ abstract class Codebase
 	  //   $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/container/?id=StubModuleBuilder', CodebaseInterface::ALL_CHANNELS);  
 	//    $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/class/?id=\frdlweb\StubModuleBuilder', CodebaseInterface::CHANNEL_FALLBACK);  
 	 //     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', CodebaseInterface::CHANNEL_TEST);
+	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/installer/webfan.endpoint.webfat-installer.php', CodebaseInterface::ALL_CHANNELS);
 	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', CodebaseInterface::CHANNEL_TEST);
 
 

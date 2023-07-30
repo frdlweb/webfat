@@ -5037,7 +5037,7 @@ Content-Type: application/x-httpd-php
  }),	
 		
 'fascades.module'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-    return (new (class() extends Webfan\Node{
+    return (new class() extends \Webfan\Node{
 		      use Webfan\withClassCastingTrait;
 		      protected static $_currentP;
 		      public function __construct( ){
@@ -5052,7 +5052,7 @@ Content-Type: application/x-httpd-php
 		      public function make($from, $to){
                          return $this->classCasting($to, $from);
                       }
-		 }));				 
+		 });				 
 }, 'factory'],  	
 	
 'fascades.stubrunner' =>( function(\Psr\Container\ContainerInterface $container){

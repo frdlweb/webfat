@@ -10,5 +10,9 @@ return [
              'enabled'=>true,
     ],
 
+    'ui'=>[
+             'enabled'=>true,
+    ],
+
 
 ];

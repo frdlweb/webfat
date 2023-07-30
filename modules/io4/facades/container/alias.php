@@ -10,7 +10,7 @@ return [
 	  	[
 											 
 	    ],
-	$container->has('container') ? $container->get('container') : $container);  //   new \App\Testy\Helper();
+	$container->has('container') ? $container->get('container') : $container);  
  }),
 
 ];

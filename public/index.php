@@ -4286,7 +4286,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	                $Manager = new \Statical\Manager();
                             if(is_callable([$container, 'set'])){
 			      try{	    
-                                 $container->set('FacadesAliasManager');
+                                 $container->set('FacadesAliasManager', $Manager);
 			      }catch(\Exception $e){
                                  if($throw){
                                    throw $e;
@@ -4302,8 +4302,8 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
                    return false;
 		 }
               try{	   
-		$Manager->addProxyService($alias,//$alias \FrdlTest::class,																	
-		  $proxy, //$proxy \FrdlTestTesterFascadeProxyObject::class																		
+		$Manager->addProxyService($alias,/* $alias 'Test',*/
+		  $proxy, /* $proxy \FrdlTestTesterFascadeProxyObject::class	*/																	
 		  $container,  //$container																		
 		  $id, //$id																		
 		 $namespace // $namespace								

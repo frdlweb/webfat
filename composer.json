@@ -2,7 +2,13 @@
   "name" : "frdlweb/webfat",
   "description": "Starting point for Webfat Initial Apps: DefaultPage, IO4, Docu, Demo, ...Wayne Insane initial files...",	  
   "license": ["MIT"],	  
+  "version" : "v0.0.2-next",
   "require" : {
 	    "php": ">=8.1"
-  }
+  },
+   "repositories": [
+	{"type": "composer", "url": "https://frdl.repo.pkg.frdl.de"},
+        {"type": "composer", "url": "https://repo.pkg.frdl.de"},
+        {"packagist": false}
+    ]	
 }

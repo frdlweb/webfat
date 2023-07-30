@@ -3,6 +3,9 @@ NIY: ~~Place content files for example.com into userdata/sites/example.com as in
 Changed:
 ° Use Webfan Webhosting API instead
 ° Introduced runtime "@Scopes":
+  + @transport - Transport and Transaction Contexts (via API/WEB)
+  + @tmp - Avoid any persistances in runtime if possible.
+  + @session - Avoid any longtime persistances in runtime if possible, although persist states in a time-limited session (user-session or other client-session).
   + @shared - The FRDL_WORKSPACE directory shareable by all sysusers/webhosts apps.
   + @global  - The /.frdl Workspace-Directory is placed/running in the machine users home directory.
   + @www  - The /.frdl Workspace-Directory is placed/running in the public web accessible DOCUMENT_ROOT folder.

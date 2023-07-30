@@ -4476,9 +4476,38 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 
 	if(!$this['Container']->has('config.runtime.import-facades') || false !== $this['Container']->get('config.runtime.import-facades')  ){
+/*
+		$this->getAsFacade('Config',
+				   \get_class(new class extends \Statical\BaseProxy{}), 
+				   'fascades.config',
+				    $this['Container']->has('config.runtime.import-facades')
+				    ? $this['Container']->get('config.runtime.import-facades')
+				    : '*',
+				   $this['Container'],
+				   true);
+		*/
                 $this->getAsFacade('Helper',
 				   \get_class(new class extends \Statical\BaseProxy{}), 
 				   'fascades.helper',
+				    $this['Container']->has('config.runtime.import-facades')
+				    ? $this['Container']->get('config.runtime.import-facades')
+				    : '*',
+				   $this['Container'],
+				   true);
+
+		             
+		$this->getAsFacade('Container',
+				   \get_class(new class extends \Statical\BaseProxy{}), 
+				   'fascades.container',
+				    $this['Container']->has('config.runtime.import-facades')
+				    ? $this['Container']->get('config.runtime.import-facades')
+				    : '*',
+				   $this['Container'],
+				   true);
+		
+		$this->getAsFacade('Stubrunner',
+				   \get_class(new class extends \Statical\BaseProxy{}), 
+				   'fascades.stubrunner',
 				    $this['Container']->has('config.runtime.import-facades')
 				    ? $this['Container']->get('config.runtime.import-facades')
 				    : '*',
@@ -4996,9 +5025,17 @@ Content-Type: application/x-httpd-php
 	    ],
 	$container->has('container') ? $container->get('container') : $container);  
  }),	
-				
+		
+'fascades.module'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+    return new Webfan\Node;				 
+}, 'factory'],  	
 	
-
+'fascades.stubrunner' =>( function(\Psr\Container\ContainerInterface $container){
+      return \Webfan\FacadeProxy::createProxy($container->get('app.runtime.stubrunner'));  
+ }),		
+'fascades.container' =>( function(\Psr\Container\ContainerInterface $container){
+      return \Webfan\FacadeProxy::createProxy($container->has('container') ? $container->get('container') : $container);  
+ }),
 		  'proxy-object-factory.cache-configuration'=> (function(\Psr\Container\ContainerInterface $container){	
 			 $config = new \ProxyManager\Configuration();
 	

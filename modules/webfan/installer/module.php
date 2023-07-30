@@ -7,7 +7,7 @@ return [
     ],
 
     'client'=>[
-             'true'=>false,
+             'enabled'=>true,
     ],
 
 

@@ -4486,6 +4486,16 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 				   $this['Container'],
 				   true);
 		*/
+		$this->getAsFacade('Module',
+				   \get_class(new class extends \Statical\BaseProxy{}), 
+				   'fascades.modules',
+				    $this['Container']->has('config.runtime.import-facades')
+				    ? $this['Container']->get('config.runtime.import-facades')
+				    : '*',
+				   $this['Container'],
+				   true);
+
+		
                 $this->getAsFacade('Helper',
 				   \get_class(new class extends \Statical\BaseProxy{}), 
 				   'fascades.helper',
@@ -5027,7 +5037,22 @@ Content-Type: application/x-httpd-php
  }),	
 		
 'fascades.module'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-    return new Webfan\Node;				 
+    return (new (class() extends Webfan\Node{
+		      use Webfan\withClassCastingTrait;
+		      protected static $_currentP;
+		      public function __construct( ){
+                        self::$_currentP=$this;
+                      }
+		      public function import($import){
+                         return $this->castFrom($import);
+                      }
+		      public function export($export){
+                         return $this->castTo($export);
+                      }
+		      public function make($from, $to){
+                         return $this->classCasting($to, $from);
+                      }
+		 }));				 
 }, 'factory'],  	
 	
 'fascades.stubrunner' =>( function(\Psr\Container\ContainerInterface $container){

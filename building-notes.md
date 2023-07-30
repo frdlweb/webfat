@@ -3,10 +3,12 @@ NIY: ~~Place content files for example.com into userdata/sites/example.com as in
 Changed:
 ° Use Webfan Webhosting API instead
 ° Introduced runtime "@Scopes":
+  + @shared - The FRDL_WORKSPACE directory shareable by all sysusers/webhosts apps.
   + @global  - The /.frdl Workspace-Directory is placed/running in the machine users home directory.
   + @www  - The /.frdl Workspace-Directory is placed/running in the public web accessible DOCUMENT_ROOT folder.
   + @cwd  - The /.frdl Workspace-Directory is placed/running in the current working directory.
-  + ?string - Specify a directory (e.g. Module folder)
+  + ?string - Specify a custom directory (e.g. a Modules folder)
+The availability of some scopes may depend on the PHP *open_basedir* settings.
 
 ## Building Flavors and Configurations
 °   | Enduser | Webmaster | Developer

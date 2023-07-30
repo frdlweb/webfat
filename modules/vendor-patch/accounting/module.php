@@ -3,21 +3,9 @@
 
 return [
     'enabled'=>false,
-    'server'=>[
-            'enabled'=>false,
-    ],
-
-    'client'=>[
-             'enabled'=>false,
-    ],
-
-    'ui'=>[
-             'enabled'=>false,
-    ],
-
      'package' => [
          'type'=>'webfan-module',
-          'dependencies' => [
+          'webfan-requires' => [
                 [
                    'id' => 'ext-db',
                    'type'=>'webfan-ext',

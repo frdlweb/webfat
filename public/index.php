@@ -4283,7 +4283,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
               $Manager = $container->has( 'FacadesAliasManager' ) 
 	          ? $container->get( 'FacadesAliasManager' ) 
 		  :  (function ($container, $throw) {	
-	                $Manager = new \Statical\Manager();
+	                $Manager = new \Statical\Manager('enable');
                             if(is_callable([$container, 'set'])){
 			      try{	    
                                  $container->set('FacadesAliasManager', $Manager);
@@ -5010,7 +5010,7 @@ Content-Type: application/x-httpd-php
 
 	
 		  'FacadesAliasManager'=>  (function(\Psr\Container\ContainerInterface $container){		   
-			  return new \Statical\Manager();
+			  return new \Statical\Manager('enable');
 		  }),	
 		  'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
 			return $container->get('app.runtime.stubrunner')->getStub();			

@@ -4473,6 +4473,18 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
                 $stubContainerId = 'stub';		   
 		$this['Container']->addContainer($this->getAsContainer('stub'), $stubContainerId);	
+
+
+	if(!$this['Container']->has('config.runtime.import-facades') || false !== $this['Container']->get('config.runtime.import-facades')  ){
+                $this->getAsFacade('Helper',
+				   \get_class(new class extends \Statical\BaseProxy{}), 
+				   'fascades.helper',
+				    $this['Container']->has('config.runtime.import-facades')
+				    ? $this['Container']->get('config.runtime.import-facades')
+				    : '*',
+				   $this['Container'],
+				   true);
+	}
 		
 	  return $this['Container'];	
 	}
@@ -4955,7 +4967,7 @@ Content-Disposition: "php" ; filename="$HOME/container_default_definitions.php" 
 Content-Type: application/x-httpd-php
 
 <?php
- 
+ //@ToDo: Compose from https://github.com/frdlweb/webfat and modules...
     return [
 		  'config.params.app.dir'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
 			return $container->get('app.runtime.stubrunner')->getApplicationsDirectory();			
@@ -4973,8 +4985,20 @@ Content-Type: application/x-httpd-php
 				;			
 		  }, 'factory'],	
 
-		
-							   
+	
+'fascades.helper' =>( function(\Psr\Container\ContainerInterface $container){
+	      return \Webfan\FacadeProxiesMap::createProxy([
+		        new \Webfan\Webfat\App\KernelHelper,
+		        new \Webfan\Webfat\App\KernelFunctions,
+		     ],
+	  	[
+											 
+	    ],
+	$container->has('container') ? $container->get('container') : $container);  
+ }),	
+				
+	
+
 		  'proxy-object-factory.cache-configuration'=> (function(\Psr\Container\ContainerInterface $container){	
 			 $config = new \ProxyManager\Configuration();
 	

@@ -5,5 +5,17 @@
 The code will change in future!
 
 # Installation
-* Set your webserver/webhost www-directory to the `public` directory
+There are 2-3 ways to use this framework:
 * You can go with the step by step guidance as this project grows by just [downloading ONE file](https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php).
+  * Copy it to any public webhost running PHP >=8.0 and open it in the browser.
+  * [Get help and support](https://frdl.de/groups/profile/139/webmaster)
+  * [Go professional](https://domainundhomepagespeicher.de/)
+
+* Set your webserver/webhost www-directory to the `public` directory.
+  * [Add or create Frdlweb Software](https://packages.frdl.de/)
+  * Use composer and/or the other tools.
+
+
+----
+More Infos...
+* [Building notes](building-notes.md)

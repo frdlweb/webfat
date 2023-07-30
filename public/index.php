@@ -3865,9 +3865,9 @@ public function init (?string $scope = null) : void {
 
  });		
 
-call_user_func(function()use($getRootDir) {
+call_user_func(function()use($getRootDir, $scope) {
 	
-$drush_server_home = (function() use($getRootDir) {
+$drush_server_home = (function() use($getRootDir, $scope) {
 	
 	if(function_exists('\posix_getpwuid') && function_exists('\posix_getui') ){		
 		$user = \posix_getpwuid(\posix_getuid());		

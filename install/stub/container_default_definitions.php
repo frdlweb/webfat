@@ -17,7 +17,17 @@
 				;			
 		  }, 'factory'],	
 
-		
+	    
+		  'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getStub();			
+		  }, 'factory'],   
+		  'app.runtime.codebase'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getCodebase();	
+		  }, 'factory'],    
+		  'app.runtime.autoloader.remote'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getRemoteAutoloader();	
+		  }, 'factory'],   	
+	    
 							   
 		  'proxy-object-factory.cache-configuration'=> (function(\Psr\Container\ContainerInterface $container){	
 			 $config = new \ProxyManager\Configuration();
@@ -56,15 +66,6 @@
 		  'FacadesAliasManager'=>  (function(\Psr\Container\ContainerInterface $container){		   
 			  return new \Statical\Manager('enable');
 		  }),	
-		  'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-			return $container->get('app.runtime.stubrunner')->getStub();			
-		  }, 'factory'],   
-		  'app.runtime.codebase'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-			return $container->get('app.runtime.stubrunner')->getCodebase();	
-		  }, 'factory'],    
-		  'app.runtime.autoloader.remote'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-			return $container->get('app.runtime.stubrunner')->getRemoteAutoloader();	
-		  }, 'factory'],   	
 
 		
 	    \Invoker\InvokerInterface::class =>  [(function(\Psr\Container\ContainerInterface $container){	
@@ -93,23 +94,25 @@
 			        ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_INSTALLER_REMOTE),
 			      $container
 			);	 
-		   }),	
+      }),	
 		   
       
       'define' => (function(\Psr\Container\ContainerInterface $container){
 				 $commonJS = $container->get('module.loader.CommonJS');
 		       return $commonJS['define'];
-		    }),
+	}),
 	
-		  'defined' =>(function(\Psr\Container\ContainerInterface $container){
+		
+	    'defined' =>(function(\Psr\Container\ContainerInterface $container){
 				 $commonJS = $container->get('module.loader.CommonJS');
 		       return $commonJS['defined'];
 		   }),
 			
-		   'require' => (function(\Psr\Container\ContainerInterface $container){
+		
+	    'require' => (function(\Psr\Container\ContainerInterface $container){
 				 $commonJS = $container->get('module.loader.CommonJS');
-		       return $commonJS['require'];
-		   }),		
+		       return $commonJS['require'];		 
+	    }),		
 
       
  'module.loader.CommonJS' => (function(\Psr\Container\ContainerInterface $container){

@@ -8,7 +8,7 @@ return [
           'webfan-requires' => [
                 [
                    'id' => 'ext-db',
-                   'type'=>'webfan-ext',
+                   'type'=>'webfan-extension',
                 ],
                 [
                    'id' => 'webfat:webfan/accounting',

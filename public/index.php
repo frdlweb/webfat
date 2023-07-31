@@ -5141,7 +5141,7 @@ Content-Type: application/x-httpd-php
 		   }),		
 							   
  \Webfan\InstallerClient::class => (function(\Psr\Container\ContainerInterface $container){
-        $proxy = new  \Webfan\RemoteObjectProxyClientFactory(
+      $proxy = new  \Webfan\RemoteObjectProxyClientFactory(
 		$container->get('app.runtime.codebase')
 			        ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_INSTALLER_REMOTE),
 		$container->get('proxy-object-factory.cache-configuration'),
@@ -5156,6 +5156,7 @@ Content-Type: application/x-httpd-php
 			      $container
 			);	 
               */
+	 return $proxy;
   }),	
 
  'module.loader.CommonJS' => (function(\Psr\Container\ContainerInterface $container){

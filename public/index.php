@@ -5140,14 +5140,23 @@ Content-Type: application/x-httpd-php
 		       return $commonJS['require'];
 		   }),		
 							   
-                    \Webfan\InstallerClient::class => (function(\Psr\Container\ContainerInterface $container){
+ \Webfan\InstallerClient::class => (function(\Psr\Container\ContainerInterface $container){
+      $proxy = new  RemoteObjectProxyClientFactory(
+		$container->get('app.runtime.codebase')
+			        ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_INSTALLER_REMOTE),
+		$container->get('proxy-object-factory.cache-configuration'),
+		\Webfan\Installer::class,
+		new \Webfan\Transform\RemoteApiObjectsTransformAll
+	);
+			    /*
 			return new \Webfan\InstallerClient(
                               $container->get('proxy-object-factory.cache-configuration'),
 			      $container->get('app.runtime.codebase')
 			        ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_INSTALLER_REMOTE),
 			      $container
 			);	 
-		   }),	
+              */
+  }),	
 
  'module.loader.CommonJS' => (function(\Psr\Container\ContainerInterface $container){
 

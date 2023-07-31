@@ -1503,6 +1503,139 @@ class Php
 
 
 
+namespace Webfan\Sandbox{
+
+use Webfan\Sandbox\EmptyWhitelistSecurityManager;
+
+// 'to-classmap/frdl/implementation/vendor/psx/sandbox/src/WebfanRuntime.php',
+use PSX\Sandbox\WebfanRuntime as BaseRuntime;
+// use PSX\Sandbox\Runtime as BaseRuntime;
+use PhpParser\Error;
+use PhpParser\ParserFactory;
+
+use PSX\Sandbox\Parser;
+use PSX\Sandbox\SecurityManager;
+ 
+class Runtime //extends BaseRuntime
+{
+    protected   $token;
+   // protected Parser $parser;
+    protected $cachePath;
+    protected  $context = [];
+	protected $SecurityManager;
+
+	public static function create(string $token, 
+								?string $cachePath = null,
+								 ?SecurityManager $SecurityManager = null //new EmptyWhitelistSecurityManager
+								 ){ 
+        $Runtime = new self($token,
+							$cachePath,
+							$SecurityManager);	
+		
+		return $Runtime;
+	}
+	
+    public function getSecurityManager()
+    {
+		return $this->SecurityManager;
+	}
+	
+    public function secman()
+    {
+		return $this->getSecurityManager();
+	}
+	
+    public function run($code, ?array $context = null)
+    {
+        $file = rtrim($this->cachePath, '//\ ').\DIRECTORY_SEPARATOR
+			. 'runtime_'.strlen($this->token).'_' . substr(sha1($this->token), 0, 8) . '.php';
+
+		$parser = new Parser($this->getSecurityManager());
+		$parsedCode = $parser->parse($code);
+		
+		
+        // write file if it does not exist or the code has changed
+        if (!file_exists($file) || !is_file($file) || sha1_file($file) != sha1($parsedCode)) {
+			if(!is_dir(dirname($file))){
+			  mkdir(dirname($file), 0755, true);	
+			}
+            file_put_contents($file, $parsedCode);
+        }
+ 
+		if(is_array($context)){
+			$this->set($context);
+		}
+        return self::runIsolate($file, $this->context);
+    }	
+	
+    public static function runIsolate($file, array $context)
+    {
+        return (static function ($context, $file) {
+              extract($context);
+              return include $file;
+        })($context, $file);
+    }
+	
+	
+	public function set($name, $value = null)
+    {
+		if(is_array($name)){					
+		  foreach( $name as $k => $v){
+			  $this->set($k, $v);
+		  }
+		}else{
+			$this->context[$name] = $value;
+		}        
+    }
+	
+
+ 
+    public function __construct(string $token, 
+								  //?array $context = [],
+								 ?string $cachePath = null,
+								 ?SecurityManager $SecurityManager = null //new EmptyWhitelistSecurityManager
+								//,?Parser $parser = null
+								)
+    {
+		
+		
+				
+		if(!is_string($cachePath)){
+			$cachePath = rtrim((is_callable('\Container::has') && \Container::has('app.runtime.dir')
+								 ? \Container::get('app.runtime.dir') 
+								 : getenv('FRDL_WORKSPACE') ) )
+						              .\DIRECTORY_SEPARATOR. 'runtime' .\DIRECTORY_SEPARATOR
+				                       . 'cache' .\DIRECTORY_SEPARATOR. 'sbxp-parsed-php-vm-scripts' .\DIRECTORY_SEPARATOR;	
+		}
+		
+        $this->token     = $token;
+        $this->SecurityManager    = $SecurityManager ?? new EmptyWhitelistSecurityManager;
+      //  $this->parser    = $parser ?? new Parser($SecurityManager);
+        $this->cachePath = $cachePath === null ? \sys_get_temp_dir() : $cachePath;
+        $this->context   = [];
+		 //if(is_array($context)){
+		 //  foreach( 	$context as $k => $v){
+		 //	  $this->set($k, $v);
+		 //  }
+		 //}
+    }
+ 
+}
+
+
+}//ns
+
+
+
+
+
+
+
+
+
+
+
+
 namespace App\compiled\Instance\MimeStub5\MimeStubEntity{
 use frdl;
 use frdlweb\StubItemInterface as StubItemInterface;	 

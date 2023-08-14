@@ -1913,7 +1913,7 @@ use Psr\Container\ContainerInterface;
 			       &&  class_exists(\Webfan\Helper\PhpBinFinder::class, $class !== \Webfan\Helper\PhpBinFinder::class) 
 			       &&  class_exists(\Symfony\Component\Process\ExecutableFinder::class, $class !== \Symfony\Component\Process\ExecutableFinder::class) 
 			       &&  class_exists(\Symfony\Component\Process\PhpExecutableFinder::class, $class !== \Symfony\Component\Process\PhpExecutableFinder::class) 
-			    ? (new \frdl\Lint\Php($cacheDirLint) ) ->lintString($codeWithStartTags)
+			    ? @(new \frdl\Lint\Php($cacheDirLint) ) ->lintString($codeWithStartTags)
 			    : true;
 	
 					if(true !==$fehler ){		

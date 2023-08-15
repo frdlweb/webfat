@@ -2789,7 +2789,7 @@ public function generateBundary($opts = array()) {
     
     public function getEcoding()
     {
-    	$this->encoding=strtolower($this->getHeader('Content-Transfer-Encoding'));
+    	$this->encoding=@strtolower($this->getHeader('Content-Transfer-Encoding'));
         return $this->encoding;
     }
     
@@ -2973,7 +2973,7 @@ public function generateBundary($opts = array()) {
      */
     static protected function parseHeaderContent($content)
     {
-        $parts = explode(';', $content);
+        $parts = @explode(';', $content);
         $headerValue = array_shift($parts);
         $options = array();
         // Parse options

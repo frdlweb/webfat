@@ -4604,8 +4604,9 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		 }	
 
 
-                $stubContainerId = 'stub';		   
-		$this['Container']->addContainer($this->getAsContainer('stub'), $stubContainerId);	
+                $stubContainerId = 'stub';		        
+		$stubContainer = $this->getAsContainer('stub');
+		$this['Container']->addContainer($stubContainer, $stubContainerId);	
 
 
 	if(!$this['Container']->has('config.runtime.import-facades') || false !== $this['Container']->get('config.runtime.import-facades')  ){

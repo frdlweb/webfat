@@ -461,8 +461,12 @@ if (!\interface_exists(StubHelperInterface::class, false)) {
 namespace PSX\Sandbox{
 	if(!function_exists('\PSX\Sandbox\runIsolate')){
 		function runIsolate($file, array $context){   
-			extract($context);    
-			return include $file;
+			if(\class_exists(\Webfan\Sandbox\Runtime::class)){
+                           return \Webfan\Sandbox\Runtime::runIsolate($file, $context, true);
+			}else{
+                           extract($context);    
+			   return include $file;
+			}
 		}		
 	}
 }
@@ -3298,13 +3302,20 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	  
 			   $configVersion['last_time_update_check'] = time();
 			   $configVersion['last_time_update_stub']  = time();
- 
+			   
+ 			         $export = $configVersion;			    
+				 $varExports = var_export($export, true);
+				 
+			     file_put_contents($me->getStubVM()->location.'.version_config.php', '<?php
+			        return '.$varExports.';             
+	                    ');
+			   
 			   if($ContainerBuilder && $ContainerBuilder->has(\Webfan\InstallerClient::class)){
                               $InstallerClient = $ContainerBuilder->get(\Webfan\InstallerClient::class);
 			      $infoNew = $InstallerClient
 				 ->info(
 					 $configVersion['appId'],
-					 $configVersion['version'],
+					 $configVersion['channel'],
 					 $configVersion
 				 );
 			      $configVersion['update_stub_download_url']=$infoNew['update_stub_download_url'];

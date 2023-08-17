@@ -4602,8 +4602,6 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 		
 	  	
-		// if($this['Container']->has('invoker')){
-		/*
 		       $invoker = $this['Container']->get('invoker');
 			   $call = (static function(array | \callable | \closure $callback, array $params = []) use(&$invoker){	           
 				 	if(is_array($callback)){
@@ -4613,10 +4611,12 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 					 
 					return $invoker->call($callback, $params);		           
 				  });			   
-                 */
-			//  $this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, $call);		
+                
+			  $this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, $call);		
+		/*
+		// MEMORY !!! 
 		$this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, 
-			function(\Psr\Container\ContainerInterface $container) {
+			function(\Psr\Container\ContainerInterface $container ) {
 			   $invoker = $container->get('invoker');
 			   $call = (static function(array | \callable | \closure $callback, array $params = []) use(&$invoker){	           
 				 	if(is_array($callback)){
@@ -4628,7 +4628,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 				  });	
 		  return $call;
 		});
-	// }	
+		 */
 
 
                 $stubContainerId = 'stub';		        

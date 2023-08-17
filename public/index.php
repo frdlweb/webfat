@@ -5317,7 +5317,7 @@ Content-Type: application/x-httpd-php
 			    return array (
   'time' => 0,
   'version' => '0.0.0',
-  'channel' => 'latest',
+  // 'channel' => 'latest',   //"latest" or "stable" | "test" or "fallback" for tests (NOT recommended!)
   /****'appId'=>'@@@APPID@@@',*****/
 );
 			  

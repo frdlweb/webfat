@@ -4611,60 +4611,60 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	  return $this['Container'];	
 	}
 
-	public function withFacades(){	                    
+	public function withFacades(?string $baseNamespace = '', ?string $namespace = '*'){	                    
 		if(!isset($this['Container'])){
                   //$this['Container'] =
 			  $this->getAsContainer(null);			
 		}	
-	if(!$this['Container']->has('config.runtime.import-facades') || false !== $this['Container']->get('config.runtime.import-facades')  ){
+	//if(!$this['Container']->has('config.runtime.import-facades') || false !== $this['Container']->get('config.runtime.import-facades')  ){
 /*
-		$this->getAsFacade('Config',
+		$this->getAsFacade($baseNamespace.'Config',
 				   \get_class(new class extends \Statical\BaseProxy{}), 
 				   'fascades.config',
 				    $this['Container']->has('config.runtime.import-facades')
 				    ? $this['Container']->get('config.runtime.import-facades')
-				    : '*',
+				    : $namespace,
 				   $this['Container'],
 				   true);
 		*/
-		$this->getAsFacade('Module',
+		$this->getAsFacade($baseNamespace.'Module',
 				   \get_class(new class extends \Statical\BaseProxy{}), 
 				   'fascades.modules',
 				    $this['Container']->has('config.runtime.import-facades')
 				    ? $this['Container']->get('config.runtime.import-facades')
-				    : '*',
+				    : $namespace,
 				   $this['Container'],
 				   true);
 
 		
-                $this->getAsFacade('Helper',
+                $this->getAsFacade($baseNamespace.'Helper',
 				   \get_class(new class extends \Statical\BaseProxy{}), 
 				   'fascades.helper',
 				    $this['Container']->has('config.runtime.import-facades')
 				    ? $this['Container']->get('config.runtime.import-facades')
-				    : '*',
+				    : $namespace,
 				   $this['Container'],
 				   true);
 
 		             
-		$this->getAsFacade('Container',
+		$this->getAsFacade($baseNamespace.'Container',
 				   \get_class(new class extends \Statical\BaseProxy{}), 
 				   'fascades.container',
 				    $this['Container']->has('config.runtime.import-facades')
 				    ? $this['Container']->get('config.runtime.import-facades')
-				    : '*',
+				    : $namespace,
 				   $this['Container'],
 				   true);
 		
-		$this->getAsFacade('Stubrunner',
+		$this->getAsFacade($baseNamespace.'Stubrunner',
 				   \get_class(new class extends \Statical\BaseProxy{}), 
 				   'fascades.stubrunner',
 				    $this['Container']->has('config.runtime.import-facades')
 				    ? $this['Container']->get('config.runtime.import-facades')
-				    : '*',
+				    : $namespace,
 				   $this['Container'],
 				   true);
-	}
+	//}
 	   return $this;
 	}
 	

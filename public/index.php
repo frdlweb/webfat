@@ -416,7 +416,7 @@ interface StubRunnerInterface extends StubInterface
 	public function getFrdlwebWorkspaceDirectory() : string;
 	public function getWebrootConfigDirectory() : string;
 	public function getApplicationsDirectory() : string;
-	public function getRemoteAutoloader() : LoaderInterface;
+	public function getRemoteAutoloader(?array $configVersion = null, ?array $config = null, ?\Frdlweb\Contract\Autoload\CodebaseInterface $codebase = null) : LoaderInterface;
 	public function autoUpdateStub(string | bool $update = null, string $newVersion = null, string $url = null);
 	
 }	
@@ -3315,7 +3315,9 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 			      $infoNew = $InstallerClient
 				 ->info(
 					 $configVersion['appId'],
-					 $configVersion['channel'],
+					 isset($configVersion['channel'])
+					    ? $configVersion['channel']
+					    : 'latest',
 					 $configVersion
 				 );
 			      $configVersion['update_stub_download_url']=$infoNew['update_stub_download_url'];
@@ -3356,7 +3358,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 				? $newVersion
 				: $configVersion['update_stub_latest_version'];   
 			   
-			$update =  $update || !version_compare($configVersion['version'], $newVersion, '==');
+			$update =  $update || !version_compare($configVersion['version'], $newVersion, '>=');
 		   }
 		   
 		 if(true === $update){	 	
@@ -3395,9 +3397,11 @@ Allow from localhost
 HTACCESSCONTENT);					
 					
 			 }
-		 }			
 
-		   if(0 < count( array_diff_assoc($configVersion, $configVersionOld) )){                                         
+			 
+		 }//update  true===$update			
+
+		   if(true === $update || 0 < count( array_diff_assoc($configVersion, $configVersionOld) )){                                         
 			        $export = array_merge($configVersion, [
 					 'version' => is_string($newVersion) ? $newVersion : $configVersion['version'],
 				 ]);			    
@@ -3407,7 +3411,10 @@ HTACCESSCONTENT);
 			        return '.$varExports.';             
 	                    ');
 		   }
-		   
+
+		    if(true === $update){
+                       $me->getRemoteAutoloader->prune(5);
+		    }
              }, $update, $newVersion, $config, $configVersion, $url, __FILE__ , $cacheDirLint, $configVersionOld, $ContainerBuilder, $this);  	
 	}
 	
@@ -3564,15 +3571,15 @@ HTACCESSCONTENT);
 		return $this->Codebase;
 	}
 	
-	public function getRemoteAutoloader() : LoaderInterface {
+	public function getRemoteAutoloader(?array $configVersion = null, ?array $config = null, ?\Frdlweb\Contract\Autoload\CodebaseInterface $codebase = null) : LoaderInterface {
 		
 		if(null !== $this->RemoteAutoloader){
 		   return $this->RemoteAutoloader;	
 		}
 		
-		$codebase = $this->getCodebase();
-		$configVersion = $this->configVersion();
-		$config = $this->config(); 
+		$codebase = $codebase ?? $this->getCodebase();
+		$configVersion = $configVersion ?? $this->configVersion();
+		$config = $config ?? $this->config(); 
 		
 		 
 		

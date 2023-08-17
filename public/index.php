@@ -1539,6 +1539,31 @@ class Runtime //extends BaseRuntime
 		return $Runtime;
 	}
 	
+    public function __construct(string $token, ?string $cachePath = null, ?SecurityManager $SecurityManager = null )
+    {
+		
+		
+				
+		if(!is_string($cachePath)){
+			$cachePath = rtrim((is_callable('\Container::has') && \Container::has('app.runtime.dir')
+								 ? \Container::get('app.runtime.dir') 
+								 : getenv('FRDL_WORKSPACE') ) )
+						              .\DIRECTORY_SEPARATOR. 'runtime' .\DIRECTORY_SEPARATOR
+				                       . 'cache' .\DIRECTORY_SEPARATOR. 'sbxp-parsed-php-vm-scripts' .\DIRECTORY_SEPARATOR;	
+		}
+		
+        $this->token     = $token;
+        $this->SecurityManager    = $SecurityManager ?? new EmptyWhitelistSecurityManager;
+      //  $this->parser    = $parser ?? new Parser($SecurityManager);
+        $this->cachePath = $cachePath === null ? \sys_get_temp_dir() : $cachePath;
+        $this->context   = [];
+    }
+	
+    public function setSecurityManager(SecurityManager $SecurityManager)
+    {
+		$this->SecurityManager = $SecurityManager;
+		return $this;
+	}	
     public function getSecurityManager()
     {
 		return $this->SecurityManager;
@@ -1572,12 +1597,14 @@ class Runtime //extends BaseRuntime
         return self::runIsolate($file, $this->context);
     }	
 	
-    public static function runIsolate($file, array $context)
+    public static function runIsolate($file, array $context, ?bool $doRequire = true)
     {
-        return (static function ($context, $file) {
+        return (static function ($context, $file, $doRequire) {
               extract($context);
-              return include $file;
-        })($context, $file);
+              return false === $doRequire
+				     ? include $file
+				     : require $file;
+        })($context, $file, $doRequire);
     }
 	
 	
@@ -1591,42 +1618,8 @@ class Runtime //extends BaseRuntime
 			$this->context[$name] = $value;
 		}        
     }
-	
-
  
-    public function __construct(string $token, 
-								  //?array $context = [],
-								 ?string $cachePath = null,
-								 ?SecurityManager $SecurityManager = null //new EmptyWhitelistSecurityManager
-								//,?Parser $parser = null
-								)
-    {
-		
-		
-				
-		if(!is_string($cachePath)){
-			$cachePath = rtrim((is_callable('\Container::has') && \Container::has('app.runtime.dir')
-								 ? \Container::get('app.runtime.dir') 
-								 : getenv('FRDL_WORKSPACE') ) )
-						              .\DIRECTORY_SEPARATOR. 'runtime' .\DIRECTORY_SEPARATOR
-				                       . 'cache' .\DIRECTORY_SEPARATOR. 'sbxp-parsed-php-vm-scripts' .\DIRECTORY_SEPARATOR;	
-		}
-		
-        $this->token     = $token;
-        $this->SecurityManager    = $SecurityManager ?? new EmptyWhitelistSecurityManager;
-      //  $this->parser    = $parser ?? new Parser($SecurityManager);
-        $this->cachePath = $cachePath === null ? \sys_get_temp_dir() : $cachePath;
-        $this->context   = [];
-		 //if(is_array($context)){
-		 //  foreach( 	$context as $k => $v){
-		 //	  $this->set($k, $v);
-		 //  }
-		 //}
-    }
- 
-}
-
-
+}//class runtime
 }//ns
 
 

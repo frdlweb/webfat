@@ -4615,8 +4615,8 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 				  });			   
                  */
 			//  $this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, $call);		
-		$this['Container']->factory(\IO4\Container\ContainerCollectionInterface::CALL_ID, 
-			function(\Psr\Container\ContainerInterface $container, $previous = null) {
+		$this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, 
+			function(\Psr\Container\ContainerInterface $container) {
 			   $invoker = $container->get('invoker');
 			   $call = (static function(array | \callable | \closure $callback, array $params = []) use(&$invoker){	           
 				 	if(is_array($callback)){

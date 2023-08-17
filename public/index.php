@@ -3400,11 +3400,13 @@ HTACCESSCONTENT);
 
 			 
 		 }//update  true===$update			
-
+			      
+		   $export = array_merge($configVersion, [
+		         'version' => is_string($newVersion) ? $newVersion : $configVersion['version'],
+		    ]);	
+		   
 		   if(true === $update || 0 < count( array_diff_assoc($configVersion, $configVersionOld) )){                                         
-			        $export = array_merge($configVersion, [
-					 'version' => is_string($newVersion) ? $newVersion : $configVersion['version'],
-				 ]);			    
+		    
 				 $varExports = var_export($export, true);
 				 
 			     file_put_contents($me->getStubVM()->location.'.version_config.php', '<?php
@@ -3413,7 +3415,7 @@ HTACCESSCONTENT);
 		   }
 
 		    if(true === $update){
-                       $me->getRemoteAutoloader->prune(5);
+                       $me->getRemoteAutoloader($export, $config)->prune(5);
 		    }
              }, $update, $newVersion, $config, $configVersion, $url, __FILE__ , $cacheDirLint, $configVersionOld, $ContainerBuilder, $this);  	
 	}
@@ -4981,7 +4983,7 @@ class Codebase extends \frdl\Codebase implements CodebaseInterface
 			usleep(100);
 		}
 		
-		$this->setUpdateChannel($configVersion['channel']);	
+		$this->setUpdateChannel($configVersion['channel'] ?? 'latest');	
 		if(true === $breakScript){
 		   die();	
 		}

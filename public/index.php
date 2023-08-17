@@ -5180,7 +5180,11 @@ Content-Type: application/x-httpd-php
 	
 'facades.fs' =>( function(\Psr\Container\ContainerInterface $container){
 	      return \Webfan\FacadeProxiesMap::createProxy([
-		        new \Webfan\Fs\MountManager([], true), 
+		        new \Webfan\Fs\MountManager([
+			   'cache' => new \League\Flysystem\Filesystem(
+			     new \League\Flysystem\Adapter\Local(rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR)
+			   ),			    
+			], true), 
 		     ],
 	  	[
 											 

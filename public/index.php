@@ -5192,7 +5192,7 @@ Content-Type: application/x-httpd-php
 	      return \Webfan\FacadeProxiesMap::createProxy([
 		        new \Webfan\Webfat\App\KernelHelper,
 		        new \Webfan\Webfat\App\KernelFunctions,
-			$container->get('app.core.io4'),				   
+			//$container->get('app.core.io4'),				   
 		     ],
 	  	[
 		'call' => \IO4\Container\ContainerCollectionInterface::CALL_ID,									 

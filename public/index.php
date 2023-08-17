@@ -4602,19 +4602,33 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 		
 	  	
-		 if($this['Container']->has('invoker')){
+		// if($this['Container']->has('invoker')){
+		/*
 		       $invoker = $this['Container']->get('invoker');
 			   $call = (static function(array | \callable | \closure $callback, array $params = []) use(&$invoker){	           
 				 	if(is_array($callback)){
-			             $fn = (\Closure::fromCallable($callback))->bindTo($callback[0], \get_class($callback[0]));
-			             $callback = $fn;		           
-				 	}		                                     
+			                  $fn = (\Closure::fromCallable($callback))->bindTo($callback[0], \get_class($callback[0]));
+			                       $callback = $fn;		           
+				 	  }		                                     
 					 
 					return $invoker->call($callback, $params);		           
 				  });			   
-
-			  $this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, $call);		
-		 }	
+                 */
+			//  $this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, $call);		
+		$this['Container']->factory(\IO4\Container\ContainerCollectionInterface::CALL_ID, 
+			function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			   $invoker = $container->get('invoker');
+			   $call = (static function(array | \callable | \closure $callback, array $params = []) use(&$invoker){	           
+				 	if(is_array($callback)){
+			                       $fn = (\Closure::fromCallable($callback))->bindTo($callback[0], \get_class($callback[0]));
+			                       $callback = $fn;		           
+				 	  }		                                     
+					 
+					return $invoker->call($callback, $params);		           
+				  });	
+		  return $call;
+		});
+	// }	
 
 
                 $stubContainerId = 'stub';		        
@@ -4625,59 +4639,26 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	}
 
 	public function withFacades(?string $baseNamespace = '', ?string $namespace = '*'){	                    
-		if(!isset($this['Container'])){
-                  //$this['Container'] =
-			  $this->getAsContainer(null);			
-		}	
-	//if(!$this['Container']->has('config.runtime.import-facades') || false !== $this['Container']->get('config.runtime.import-facades')  ){
-/*
-		$this->getAsFacade($baseNamespace.'Config',
-				   \get_class(new class extends \Statical\BaseProxy{}), 
-				   'fascades.config',
-				    $this['Container']->has('config.runtime.import-facades')
-				    ? $this['Container']->get('config.runtime.import-facades')
-				    : $namespace,
-				   $this['Container'],
-				   true);
-		*/
-		$this->getAsFacade($baseNamespace.'Module',
-				   \get_class(new class extends \Statical\BaseProxy{}), 
-				   'fascades.modules',
-				    $this['Container']->has('config.runtime.import-facades')
-				    ? $this['Container']->get('config.runtime.import-facades')
-				    : $namespace,
-				   $this['Container'],
-				   true);
+		 $container  = $this->getAsContainer(null);
+          
+                 $FacadesMap = $container->get('config.app.core.code.facades.$map');
 
-		
-                $this->getAsFacade($baseNamespace.'Helper',
+                  foreach($FacadesMap as $aliasClass => $containerId){
+		        $this->getAsFacade($baseNamespace.$aliasClass,
 				   \get_class(new class extends \Statical\BaseProxy{}), 
-				   'fascades.helper',
-				    $this['Container']->has('config.runtime.import-facades')
-				    ? $this['Container']->get('config.runtime.import-facades')
-				    : $namespace,
-				   $this['Container'],
+				    $containerId,
+				    $namespace,
+				     $container,
 				   true);
-
-		             
-		$this->getAsFacade($baseNamespace.'Container',
+		  }
+			    
+		$this->getAsFacade('io4',
 				   \get_class(new class extends \Statical\BaseProxy{}), 
-				   'fascades.container',
-				    $this['Container']->has('config.runtime.import-facades')
-				    ? $this['Container']->get('config.runtime.import-facades')
-				    : $namespace,
-				   $this['Container'],
+				    'app.core.io4',
+				    '*',
+				     $container,
 				   true);
 		
-		$this->getAsFacade($baseNamespace.'Stubrunner',
-				   \get_class(new class extends \Statical\BaseProxy{}), 
-				   'fascades.stubrunner',
-				    $this['Container']->has('config.runtime.import-facades')
-				    ? $this['Container']->get('config.runtime.import-facades')
-				    : $namespace,
-				   $this['Container'],
-				   true);
-	//}
 	   return $this;
 	}
 	
@@ -5176,19 +5157,75 @@ Content-Type: application/x-httpd-php
 				;			
 		  }, 'factory'],	
 
+		
+	'config.app.core.code.facades.$map'=>  (function(\Psr\Container\ContainerInterface $container){		   
+	   if($container->has('app.core.config.code.facades.$map')){
+             $FacadesMap = $container->get('app.core.config.code.facades.$map');
+	   }elseif($container->has('app.core.config.code.facades.$map.dist')){
+             $FacadesMap = $container->get('app.core.config.code.facades.$map.dist');
+	   }elseif($container->has('app.core.config.code.facades.$map.defaults')){
+             $FacadesMap = $container->get('app.core.config.code.facades.$map.defaults');
+	   }else{
+             $FacadesMap = [
+                    'App' =>  'app.core.io4',
+                    'fs' =>  'facades.fs',
+                    'Module' =>  'facades.modules',
+                    'Helper' =>  'facades.helper',
+                    'Container' =>  'facades.container',
+                    'Stubrunner' =>  'facades.stubrunner',
+		];
+	   }
+	   return $FacadesMap;	
+	}),	
 	
-'fascades.helper' =>( function(\Psr\Container\ContainerInterface $container){
+'facades.fs' =>( function(\Psr\Container\ContainerInterface $container){
 	      return \Webfan\FacadeProxiesMap::createProxy([
-		        new \Webfan\Webfat\App\KernelHelper,
-		        new \Webfan\Webfat\App\KernelFunctions,
+		        new \Webfan\Fs\MountManager([], true), 
 		     ],
 	  	[
 											 
 	    ],
 	$container->has('container') ? $container->get('container') : $container);  
+ }),
+	
+'facades.helper' =>( function(\Psr\Container\ContainerInterface $container){
+	      return \Webfan\FacadeProxiesMap::createProxy([
+		        new \Webfan\Webfat\App\KernelHelper,
+		        new \Webfan\Webfat\App\KernelFunctions,
+			$container->get('app.core.io4'),				   
+		     ],
+	  	[
+		'call' => \IO4\Container\ContainerCollectionInterface::CALL_ID,									 
+	    ],
+	$container->has('container') ? $container->get('container') : $container);  
  }),	
-		
-'fascades.module'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+	
+'app.core.io4'=> [function(\Psr\Container\ContainerInterface $container) {
+    return (new class($container) extends \Webfan\Node{
+		      use Webfan\withClassCastingTrait; 
+	              protected $container;
+		      public function __construct(\Psr\Container\ContainerInterface $container ){
+                        $this->container = $container;
+                      }
+	              public function __get($n){
+                          $FacadesMap = $container->get('config.app.core.code.facades.$map');
+			  if(isset($FacadesMap[$n]) && $container->has($FacadesMap[$n])){
+                            return $container->get($FacadesMap[$n]);
+			  }
+		      }
+		      public function import($import){
+                         return $this->castFrom($import);
+                      }
+		      public function export($export){
+                         return $this->castTo($export);
+                      }
+		      public function make($from, $to){
+                         return $this->classCasting($to, $from);
+                      }
+		 });				 
+}, 'default'],  
+	
+'facades.module'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
     return (new class() extends \Webfan\Node{
 		      use Webfan\withClassCastingTrait;
 		      protected static $_currentP;
@@ -5207,10 +5244,10 @@ Content-Type: application/x-httpd-php
 		 });				 
 }, 'factory'],  	
 	
-'fascades.stubrunner' =>( function(\Psr\Container\ContainerInterface $container){
+'facades.stubrunner' =>( function(\Psr\Container\ContainerInterface $container){
       return \Webfan\FacadeProxy::createProxy($container->get('app.runtime.stubrunner'));  
  }),		
-'fascades.container' =>( function(\Psr\Container\ContainerInterface $container){
+'facades.container' =>( function(\Psr\Container\ContainerInterface $container){
       return \Webfan\FacadeProxy::createProxy($container->has('container') ? $container->get('container') : $container);  
  }),
 		  'proxy-object-factory.cache-configuration'=> (function(\Psr\Container\ContainerInterface $container){	
@@ -5275,6 +5312,19 @@ Content-Type: application/x-httpd-php
 				); 
 				return $invoker;
 		     }), 'factory'],
+				   
+ \Webfan\InstallerClient::class => (function(\Psr\Container\ContainerInterface $container){
+      $proxy = new  \Webfan\RemoteObjectProxyClientFactory(
+		$container->get('app.runtime.codebase')
+			        ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_INSTALLER_REMOTE),
+		$container->get('proxy-object-factory.cache-configuration'),
+		\Webfan\Installer::class,
+		new \Webfan\Transform\RemoteApiObjectsTransformAll
+	);
+	 return $proxy;
+  }),	
+
+ //'module.loader.CommonJS'=>moved to remote fallback-container!!!
 		  				
 		
 		   'define' => (function(\Psr\Container\ContainerInterface $container){
@@ -5291,20 +5341,7 @@ Content-Type: application/x-httpd-php
 				 $commonJS = $container->get('module.loader.CommonJS');
 		       return $commonJS['require'];
 		   }),		
-							   
- \Webfan\InstallerClient::class => (function(\Psr\Container\ContainerInterface $container){
-      $proxy = new  \Webfan\RemoteObjectProxyClientFactory(
-		$container->get('app.runtime.codebase')
-			        ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_INSTALLER_REMOTE),
-		$container->get('proxy-object-factory.cache-configuration'),
-		\Webfan\Installer::class,
-		new \Webfan\Transform\RemoteApiObjectsTransformAll
-	);
-	 return $proxy;
-  }),	
 
- //'module.loader.CommonJS'=>moved to remote fallback-container!!!
-	
 							   
 ];//default container definitions
 		

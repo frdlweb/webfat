@@ -137,8 +137,9 @@ namespace{
 		)
 		  );
  })();	
-	
-	
+} 	
+
+namespace{	
 if ( !function_exists('sys_get_temp_dir')) {
   function sys_get_temp_dir() {
     if (!empty($_ENV['TMP'])) { return realpath($_ENV['TMP']); }
@@ -154,7 +155,13 @@ if ( !function_exists('sys_get_temp_dir')) {
 } 	
 } 
 
-
+namespace{	
+ if ( !function_exists('spl_object_id')) {
+  function spl_object_id($object) {
+     return spl_object_hash($object);
+  }
+ } 	
+} 
 
 
 namespace frdl\patch{

@@ -97,6 +97,7 @@ setTimeout(()=>{
 namespace{
 	
  (static function () : void {	
+	if(defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___'))return;
 	$fileparts = explode('.', basename(__FILE__));
 	define('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___', !in_array(basename(__FILE__), [
 		  'index.php',
@@ -357,7 +358,7 @@ if (!\interface_exists(StubInterface::class, false)) {
  interface StubInterface
  { 
    public function init (?string $scope = null) : void;  
-   public function moduleLocation(?string $location = null);
+   //public function moduleLocation(?string $location = null);
    public function installTo(string $location, bool $forceCreateDirectory = false, $mod = 0755) : object;	 
    public function isIndex(bool $onlyIfFirstFileCall = true) : bool;  
    public function install(?array $params = [] )  : bool|array;
@@ -387,14 +388,12 @@ if (!\interface_exists(StubAsFactoryInterface::class, false)) {
    public function getAsFacade($alias, $proxy, string $id = null,string $namespace = null
 				    ,?\Psr\Container\ContainerInterface $container = null
 				   , ?bool $throw = false) : bool;	
-
-
-	 public function getAsRemoteObjectProxy(string $class, ?string $url = null, ?ContainerInterface $container=null);
-	 public function getAsLazyLoadingValueHolderProxy(string $class, $initializer);
+   public function getAsRemoteObjectProxy(string $class, ?string $url = null, ?ContainerInterface $container=null);
+   public function getAsLazyLoadingValueHolderProxy(string $class, $initializer);
+   public function withFacades(?string $baseNamespace = '', ?string $namespace = '*');
  }
 } 	
 
-	
 	
 	
 if (!\interface_exists(StubRunnerInterface::class, false)) { 
@@ -1626,6 +1625,64 @@ class Runtime //extends BaseRuntime
 
 
 
+
+
+namespace Env{
+
+use \ErrorException;
+use \ValueError;
+
+use function \parse_ini_file;
+use function \realpath;
+
+use const \INI_SCANNER_RAW;
+use const \INI_SCANNER_TYPED;
+
+final class Dotenv
+{
+	const CREDITS = `/*! https://github.com/sabroan/php-dotenv/blob/main/LICENSE
+MIT License
+
+Copyright (c) 2023 Serhii Babinets
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/`;
+    public static function toArray(string $path, bool $strict = false, bool $sections = false): array
+    {
+        $realpath = realpath($path);
+        if (false === $realpath) {
+            throw new ValueError("File `$path` not found");
+        }
+        $env = parse_ini_file(
+            filename: $realpath,
+            process_sections: $sections,
+            scanner_mode: ($strict)
+                ? INI_SCANNER_RAW
+                : INI_SCANNER_TYPED
+        );
+        if ($env) {
+            return $env;
+        }
+        throw new ErrorException("Unable to parse $realpath");
+    }
+}
+}//ns Env
 
 
 
@@ -3459,7 +3516,7 @@ HTACCESSCONTENT);
 		       file_put_contents($this->getStubVM()->location.'.apc_config.php', '<?php
 			        return '.$varExports.';
                ');
-
+/*
 	    $newContent = $this->getStubVM()->serializeFile(null);
 		$fp = fopen($this->getStubVM()->location, 'w+');
 		if (flock($fp, \LOCK_EX | \LOCK_NB)) {  
@@ -3481,6 +3538,7 @@ HTACCESSCONTENT);
 			throw new \Exception('Cannot log stub in '.__METHOD__);
 		}
 		fclose($fp);
+  */
 	   return $export;
 	}
 	
@@ -3518,7 +3576,7 @@ HTACCESSCONTENT);
 		       file_put_contents($this->getStubVM()->location.'.version_config.php', '<?php
 			        return '.$varExports.';
                ');
-
+/*
 		$newContent = $this->getStubVM()->serializeFile(null);
 		$fp = fopen($this->getStubVM()->location, 'w+');
 		if (flock($fp, \LOCK_EX | \LOCK_NB)) {  
@@ -3540,6 +3598,7 @@ HTACCESSCONTENT);
 			throw new \Exception('Cannot log stub in '.__METHOD__);
 		}
 		fclose($fp);
+  */
 	   return $export;		
 	}
 				
@@ -4052,13 +4111,36 @@ $drush_server_home = (function() use($getRootDir, $scope) {
   return empty($home) ? $getRootDir($_SERVER['DOCUMENT_ROOT']) : $home;
 });
 	
-
+$HOME_DEFAULT = $drush_server_home();
 	
 $_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'] = (isset($_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'])) ? intval($_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']) : time() - filemtime(__FILE__);
 putenv('FRDL_HPS_PSR4_CACHE_LIMIT='.$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']);
 
 
 if(null === $scope){
+  $envFile = false;
+  if(file_exists(getcwd().\DIRECTORY_SEPARATOR.'.env')){
+       $envFile = getcwd().\DIRECTORY_SEPARATOR.'.env';
+  }elseif(file_exists($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'.env')){
+       $envFile = $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'.env';
+  }elseif(file_exists(__DIR__.\DIRECTORY_SEPARATOR.'.env')){
+       $envFile = __DIR__.\DIRECTORY_SEPARATOR.'.env';
+  }elseif(file_exists($HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.env')){
+       $envFile = $HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.env';
+  }elseif(file_exists($HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.frdl'.\DIRECTORY_SEPARATOR.'.env')){
+       $envFile = $HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.frdl'.\DIRECTORY_SEPARATOR.'.env';
+  }
+
+   if(false !== $envFile 
+    //  && file_exists($envFile)
+     ){
+     $env = \Env\Dotenv::toArray($envFile, false, false);
+     if(isset($env['IO4_WORKSPACE_SCOPE'])){
+         $_ENV['IO4_WORKSPACE_SCOPE'] = $env['IO4_WORKSPACE_SCOPE'];	
+         putenv('IO4_WORKSPACE_SCOPE='. $env['IO4_WORKSPACE_SCOPE']);
+     }
+   }
+	
   $scope = !empty(getenv('IO4_WORKSPACE_SCOPE')) ? getenv('IO4_WORKSPACE_SCOPE') : null;
 }
 	
@@ -4069,9 +4151,12 @@ switch($scope){
 	case '@www' :
             $__home =  $getRootDir($_SERVER['DOCUMENT_ROOT']);
 	 break;	
+	case '@parent@www' :
+            $__home =  dirname($_SERVER['DOCUMENT_ROOT']);
+	 break;	
 	case '@global' :
 	case null :
-            $__home = $drush_server_home();
+            $__home = $HOME_DEFAULT;
 	  break;
 	default :
            $__home = is_dir(getenv('IO4_WORKSPACE_SCOPE')) ? getenv('IO4_WORKSPACE_SCOPE') : $drush_server_home();
@@ -4195,7 +4280,37 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	});//\frdl\booting\once(function(){
 
   }//StubRunner->::init
+
+
 	
+	public function autoloadRemoteCodebase(?bool $unregister = true){ 
+	       $loader = $this->getRemoteAutoloader();
+		 if(true===$unregister){
+		    $loader->unregister();
+		 }
+		$loader->register(false);
+		return $loader;
+	}	
+
+
+	public function autoloading() : void{
+	   $this->init();
+	   $StubRunner = $this;
+	   $StubVM = $StubRunner->getStubVM();
+	  \frdl\booting\once(function() use(&$StubVM) {
+		if(!empty($StubVM->getFileAttachment(null, null, false))){
+			\spl_autoload_register([$StubVM,'Autoload'], true, true);
+		}
+	  });
+		
+	     $this->autoloadRemoteCodebase(true);
+
+	     \frdl\booting\once(function() use(&$StubRunner) {	
+		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
+		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$HOME/detect.php', 'stub detect.php')); 
+	      });     
+	}	
+
 	
 	public function autoload( )  : StubModuleInterface {
 		foreach($this->StubRunners as $StubRunner){
@@ -4263,7 +4378,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		}
 		return $this->StubRunners[$file];
 	}
-	
+	/*
 	public function moduleLocation(?string $location = null){
 		$this->init();
 		$cwd=getcwd();
@@ -4311,7 +4426,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		
 		return $this->LOCATIONS;
 	}	
-	
+	*/
 	public function installTo(string $location, bool $forceCreateDirectory = false, $mod = 0755) : object {
                if(isset($this->LOCATIONS[$location])){
 			$this->load($this->LOCATIONS[$location].\DIRECTORY_SEPARATOR.self::FILENAME, $location);
@@ -4384,13 +4499,10 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	} 
      }
 	
-	public function __invoke() :?StubHelperInterface{	
-    
-		
+	public function __invoke() :?StubHelperInterface{			
 		if(defined('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___') && false !== ___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___){ 
 			throw new \Exception('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___ is defined in '.__FILE__.' '.__LINE__);
-		}
-	
+		}	
                 $this->MimeVM->hugRunner($this); 
 		$this->autoloading();	
 		$this->MimeVM->runStubs();
@@ -4405,20 +4517,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 				   , ?bool $throw = false){
             throw new \Exception(sprintf('Not implemented yet: %s', __METHOD__));
 	}
-    /*		
-    	class IO4FacadeProxy extends \Statical\BaseProxy
-	{
-	   
-	}
-    //addProxyService($alias, $proxy, $container, $id, $namespace)							
-	$this->c()->get('FacadesAliasManager')->addProxyService('Tester',//$alias \FrdlTest::class,																	
-		  \FrdlTestTesterFascadeProxyObject::class, //$proxy																		
-		  $this->c(),  //$container																		
-		  'service.id.tester', //$id																		
-		  '*' // $namespace								
-	);		
-    $this->c()->get('FacadesAliasManager')->enable();
-    */
+ 
 	public function getAsFacade($alias, $proxy, string $id = null, string $namespace = null
 				    ,?\Psr\Container\ContainerInterface $container = null
 				   , ?bool $throw = false) : bool {
@@ -4534,33 +4633,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	   return $proxy;	
 	}
 	 	 
-	public function autoloadRemoteCodebase(?bool $unregister = true){ 
-	       $loader = $this->getRemoteAutoloader();
-		 if(true===$unregister){
-		    $loader->unregister();
-		 }
-		$loader->register(false);
-		return $loader;
-	}	
-
-
-	public function autoloading() : void{
-	   $this->init();
-	   $StubRunner = $this;
-	   $StubVM = $StubRunner->getStubVM();
-	  \frdl\booting\once(function() use(&$StubVM) {
-		if(!empty($StubVM->getFileAttachment(null, null, false))){
-			\spl_autoload_register([$StubVM,'Autoload'], true, true);
-		}
-	  });
-		
-	     $this->autoloadRemoteCodebase(true);
-
-	     \frdl\booting\once(function() use(&$StubRunner) {	
-		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
-		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$HOME/detect.php', 'stub detect.php')); 
-	      });     
-	}			
+			
  
 	
 	
@@ -5183,6 +5256,9 @@ Content-Type: application/x-httpd-php
 		        new \Webfan\Fs\MountManager([
 			   'cache' => new \League\Flysystem\Filesystem(
 			     new \League\Flysystem\Adapter\Local(rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR)
+			   ),			    
+			   'app' => new \League\Flysystem\Filesystem(
+			     new \League\Flysystem\Adapter\Local(rtrim($container->get('config.params.app.dir'), \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR)
 			   ),			    
 			], true), 
 		     ],

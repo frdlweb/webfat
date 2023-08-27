@@ -4320,7 +4320,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 	
 	public function autoload( )  : StubModuleInterface {
-		foreach($this->StubRunners as $StubRunner){
+		foreach($this->StubRunners as $file => $StubRunner){
 			if(\spl_object_id($StubRunner) !== \spl_object_id($this)){
 			  $StubRunner-> autoloading();
 			}		   

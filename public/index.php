@@ -4321,11 +4321,12 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	
 	public function autoload( )  : StubModuleInterface {
 		foreach($this->StubRunners as $StubRunner){
-		    $StubRunner-> autoloading();
-		}
-		
+			if(\spl_object_id($StubRunner) !== \spl_object_id($this)){
+			  $StubRunner-> autoloading();
+			}		   
+		}		
 	 return $this;
-	}	
+	}		
 	
 	public function install(?array $params = []  )  : bool|array {
 		

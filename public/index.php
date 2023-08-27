@@ -4442,7 +4442,9 @@ $_dir = getenv('FRDL_HOME') . \DIRECTORY_SEPARATOR . '.frdl';
   }
 //}
 	
- 
+	 if(!@is_dir($_dir)){
+		@mkdir($_dir, 0775, true); 
+	 }	 
   if(@!is_dir($_dir) || !is_writable($_dir)   || !is_readable($_dir)  ){  
 
       $possibleFiles = glob(getenv('FRDL_HOME').'/*/');

@@ -454,7 +454,28 @@ if (!\interface_exists(StubHelperInterface::class, false)) {
   //public function _run_php_1(StubItemInterface $part, $class = null, ?bool $lint = null);
  }
 } 
- 
+
+
+if (!\interface_exists(StubContextDirectoriesInterface::class, false)) {	
+ interface StubContextDirectoriesInterface
+ { 
+   public function getDataStoresDirectory( ?bool $create = false ) : string;
+   public function getUserDirectory(string $userHandle, ?bool $create = false) : string;
+   public function getSitesRootDirectory( ?bool $create = false ) : string;
+   public function getDomainsRootDirectory( ?bool $create = false ) : string;
+   public function getSiteDirectory(string $host, ?bool $create = false) : string;
+   public function getDomainDirectory(string $domain, ?bool $create = false) : string;
+   public function getSiteConfigDirectory(string $host = null, ?bool $create = false) : string;
+   public function getSiteDataDirectory(string $host = null, ?bool $create = false) : string;
+   public function getSiteRuntimeDirectory(string $host = null, ?bool $create = false) : string;
+   public function getSiteModulesDirectory(string $host = null, ?bool $create = false) : string;
+   public function getSiteUserDirectory(string $host, string $userHandle, ?bool $create = false) : string;
+   public function getConfigsRootDirectory( ?bool $create = false ) : string;
+ }
+} 
+
+
+	
 }//namespace frdlweb
 
 
@@ -1704,6 +1725,7 @@ use frdlweb\StubHelperInterface as StubHelperInterface;
 use frdlweb\StubRunnerInterface as StubRunnerInterface;	
 use frdlweb\StubModuleInterface as StubModuleInterface;
 use frdlweb\StubAsFactoryInterface as StubAsFactoryInterface;
+use frdlweb\StubContextDirectoriesInterface as StubContextDirectoriesInterface;
 use Frdlweb\Contract\Autoload\LoaderInterface;	
 use Psr\Container\ContainerInterface;
 
@@ -3263,7 +3285,7 @@ class MimeStubIndex extends MimeStub5 {
 
 	
 
-class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModuleInterface, StubAsFactoryInterface
+class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModuleInterface, StubAsFactoryInterface, StubContextDirectoriesInterface
 {
 	
 	const DEF_SOURCE = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php';

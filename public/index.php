@@ -3749,6 +3749,212 @@ HTACCESSCONTENT);
 	
 
 
+
+
+
+	public function getDataStoresDirectory( ?bool $create = false ) : string {
+	  $dir = 
+	        $this->getFrdlwebWorkspaceDirectory()
+			.\DIRECTORY_SEPARATOR.urlencode('.data-stores').\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir;		 
+	}	
+	
+	public function getUserDirectory(string $userHandle, ?bool $create = false) : string {
+	  $dir = 
+	        $this->getDataStoresDirectory($create)	
+			.\DIRECTORY_SEPARATOR.urlencode('users').\DIRECTORY_SEPARATOR	
+			.urlencode($userHandle)
+			.\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir;	 
+	}	
+
+
+	public function getRuntimesRootDirectory( ?bool $create = false ) : string {
+	  $dir = 
+	        $this->getFrdlwebWorkspaceDirectory()
+			.\DIRECTORY_SEPARATOR.urlencode('site-application-runtimes').\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir;		 
+	}		
+	public function getSitesRootDirectory( ?bool $create = false ) : string {
+	  $dir = 
+	        $this->getDataStoresDirectory($create)	
+			.\DIRECTORY_SEPARATOR.urlencode('sites').\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir;	 
+	}
+	public function getConfigsRootDirectory( ?bool $create = false ) : string {
+	  $dir = 
+	        $this->getDataStoresDirectory($create)	
+			.\DIRECTORY_SEPARATOR.urlencode('configs').\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir;	 
+	}	
+	
+	public function getDomainsRootDirectory( ?bool $create = false ) : string {
+	  $dir = 
+	        $this->getDataStoresDirectory($create)	
+			.\DIRECTORY_SEPARATOR.urlencode('domains').\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir;	 
+	}		
+	public function getSiteDirectory(string $host, ?bool $create = false) : string {
+		$dns = array_reverse(explode('.', $host));
+		$tld = array_shift($dns);
+		$apex = array_shift($dns);
+		$domain = $apex.'.'.$tld;
+		$hash = sha1($domain);
+	  $dir = 
+	        $this->getSitesRootDirectory($create)	
+			.\DIRECTORY_SEPARATOR	
+			.substr($hash, 0, 2)	
+			.\DIRECTORY_SEPARATOR	
+			.substr($hash, 2, 2)	
+			.\DIRECTORY_SEPARATOR	
+			.$domain	
+			.\DIRECTORY_SEPARATOR	
+			.implode(\DIRECTORY_SEPARATOR, $dns);
+
+              $dir =  rtrim($dir, '\\/ ').\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir;	 
+	}	
+	public function getDomainDirectory(string $domain, ?bool $create = false) : string {
+		$dns = array_reverse(explode('.', $domain));
+		$tld = array_shift($dns);
+		$apex = array_shift($dns);
+		$domain = $apex.'.'.$tld;
+		$hash = sha1($domain);
+	  $dir = 
+	        $this->getDomainsRootDirectory($create)	
+			.\DIRECTORY_SEPARATOR	
+			.substr($hash, 0, 2)	
+			.\DIRECTORY_SEPARATOR	
+			.substr($hash, 2, 2)	
+			.\DIRECTORY_SEPARATOR	
+			.$domain	
+			.\DIRECTORY_SEPARATOR	
+			.implode(\DIRECTORY_SEPARATOR, $dns);
+
+              $dir =  rtrim($dir, '\\/ ').\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir; 	 
+	}
+
+
+	public function getSiteConfigDirectory(string $host = null, ?bool $create = false) : string {
+		$dns = array_reverse(explode('.', $host));
+		$tld = array_shift($dns);
+		$apex = array_shift($dns);
+		$domain = $apex.'.'.$tld;
+		$hash = sha1($domain);
+	  $dir = 
+	        $this->getConfigsRootDirectory($create)	
+			.\DIRECTORY_SEPARATOR	
+			.substr($hash, 0, 2)	
+			.\DIRECTORY_SEPARATOR	
+			.substr($hash, 2, 2)	
+			.\DIRECTORY_SEPARATOR	
+			.$domain	
+			.\DIRECTORY_SEPARATOR	
+			.implode(\DIRECTORY_SEPARATOR, $dns);
+
+              $dir =  rtrim($dir, '\\/ ').\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir; 
+	}
+	public function getSiteDataDirectory(string $host = null, ?bool $create = false) : string {
+	    $dir = 
+	        $this->getSiteDirectory($host, $create)	
+			.\DIRECTORY_SEPARATOR	
+			.'.data'.\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir;	
+	}
+	public function getSiteRuntimeDirectory(string $host = null, ?bool $create = false) : string {			
+		$dns = array_reverse(explode('.', $host));
+		$tld = array_shift($dns);
+		$apex = array_shift($dns);
+		$domain = $apex.'.'.$tld;
+		$hash = sha1($domain);
+	  $dir = 
+	        $this->getRuntimesRootDirectory($create)	
+			.\DIRECTORY_SEPARATOR	
+			.substr($hash, 0, 2)	
+			.\DIRECTORY_SEPARATOR	
+			.substr($hash, 2, 2)	
+			.\DIRECTORY_SEPARATOR	
+			.$domain	
+			.\DIRECTORY_SEPARATOR	
+			.implode(\DIRECTORY_SEPARATOR, $dns);
+
+              $dir =  rtrim($dir, '\\/ ').\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir;
+	}
+
+	public function getSiteModulesDirectory(string $host = null, ?bool $create = false) : string {
+	    $dir = 
+	        $this->getSiteDirectory($host, $create)	
+			.\DIRECTORY_SEPARATOR	
+			.'modules'.\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir;		 
+	}	
+	
+	public function getSiteUserDirectory(string $host, string $userHandle, ?bool $create = false) : string {
+	  $dir = 
+	        $this->getSiteDirectory($host, $create)	
+			.\DIRECTORY_SEPARATOR	
+			.'.users'.\DIRECTORY_SEPARATOR;
+		
+		if($create && !is_dir($dir)){
+			 @mkdir($dir,0775,true);
+		}
+	  return $dir;	
+	}	
+
+
+
+	
 	
 	public function getFrdlwebWorkspaceDirectory() : string {
 		if(!empty(getenv('FRDL_WORKSPACE'))){
@@ -3757,7 +3963,6 @@ HTACCESSCONTENT);
 		 $this->init();
 		 return getenv('FRDL_WORKSPACE');	
 	}
-	
 	
 	public function getWebrootConfigDirectory() : string {
 		 
@@ -4154,11 +4359,14 @@ if(null === $scope){
 switch($scope){
 	case '@cwd' :
             $__home =  getcwd();
-	 break;	
+	 break;		
 	case '@www' :
+            $__home =  $_SERVER['DOCUMENT_ROOT'];
+	 break;	
+	case '@www@root' :
             $__home =  $getRootDir($_SERVER['DOCUMENT_ROOT']);
 	 break;	
-	case '@parent@www' :
+	case '@www@parent' :
             $__home =  dirname($_SERVER['DOCUMENT_ROOT']);
 	 break;	
 	case '@global' :
@@ -4166,7 +4374,7 @@ switch($scope){
             $__home = $HOME_DEFAULT;
 	  break;
 	default :
-           $__home = is_dir(getenv('IO4_WORKSPACE_SCOPE')) ? getenv('IO4_WORKSPACE_SCOPE') : $drush_server_home();
+           $__home = is_dir(getenv('IO4_WORKSPACE_SCOPE')) ? getenv('IO4_WORKSPACE_SCOPE') : $HOME_DEFAULT;
 	 break;
 }
 
@@ -4310,8 +4518,10 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		}
 	  });
 		
-	     $this->autoloadRemoteCodebase(true);
-
+	  // \frdl\booting\once(function() use(&$StubRunner) {	
+	        $StubRunner->autoloadRemoteCodebase(true);
+          //  });
+		
 	     \frdl\booting\once(function() use(&$StubRunner) {	
 		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$STUB/bootstrap.php', 'stub bootstrap.php')); 
 		 $StubRunner->getStubVM()->_run_php_1( $StubRunner->getStubVM()->get_file($StubRunner->getStub(), '$HOME/detect.php', 'stub detect.php')); 
@@ -4320,11 +4530,12 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 	
 	public function autoload( )  : StubModuleInterface {
+		$this-> autoloading();
 		foreach($this->StubRunners as $file => $StubRunner){
-			if(\spl_object_id($StubRunner) !== \spl_object_id($this) && is_object($StubRunner) && null !== $StubRunner){
-			  $StubRunner-> autoloading();
+			if(is_object($StubRunner) && null !== $StubRunner && \spl_object_id($StubRunner) !== \spl_object_id($this)){
+			   $StubRunner-> autoloading();
 			}		   
-		}		
+		}	
 	 return $this;
 	}			
 	
@@ -5267,6 +5478,18 @@ Content-Type: application/x-httpd-php
 			   ),			    
 			   'app' => new \League\Flysystem\Filesystem(
 			     new \League\Flysystem\Adapter\Local(rtrim($container->get('config.params.app.dir'), \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR)
+			   ),		
+			   'well-known' => new \League\Flysystem\Filesystem(
+			     new \League\Flysystem\Adapter\Local($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'.well-known'.\DIRECTORY_SEPARATOR)
+			   ),		
+			   'web+public' => new \League\Flysystem\Filesystem(
+			     new \League\Flysystem\Adapter\Local($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR)
+			   ),		
+			   'web+www' => new \League\Flysystem\Filesystem(
+			     new \League\Flysystem\Adapter\Local($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR)
+			   ),		
+			   'www' => new \League\Flysystem\Filesystem(
+			     new \League\Flysystem\Adapter\Local($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR)
 			   ),			    
 			], true), 
 		     ],

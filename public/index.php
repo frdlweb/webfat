@@ -3516,7 +3516,7 @@ HTACCESSCONTENT);
 		       file_put_contents($this->getStubVM()->location.'.apc_config.php', '<?php
 			        return '.$varExports.';
                ');
-/*
+
 	    $newContent = $this->getStubVM()->serializeFile(null);
 		$fp = fopen($this->getStubVM()->location, 'w+');
 		if (flock($fp, \LOCK_EX | \LOCK_NB)) {  
@@ -3538,7 +3538,7 @@ HTACCESSCONTENT);
 			throw new \Exception('Cannot log stub in '.__METHOD__);
 		}
 		fclose($fp);
-  */
+  
 	   return $export;
 	}
 	
@@ -3576,7 +3576,7 @@ HTACCESSCONTENT);
 		       file_put_contents($this->getStubVM()->location.'.version_config.php', '<?php
 			        return '.$varExports.';
                ');
-/*
+
 		$newContent = $this->getStubVM()->serializeFile(null);
 		$fp = fopen($this->getStubVM()->location, 'w+');
 		if (flock($fp, \LOCK_EX | \LOCK_NB)) {  
@@ -3598,7 +3598,7 @@ HTACCESSCONTENT);
 			throw new \Exception('Cannot log stub in '.__METHOD__);
 		}
 		fclose($fp);
-  */
+  
 	   return $export;		
 	}
 				

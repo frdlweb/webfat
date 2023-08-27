@@ -1640,7 +1640,7 @@ use const \INI_SCANNER_TYPED;
 
 final class Dotenv
 {
-	const CREDITS = `/*! https://github.com/sabroan/php-dotenv/blob/main/LICENSE
+	const CREDITS = '/*! https://github.com/sabroan/php-dotenv/blob/main/LICENSE
 MIT License
 
 Copyright (c) 2023 Serhii Babinets
@@ -1662,7 +1662,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-*/`;
+*/';
     public static function toArray(string $path, bool $strict = false, bool $sections = false): array
     {
         $realpath = realpath($path);

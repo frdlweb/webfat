@@ -5499,6 +5499,9 @@ Content-Type: application/x-httpd-php
 'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container, $previous = null) {
 	$fsManager = $container->get('facades.fs');		
 	$filesystem = $fsManager->mount('cache');
+	$filesystem->createDir('pools');
+	$filesystem->createDir('pools/remote-container');
+	$filesystem->createDir('pools/templates');
 	$pool = new \Cache\Adapter\Filesystem\FilesystemCachePool($filesystem);
 	return $pool;
 }),   

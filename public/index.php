@@ -1692,7 +1692,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */';
        
-public static function toArray(string $path, bool $strict = false, bool $sections = false): array
+public static function toArray(string $path, bool $strict = false, bool $sections = false): array | bool
     {
         $realpath = @realpath($path);
         if (false === $realpath || !file_exists($realpath) || !is_file($realpath)) {

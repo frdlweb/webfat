@@ -1691,12 +1691,26 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */';
-    public static function toArray(string $path, bool $strict = false, bool $sections = false): array
+       
+public static function toArray(string $path, bool $strict = false, bool $sections = false): array
     {
-        $realpath = realpath($path);
-        if (false === $realpath) {
-            throw new ValueError("File `$path` not found");
+        $realpath = @realpath($path);
+        if (false === $realpath || !file_exists($realpath) || !is_file($realpath)) {
+           $env = \parse_ini_string(
+            ini_string: $path,
+            process_sections: $sections,
+            scanner_mode: ($strict)
+                ? INI_SCANNER_RAW
+                : INI_SCANNER_TYPED
+           );
+          if ($env) {
+            return $env;
+          }else{
+			 return false;  
+		  }
         }
+		
+		
         $env = parse_ini_file(
             filename: $realpath,
             process_sections: $sections,
@@ -1706,8 +1720,10 @@ SOFTWARE.
         );
         if ($env) {
             return $env;
-        }
-        throw new ErrorException("Unable to parse $realpath");
+        }else{
+			 return false;  
+		  }
+       // throw new ErrorException("Unable to parse $realpath");
     }
 }
 }//ns Env

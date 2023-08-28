@@ -5493,6 +5493,14 @@ Content-Type: application/x-httpd-php
 	   }
 	   return $FacadesMap;	
 	}),	
+
+		  
+'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container, $previous = null) {
+	$fsManager = $container->get('facades.fs');		
+	$filesystem = $fsManager->mount('cache');
+	$pool = new \Cache\Adapter\Filesystem\FilesystemCachePool($filesystem);
+	return $pool;
+}),   
 	
 'facades.fs' =>( function(\Psr\Container\ContainerInterface $container){
 	      return \Webfan\FacadeProxiesMap::createProxy([

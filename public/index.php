@@ -5502,7 +5502,7 @@ Content-Type: application/x-httpd-php
 	$filesystem->createDirectory('pools');
 	$filesystem->createDirectory('pools/remote-container');
 	$filesystem->createDirectory('pools/templates');
-	$pool = new \Cache\Adapter\Filesystem\FilesystemCachePool($filesystem);
+	$pool = new \Webfan\Fs\CachePool($filesystem);
 	return $pool;
 }),   
 	

@@ -5496,14 +5496,8 @@ Content-Type: application/x-httpd-php
 	}),	
 
 		  
-'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container, $previous = null) {
-	$fsManager = $container->get('facades.fs');		
-	$filesystem = $fsManager->mount('cache');
-	$filesystem->createDirectory('pools');
-	$filesystem->createDirectory('pools/remote-container');
-	$filesystem->createDirectory('pools/templates');
-	$pool = new \Webfan\Fs\CachePool($filesystem);
-	return $pool;
+'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container) {
+     return new \Desarrolla2\Cache\File($container->get('config.params.dirs.runtime.cache'));
 }),   
 	
 'facades.fs' =>( function(\Psr\Container\ContainerInterface $container){

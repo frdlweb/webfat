@@ -4353,15 +4353,15 @@ putenv('FRDL_HPS_PSR4_CACHE_LIMIT='.$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']);
 
 if(null === $scope){
   $envFile = false;
-  if(file_exists(getcwd().\DIRECTORY_SEPARATOR.'.env')){
+  if(@file_exists(getcwd().\DIRECTORY_SEPARATOR.'.env')){
        $envFile = getcwd().\DIRECTORY_SEPARATOR.'.env';
-  }elseif(file_exists($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'.env')){
+  }elseif(@file_exists($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'.env')){
        $envFile = $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'.env';
-  }elseif(file_exists(__DIR__.\DIRECTORY_SEPARATOR.'.env')){
+  }elseif(@file_exists(__DIR__.\DIRECTORY_SEPARATOR.'.env')){
        $envFile = __DIR__.\DIRECTORY_SEPARATOR.'.env';
-  }elseif(file_exists($HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.env')){
+  }elseif(@file_exists($HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.env')){
        $envFile = $HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.env';
-  }elseif(file_exists($HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.frdl'.\DIRECTORY_SEPARATOR.'.env')){
+  }elseif(@file_exists($HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.frdl'.\DIRECTORY_SEPARATOR.'.env')){
        $envFile = $HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.frdl'.\DIRECTORY_SEPARATOR.'.env';
   }
 

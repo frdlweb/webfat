@@ -5510,22 +5510,22 @@ Content-Type: application/x-httpd-php
 	      return \Webfan\FacadeProxiesMap::createProxy([
 		        new \Webfan\Fs\MountManager([
 			   'cache' => new \League\Flysystem\Filesystem(
-			     new \League\Flysystem\Adapter\Local(rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR)
+			     new \League\Flysystem\Local\LocalFilesystemAdapter(rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR)
 			   ),			    
 			   'app' => new \League\Flysystem\Filesystem(
-			     new \League\Flysystem\Adapter\Local(rtrim($container->get('config.params.app.dir'), \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR)
+			     new \League\Flysystem\Local\LocalFilesystemAdapter(rtrim($container->get('config.params.app.dir'), \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR)
 			   ),		
 			   'well-known' => new \League\Flysystem\Filesystem(
-			     new \League\Flysystem\Adapter\Local($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'.well-known'.\DIRECTORY_SEPARATOR)
+			     new \League\Flysystem\Local\LocalFilesystemAdapter($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'.well-known'.\DIRECTORY_SEPARATOR)
 			   ),		
 			   'web+public' => new \League\Flysystem\Filesystem(
-			     new \League\Flysystem\Adapter\Local($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR)
+			     new \League\Flysystem\Local\LocalFilesystemAdapter($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR)
 			   ),		
 			   'web+www' => new \League\Flysystem\Filesystem(
-			     new \League\Flysystem\Adapter\Local($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR)
+			     new \League\Flysystem\Local\LocalFilesystemAdapter($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR)
 			   ),		
 			   'www' => new \League\Flysystem\Filesystem(
-			     new \League\Flysystem\Adapter\Local($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR)
+			     new \League\Flysystem\Local\LocalFilesystemAdapter($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR)
 			   ),			    
 			], true), 
 		     ],

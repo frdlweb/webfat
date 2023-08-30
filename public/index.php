@@ -5290,7 +5290,12 @@ class Codebase extends \frdl\Codebase implements CodebaseInterface
 			usleep(100);
 		}
 		
-		$this->setUpdateChannel($configVersion['channel'] ?? 'latest');	
+		$this->setUpdateChannel($configVersion['channel'] ?? 'latest');	        
+		$this->setServiceEndpoint(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE,
+						  'https://website.webfan3.de/container/?channel='.urlencode($configVersion['channel'])
+									 .'&app='.urlencode($configVersion['appId']),
+					  \Frdlweb\Contract\Autoload\CodebaseInterface::ALL_CHANNELS);  
+		
 		if(true === $breakScript){
 		   die();	
 		}
@@ -5376,7 +5381,7 @@ abstract class Codebase
 
 
             //ENDPOINT_CONTAINER_REMOTE
-	    $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_CONTAINER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.container-remote.php', CodebaseInterface::ALL_CHANNELS);  
+	    $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_CONTAINER_REMOTE, 'https://website.webfan3.de/container/', CodebaseInterface::ALL_CHANNELS);  
 
 
             //ENDPOINT_CONFIG_REMOTE

@@ -5479,28 +5479,53 @@ Content-Type: application/x-httpd-php
 <?php
  //@ToDo: Compose from https://github.com/frdlweb/webfat and modules...
     return [
-		  'config.params.app.dir'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
+		 
+	'config.params.app.dir'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
 			return $container->get('app.runtime.stubrunner')->getApplicationsDirectory();			
 		  }, 'factory'],							   
-		  'config.params.dirs.runtime'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
+        'config.params.dirs.runtime'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
 			return rtrim($container->get('config.params.app.dir'), \DIRECTORY_SEPARATOR)
 				.\DIRECTORY_SEPARATOR
 				.'runtime'
 				;			
-		  }, 'factory'],								   
-		  'config.params.dirs.runtime.cache'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
-			return rtrim($container->get('config.params.dirs.runtime'), \DIRECTORY_SEPARATOR)
-				.\DIRECTORY_SEPARATOR
-				.'cache'
-				;			
-		  }, 'factory'],	
+	 }, 'factory'],								   
+	'config.sandbox.runtime.containers'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {		
+		return [
+                         'container'=>$container,
+			 'Stubrunner'=>$container->get('app.runtime.stubrunner'),
+			];
+	 }, 'factory'],	
 
-		
+	
+	'config.sandbox.runtime.security.allowed-classes'=>  (function(\Psr\Container\ContainerInterface $container){		   
+	   if($container->has('app.runtime.security.allowed-classes')){
+             $classes = $container->get('app.runtime.security.allowed-classes');
+	   }elseif($container->has('app.runtime.security.allowed-classes.defaults')){
+             $classes = $container->get('app.runtime.security.allowed-classes.defaults');
+	   }else{
+             $classes = [
+		     
+	     ];
+	   }
+	   return $classes;	
+	}),	
+	
+	'config.runtime.security.sandbox.allowed-functions'=>  (function(\Psr\Container\ContainerInterface $container){		   
+	   if($container->has('app.runtime.security.allowed-functions')){
+             $functions = $container->get('app.runtime.security.allowed-functions');
+	   }elseif($container->has('app.runtime.security.allowed-functions.defaults')){
+             $functions = $container->get('app.runtime.security.allowed-functions.defaults');
+	   }else{
+             $functions = [
+		     
+	     ];
+	   }
+	   return $functions;	
+	}),	
+	
 	'config.app.core.code.facades.$map'=>  (function(\Psr\Container\ContainerInterface $container){		   
 	   if($container->has('app.core.config.code.facades.$map')){
              $FacadesMap = $container->get('app.core.config.code.facades.$map');
-	   }elseif($container->has('app.core.config.code.facades.$map.dist')){
-             $FacadesMap = $container->get('app.core.config.code.facades.$map.dist');
 	   }elseif($container->has('app.core.config.code.facades.$map.defaults')){
              $FacadesMap = $container->get('app.core.config.code.facades.$map.defaults');
 	   }else{
@@ -5515,7 +5540,19 @@ Content-Type: application/x-httpd-php
 	   }
 	   return $FacadesMap;	
 	}),	
-
+	'config.app.core.code.facades.$import'=>  (function(\Psr\Container\ContainerInterface $container){		   
+	   if($container->has('app.core.config.code.facades.$import')){
+             $FacadesImport = $container->get('app.core.config.code.facades.$import');
+	   }elseif($container->has('app.core.config.code.facades.$import.defaults')){
+             $FacadesImport = $container->get('app.core.config.code.facades.$import.defaults');
+	   }else{
+             $FacadesImport = [
+                    'baseName' =>  'IO4\\',
+		     'namespace' => '*',
+		];
+	   }
+	   return $FacadesImport;	
+	}),	
 		  
 'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container) {
      return new \Desarrolla2\Cache\File($container->get('config.params.dirs.runtime.cache'));

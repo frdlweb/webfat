@@ -455,7 +455,8 @@ if (!\interface_exists(StubHelperInterface::class, false)) {
  }
 } 
 
-
+/*
+//Move to lazxer loader...
 if (!\interface_exists(StubContextDirectoriesInterface::class, false)) {	
  interface StubContextDirectoriesInterface
  { 
@@ -473,7 +474,7 @@ if (!\interface_exists(StubContextDirectoriesInterface::class, false)) {
    public function getConfigsRootDirectory( ?bool $create = false ) : string;
  }
 } 
-
+*/
 
 	
 }//namespace frdlweb
@@ -2071,9 +2072,6 @@ use Psr\Container\ContainerInterface;
 	
    public function serializeFile(?string $code=null){
 	   $code =(is_string($code)) ? $code : $this->__toString();
-	   $code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKE1pbWU='),     base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);			
-	   $code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKClNbWltZQ=='), base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);	
-	   $code =str_replace(base64_decode('X19oYWx0X2NvbXBpbGVyKClNaW1l'),     base64_decode("X19oYWx0X2NvbXBpbGVyKCk7TWltZQ=="), $code);	   
 	   return $code;
    }
 	 
@@ -3303,7 +3301,7 @@ class MimeStubIndex extends MimeStub5 {
 
 	
 
-class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModuleInterface, StubAsFactoryInterface, StubContextDirectoriesInterface
+class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModuleInterface, StubAsFactoryInterface//, StubContextDirectoriesInterface
 {
 	
 	const DEF_SOURCE = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php';
@@ -3791,7 +3789,7 @@ HTACCESSCONTENT);
 
 
 
-
+/*
 	public function getDataStoresDirectory( ?bool $create = false ) : string {
 	  $dir = 
 	        $this->getFrdlwebWorkspaceDirectory()
@@ -3992,7 +3990,7 @@ HTACCESSCONTENT);
 	  return $dir;	
 	}	
 
-
+*/
 
 	
 	
@@ -4639,55 +4637,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		}
 		return $this->StubRunners[$file];
 	}
-	/*
-	public function moduleLocation(?string $location = null){
-		$this->init();
-		$cwd=getcwd();
-		$docroot= $_SERVER['DOCUMENT_ROOT'];
-		$home = $_ENV['FRDL_HOME'];
-		$this->LOCATIONS =[
-		   'module' => __DIR__,
-		   'current-workingdir' =>$cwd,
-		   'pwd' =>$cwd,
-		   'cwd' => $cwd,
-	    	'.' => $cwd,
-			
-			'httpdocs'=>$docroot,
-			'www'=>$docroot,
-			'public'=>$docroot,
-			'DOCUMENT_ROOT'=>$docroot,
-			
-			'~'=>$home,
-			'home'=>$home,			
-			'FRDL_WORKSPACE' => $this->getFrdlwebWorkspaceDirectory(),//$_ENV['FRDL_WORKSPACE'],
-		
-	    ];
-		switch($location){
-			case '@shared' :	
-			   $location = 'FRDL_WORKSPACE';
-			break;
-			case '@global' :			
-                          $location = '~';
-			break;
-			case '@www' :	
-			   $location = 'DOCUMENT_ROOT';
-			break;
-			case '@cwd' :	
-			   $location = 'cwd';
-			break;
-			case __DIR__ :
-			case 'module' :
-			case '@local' :	
-			   $location = 'module';
-			break;
-		}
-		if(is_string($location)){
-			return isset($this->LOCATIONS[$location]) ? $this->LOCATIONS[$location] : false;
-		}
-		
-		return $this->LOCATIONS;
-	}	
-	*/
+
 	public function installTo(string $location, bool $forceCreateDirectory = false, $mod = 0755) : object {
                if(isset($this->LOCATIONS[$location])){
 			$this->load($this->LOCATIONS[$location].\DIRECTORY_SEPARATOR.self::FILENAME, $location);
@@ -4969,6 +4919,18 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
                 $stubContainerId = 'stub';		        
 		$stubContainer = $this->getAsContainer('stub');
 		$this['Container']->addContainer($stubContainer, $stubContainerId);	
+
+               		
+		$configVersion = $StubRunner->configVersion();
+		$stubContainerIdconfigVersion = 'config.stub.config.version';
+                $stubContainerVersion = new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter($configVersion);
+		$this['Container']->addContainer($stubContainerVersion, $stubContainerIdconfigVersion);
+
+		
+		$config = $StubRunner->config();
+		$stubContainerIdconfig = 'config.stub.config.init';
+		$stubContainerConfig =  new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter($config);
+		$this['Container']->addContainer($stubContainerConfig, $stubContainerIdconfig);
 		
 	  return $this['Container'];	
 	}
@@ -5151,6 +5113,13 @@ Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.
 
 
  return array (
+  //'bootscript'=>'script@index.php',
+  'autoupdate' => true,
+  'AUTOUPDATE_INTERVAL' => 24 * 60 * 60, 	 
+  'FRDL_REMOTE_PSR4_CACHE_LIMIT'=>	24 * 60 * 60, //-1,
+  'FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'=>	24 * 60 * 60, //-1,
+	 
+	 //Depreceated... !?!
   'workspace' =>$domain,
   'baseUrl' => 'https://'.$domain,
   'baseUrlInstaller' => false,
@@ -5158,19 +5127,14 @@ Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.
   'FRDL_CDN_HOST'=>'cdn.startdir.de',  // cdn.webfan.de | cdn.frdl.de
   'FRDL_CDN_PROXY_REMOVE_QUERY'=>	true, 
   'FRDL_CDN_SAVING_METHODS'=>	['GET'], 
-  'FRDL_REMOTE_PSR4_CACHE_LIMIT'=>	24 * 60 * 60, //-1,
-  'FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'=>	24 * 60 * 60, //-1,
   'ADMIN_EMAIL' => 'admin@'.$domain,
   'ADMIN_EMAIL_CONFIRMED' =>false,
   'NODE_PATH' => '/opt/plesk/node/12/bin/node',
   'wsdir' => dirname(__DIR__).'/.frdl/',
   'NPM_PATH' => '/opt/plesk/node/12/bin/npm',
-  'autoupdate' => true,
-  'AUTOUPDATE_INTERVAL' => 24 * 60 * 60, 
   'CACHE_ASSETS_HTTP' => true,
   'installed_from_hps_blog_id' => null,
   'stub' => null,	 
- 
 	 
 );
 			  
@@ -5188,22 +5152,12 @@ Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 <?php 
-	
-    $this->getRunner()->init();
- 	$AppLauncher = new \Webfan\AppLauncherWebfatInstaller($this->getRunner()); 
- 	 if(\method_exists($AppLauncher, 'launch')){
-	   $AppLauncher->launch();
-	}elseif(!$AppLauncher->KernelFunctions()->isCLI() ){
-		   $response = $AppLauncher->handle($AppLauncher->getContainer()->get('request'));
-		   if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){ 
-			   (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
-		   }
-	 
-	   }elseif($AppLauncher->KernelFunctions()->isCLI() ){
-		 return $AppLauncher->handleCliRequest();
-	   }else{
-	     throw new \Exception('Could not handle request ('.\PHP_SAPI.')');	
-       }	
+ $container = $this->getRunner()->getAsContainer(null);	
+ return $container->get(
+     $container->has('config.stub.config.init.bootscript')
+      ? $container->get('config.stub.config.init.bootscript')
+      : $container->get('script@setup.php')
+ );
 
 --4444EVGuDPPT--
 --EVGuDPPT--
@@ -5294,8 +5248,9 @@ class Codebase extends \frdl\Codebase implements CodebaseInterface
 		
 		$this->setUpdateChannel($configVersion['channel'] ?? 'latest');	        
 		$this->setServiceEndpoint(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE,
-						  'https://website.webfan3.de/container/?channel='.urlencode($configVersion['channel'])
-									 .'&app='.urlencode($configVersion['appId']),
+					   'https://website.webfan3.de/container/?channel='.urlencode($configVersion['channel'])
+					   .'&app='.urlencode($configVersion['appId'])
+					   .'&version='.urlencode($configVersion['version']),
 					  \Frdlweb\Contract\Autoload\CodebaseInterface::ALL_CHANNELS);  
 		
 		if(true === $breakScript){
@@ -5506,10 +5461,10 @@ Content-Type: application/x-httpd-php
 
 	
 	'config.sandbox.runtime.security.allowed-classes'=>  (function(\Psr\Container\ContainerInterface $container){		   
-	   if($container->has('app.runtime.security.allowed-classes')){
+	   if($container->has('config.stub.config.init.app.runtime.security.allowed-classes')){
+             $classes = $container->get('config.stub.config.init.app.runtime.security.allowed-classes');
+	   }elseif($container->has('app.runtime.security.allowed-classes')){
              $classes = $container->get('app.runtime.security.allowed-classes');
-	   }elseif($container->has('app.runtime.security.allowed-classes.defaults')){
-             $classes = $container->get('app.runtime.security.allowed-classes.defaults');
 	   }else{
              $classes = [
 		     \Webfan\AppLauncherWebfatInstaller::class,
@@ -5519,10 +5474,10 @@ Content-Type: application/x-httpd-php
 	}),	
 	
 	'config.runtime.security.sandbox.allowed-functions'=>  (function(\Psr\Container\ContainerInterface $container){		   
-	   if($container->has('app.runtime.security.allowed-functions')){
+	   if($container->has('config.stub.config.init.app.runtime.security.allowed-functions')){
+             $functions = $container->get('config.stub.config.init.app.runtime.security.allowed-functions');
+	   }elseif($container->has('app.runtime.security.allowed-functions')){
              $functions = $container->get('app.runtime.security.allowed-functions');
-	   }elseif($container->has('app.runtime.security.allowed-functions.defaults')){
-             $functions = $container->get('app.runtime.security.allowed-functions.defaults');
 	   }else{
              $functions = [
 		     
@@ -5532,8 +5487,8 @@ Content-Type: application/x-httpd-php
 	}),	
 	
 	'config.app.core.code.facades.$map'=>  (function(\Psr\Container\ContainerInterface $container){		   
-	   if($container->has('app.core.config.code.facades.$map')){
-             $FacadesMap = $container->get('app.core.config.code.facades.$map');
+	   if($container->has('config.stub.config.init.facades.$map')){
+             $FacadesMap = $container->get('config.stub.config.init.facades.$map');
 	   }elseif($container->has('app.core.config.code.facades.$map.defaults')){
              $FacadesMap = $container->get('app.core.config.code.facades.$map.defaults');
 	   }else{
@@ -5549,8 +5504,8 @@ Content-Type: application/x-httpd-php
 	   return $FacadesMap;	
 	}),	
 	'config.app.core.code.facades.$import'=>  (function(\Psr\Container\ContainerInterface $container){		   
-	   if($container->has('app.core.config.code.facades.$import')){
-             $FacadesImport = $container->get('app.core.config.code.facades.$import');
+	   if($container->has('config.stub.config.init.facades.$import')){
+             $FacadesImport = $container->get('config.stub.config.init.facades.$import');
 	   }elseif($container->has('app.core.config.code.facades.$import.defaults')){
              $FacadesImport = $container->get('app.core.config.code.facades.$import.defaults');
 	   }else{

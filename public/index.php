@@ -5488,6 +5488,12 @@ Content-Type: application/x-httpd-php
 				.\DIRECTORY_SEPARATOR
 				.'runtime'
 				;			
+	 }, 'factory'],									   
+        'config.params.dirs.runtime.cache'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
+			return rtrim($container->get('config.params.dirs.runtime'), \DIRECTORY_SEPARATOR)
+				.\DIRECTORY_SEPARATOR
+				.'cache'
+				;			
 	 }, 'factory'],								   
 	'runtime.context.sandbox.containers'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {		
 		return [
@@ -5557,6 +5563,18 @@ Content-Type: application/x-httpd-php
 'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container) {
      return new \Desarrolla2\Cache\File($container->get('config.params.dirs.runtime.cache'));
 }),   
+			
+	'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getStub();			
+	}, 'factory'],   
+		
+	'app.runtime.codebase'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getCodebase();	
+	 }, 'factory'],    
+		
+	'app.runtime.autoloader.remote'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getRemoteAutoloader();	
+	}, 'factory'],   	
 	
 'facades.fs' =>( function(\Psr\Container\ContainerInterface $container){
 	      return \Webfan\FacadeProxiesMap::createProxy([
@@ -5680,22 +5698,10 @@ Content-Type: application/x-httpd-php
 			  return $config;
 		  }),	
 
-	 			
 
-	
 		  'FacadesAliasManager'=>  (function(\Psr\Container\ContainerInterface $container){		   
 			  return new \Statical\Manager('enable');
 		  }),	
-		  'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-			return $container->get('app.runtime.stubrunner')->getStub();			
-		  }, 'factory'],   
-		  'app.runtime.codebase'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-			return $container->get('app.runtime.stubrunner')->getCodebase();	
-		  }, 'factory'],    
-		  'app.runtime.autoloader.remote'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-			return $container->get('app.runtime.stubrunner')->getRemoteAutoloader();	
-		  }, 'factory'],   	
-
 		
 	          \Invoker\InvokerInterface::class =>  [(function(\Psr\Container\ContainerInterface $container){	
 				 return $container->get('invoker');			

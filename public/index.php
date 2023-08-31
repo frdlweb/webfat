@@ -1604,7 +1604,9 @@ class Runtime //extends BaseRuntime
     public function run($code, ?array $context = null)
     {
         $file = rtrim($this->cachePath, '//\ ').\DIRECTORY_SEPARATOR
-			. 'runtime_'.strlen($this->token).'_' . substr(sha1($this->token), 0, 8) . '.php';
+			. 'runtime_'
+		.substr(preg_replace("/([^A-Za-z0-9])/", '', $this->token), 0, 12)
+		.strlen($this->token).'_' . sha1($this->token). '.php';
 
 		$parser = new Parser($this->getSecurityManager());
 		$parsedCode = $parser->parse($code);

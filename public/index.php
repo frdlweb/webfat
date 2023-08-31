@@ -5489,7 +5489,7 @@ Content-Type: application/x-httpd-php
 				.'runtime'
 				;			
 	 }, 'factory'],								   
-	'config.sandbox.runtime.containers'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {		
+	'runtime.context.sandbox.containers'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {		
 		return [
                          'container'=>$container,
 			 'Stubrunner'=>$container->get('app.runtime.stubrunner'),

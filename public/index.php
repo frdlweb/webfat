@@ -5512,7 +5512,7 @@ Content-Type: application/x-httpd-php
              $classes = $container->get('app.runtime.security.allowed-classes.defaults');
 	   }else{
              $classes = [
-		     
+		     \Webfan\AppLauncherWebfatInstaller::class,
 	     ];
 	   }
 	   return $classes;	

@@ -4764,7 +4764,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 
 		//$this['Container']->setCall([$this, 'call']);
-		$this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, [$this, 'call']);		
+		//$this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, [$this, 'call']);		
 
 		
 		$stubContainerId = 'stub';		        
@@ -4954,7 +4954,8 @@ Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.
 
  return array (
   //'bootscript'=>'script@index.php',
-  'autoupdate' => true,
+  // CHOOSE onInstall/firstRun : 'autoupdate' => true,
+  'IO4_FACADES_ENABLE =true,
   'AUTOUPDATE_INTERVAL' => 24 * 60 * 60, 	 
   'FRDL_REMOTE_PSR4_CACHE_LIMIT'=>	24 * 60 * 60, //-1,
   'FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'=>	24 * 60 * 60, //-1,

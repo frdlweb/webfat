@@ -4996,7 +4996,8 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 <?php 
 return (static function ($Stub,bool $isCliRequest)   {	
  $container = $Stub->getRunner()->getAsContainer(null);	 
- 		 
+  $Stub->getRunner()->withFacades('', '*');		 
+	$container->get('inc.common.bootstrap.php');
  $response = $container->has('config.stub.config.init.bootscript')
       ? $container->get('config.stub.config.init.bootscript')
       : $container->get('script@setup.php')
@@ -5007,14 +5008,13 @@ switch(true){
 	     && is_object($response)
 	     && !is_null($response)
 	     && is_callable([$response, 'handleCliRequest']) :              
-              $response = $response->handleCliRequest(
-		      [$response, 'handle']
-	      );
+              $response = $response->handleCliRequest(  );
 	  break;
 	case is_object($response)
 	     && !is_null($response)
 	     && in_array(\Symfony\Component\HttpKernel\HttpKernelInterface::class, class_implements($response)) :
-              $response = $response->handle(\Symfony\Component\HttpFoundation\Request::createFromGlobals());
+		     $request=\Symfony\Component\HttpFoundation\Request::createFromGlobals();
+              $response = $response->handle($request);
 	 break;
 	case is_object($response)
 	     && !is_null($response)
@@ -5022,7 +5022,8 @@ switch(true){
 		     in_array(\Psr\Http\Server\RequestHandlerInterface::class, class_implements($response))
 		    || in_array(\Frdlweb\WebAppInterface::class, class_implements($response)) 
 		):
-              $response = $response->handle(\GuzzleHttp\Psr7\ServerRequest::fromGlobals());
+		      $request=\GuzzleHttp\Psr7\ServerRequest::fromGlobals();
+              $response = $response->handle($request);
 	 break;
 	case is_object($response)
 	     && !is_null($response)
@@ -5067,6 +5068,7 @@ if(!$isCliRequest){
 }
 	
 })($this, 'cli' === strtolower(substr(\php_sapi_name(), 0, 3)));
+
 
 --4444EVGuDPPT--
 --EVGuDPPT--

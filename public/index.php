@@ -4915,13 +4915,21 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		});
 		 */
 
+		
+            
+		foreach($this->configVersion() as $k=>$v){
+                  $this['Container']->set('config.stub.config.version.'.$k, $v);
+		}
+		foreach($this->config() as $k=>$v){
+                  $this['Container']->set('config.stub.config.init.'.$k, $v);
+		}		
 
 		$stubContainerId = 'stub';		        
 		$stubContainer = $this->getAsContainer('stub');
 		$this['Container']->addContainer($stubContainer, $stubContainerId);	
 
                /* move to configula...		
-		$configVersion = $this->configVersion();
+		
 		$stubContainerIdconfigVersion = 'config.stub.config.version';
                 $stubContainerVersion = new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter(
 					(new class($configVersion) extends \ArrayAccess {})
@@ -4929,7 +4937,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		$this['Container']->addContainer($stubContainerVersion, $stubContainerIdconfigVersion);
 
 		
-		$config = $this->config();
+		
 		$stubContainerIdconfig = 'config.stub.config.init';
 		$stubContainerConfig =  new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter(
 			(new class($config) extends \ArrayAccess{})

@@ -5363,12 +5363,12 @@ Content-Type: application/x-httpd-php
 				.'cache'
 				;			
 	 }, 'factory'],								   
-	'runtime.context.sandbox.containers'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {		
+	'runtime.context.sandbox.containers'=>(function(\Psr\Container\ContainerInterface $container)  {		
 		return [
                          'container'=>$container,
-			 'Stubrunner'=>$container->get('app.runtime.stubrunner'),
+			// NO !?! 'Stubrunner'=>$container->get('app.runtime.stubrunner'),
 			];
-	 }, 'default'],	
+	 }),	
 
 'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container) {
      return new \Desarrolla2\Cache\File($container->get('config.params.dirs.runtime.cache'));
@@ -5621,14 +5621,7 @@ Content-Type: application/x-httpd-php
 		  }), 'factory'],	  
 			
 	          'invoker' =>[(function(\Psr\Container\ContainerInterface $container){			  		
-				$invoker =  (new \Invoker\Invoker(null, $container->has('container') ? $container->get('container') : $container )); 
-				$invoker->getParameterResolver()->prependResolver(						
-					new \Invoker\ParameterResolver\Container\ParameterNameContainerResolver($container->has('container') ? $container->get('container') : $container) 
-				);
-				$invoker->getParameterResolver()->prependResolver(
-					new \Invoker\ParameterResolver\Container\TypeHintContainerResolver($container->has('container') ? $container->get('container') : $container)
-				); 
-				return $invoker;
+			return $container->createInvoker( );
 		     }), 'factory'],
 				   
  \Webfan\InstallerClient::class => (function(\Psr\Container\ContainerInterface $container){

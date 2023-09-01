@@ -4956,7 +4956,7 @@ Content-Disposition: php ;filename="$HOME/apc_config.php";name="stub apc_config.
  return array (
   //'bootscript'=>'script@index.php',
   // CHOOSE onInstall/firstRun : 'autoupdate' => true,
-  'IO4_FACADES_ENABLE =true,
+  'IO4_FACADES_ENABLE' =true,
   'AUTOUPDATE_INTERVAL' => 24 * 60 * 60, 	 
   'FRDL_REMOTE_PSR4_CACHE_LIMIT'=>	24 * 60 * 60, //-1,
   'FRDL_REMOTE_PSR4_CACHE_LIMIT_SELF'=>	24 * 60 * 60, //-1,

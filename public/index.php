@@ -4813,7 +4813,8 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		    case 'ContainerCollection' :
 		    case \IO4\Container\ContainerCollectionInterface::class :
 		    case \Webfan\Webfat\App\ContainerCollection::class :
-		       $class = \Webfan\Webfat\App\ContainerCollection::class;		    
+		      // $class = \Webfan\Webfat\App\ContainerCollection::class;
+		    $class = \IO4\Container\Collection::class;	
                        return new $class(array_merge([], $definitions),
 				    array_merge(['onFalseGet'=>\IO4\Container\ContainerCollectionInterface::NULL_ONERROR,], $options)['onFalseGet'],
 				    array_merge(['callId'=>\IO4\Container\ContainerCollectionInterface::CALL_ID,],

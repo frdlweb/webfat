@@ -4921,13 +4921,13 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		$this['Container']->addContainer($stubContainer, $stubContainerId);	
 
                		
-		$configVersion = $StubRunner->configVersion();
+		$configVersion = $this->configVersion();
 		$stubContainerIdconfigVersion = 'config.stub.config.version';
                 $stubContainerVersion = new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter($configVersion);
 		$this['Container']->addContainer($stubContainerVersion, $stubContainerIdconfigVersion);
 
 		
-		$config = $StubRunner->config();
+		$config = $this->config();
 		$stubContainerIdconfig = 'config.stub.config.init';
 		$stubContainerConfig =  new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter($config);
 		$this['Container']->addContainer($stubContainerConfig, $stubContainerIdconfig);

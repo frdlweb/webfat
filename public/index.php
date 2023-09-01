@@ -5492,6 +5492,7 @@ Content-Type: application/x-httpd-php
 	   }else{
              $classes = [
 		     \Webfan\AppLauncherWebfatInstaller::class,
+		     \Exception::class,
 	     ];
 	   }
 	   return $classes;	

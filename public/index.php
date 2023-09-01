@@ -4994,6 +4994,7 @@ Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 <?php 
+ $this->getRunner()->init();	
 return (static function ($Stub,bool $isCliRequest)   {	
  $container = $Stub->getRunner()->getAsContainer(null);	 
 	 

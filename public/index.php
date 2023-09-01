@@ -4920,7 +4920,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		$stubContainer = $this->getAsContainer('stub');
 		$this['Container']->addContainer($stubContainer, $stubContainerId);	
 
-               		
+               /* move to configula...		
 		$configVersion = $this->configVersion();
 		$stubContainerIdconfigVersion = 'config.stub.config.version';
                 $stubContainerVersion = new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter(
@@ -4935,7 +4935,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 			(new class($config) extends \ArrayAccess{})
 		);
 		$this['Container']->addContainer($stubContainerConfig, $stubContainerIdconfig);
-		
+		*/
 	  return $this['Container'];	
 	}
 
@@ -5156,12 +5156,24 @@ Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 <?php 
- $container = $this->getRunner()->getAsContainer(null);	
- return $container->get(
+ $container = $this->getRunner()->getAsContainer(null);	 
+ 		 
+ $response =$container->get(
      $container->has('config.stub.config.init.bootscript')
       ? $container->get('config.stub.config.init.bootscript')
       : $container->get('script@setup.php')
  );
+		  
+ if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){ 		
+	(new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);		 
+ }elseif(is_string($response)){
+	echo $response;
+ }elseif(is_object($response) && $response instanceof \Exception){ 		
+	throw $response;		 
+ }else{
+	 return $response;
+ }
+ 
 
 --4444EVGuDPPT--
 --EVGuDPPT--

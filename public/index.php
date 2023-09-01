@@ -5396,7 +5396,7 @@ Content-Type: application/x-httpd-php
              $classes = [
 		     \Exception::class,
 		     \Webfan\Patches\Start\Timezone::class,
-
+                    \GuzzleHttp\Psr7\ServerRequest::class,
 		     //deprecated...:
 		     \Webfan\AppLauncherWebfatInstaller::class,
 	     ];

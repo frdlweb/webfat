@@ -4764,7 +4764,8 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 
 
-		 $this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, [$this, 'call']);		
+		// $this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, [$this, 'call']);		
+		$this['Container']->setCall([$this, 'call']);
 		
 		$stubContainerId = 'stub';		        
 		$stubContainer = $this->getAsContainer('stub');

@@ -4998,12 +4998,7 @@ return (static function ($Stub,bool $isCliRequest)   {
       ? $container->get('config.stub.config.init.bootscript')
       : $container->get('script@setup.php')
  ;
-//Symfony\Component\HttpFoundation\Request
-	//Frdlweb\WebAppInterface
-//Psr\Http\Server\RequestHandlerInterface
-//Symfony\Component\HttpKernel\HttpKernelInterface
-	// handleCliRequest()
-	//\GuzzleHttp\Psr7\ServerRequest::fromGlobals()
+ 
 switch(true){
 	case true === $isCliRequest
 	     && is_object($response)
@@ -5370,7 +5365,7 @@ Content-Type: application/x-httpd-php
                          'container'=>$container,
 			 'Stubrunner'=>$container->get('app.runtime.stubrunner'),
 			];
-	 }, 'factory'],	
+	 }, 'default'],	
 
 'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container) {
      return new \Desarrolla2\Cache\File($container->get('config.params.dirs.runtime.cache'));
@@ -5428,6 +5423,7 @@ Content-Type: application/x-httpd-php
                     'Helper' =>  'facades.helper',
                     'Container' =>  'facades.container',
                     'Stubrunner' =>  'facades.stubrunner',
+                    'Events' =>  'facades.events',
 		];
 	   }
 	   return $FacadesMap;	
@@ -5446,7 +5442,20 @@ Content-Type: application/x-httpd-php
 	   return $FacadesImport;	
 	}),	
 		  
-
+'facades.events' =>( function(\Psr\Container\ContainerInterface $container){
+	      \Webfan\App\EventModule::setBaseDir(
+		      $container->get('config.params.dirs.runtime')
+		      .\DIRECTORY_SEPARATOR.'events'
+		      .\DIRECTORY_SEPARATOR.'compiled-registered'
+	      );
+	      return \Webfan\FacadeProxiesMap::createProxy([
+		       \Webfan\App\EventModule::action('*'),				   
+		     ],
+	  	[
+		 								 
+	    ],
+	$container->has('container') ? $container->get('container') : $container);  
+ }),	
 	
 'facades.fs' =>( function(\Psr\Container\ContainerInterface $container){
 	      return \Webfan\FacadeProxiesMap::createProxy([

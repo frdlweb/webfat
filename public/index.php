@@ -3027,12 +3027,12 @@ public function generateBundary($opts = array()) {
             // Convert to UTF-8 ( Not if binary or 7bit ( aka Ascii ) )
             if (!in_array($encoding, array('binary', '7bit'))) {
                 // back de-/encode 
-                if (    'utf-8' !== strtolower(self::getHeaderOption($this->getMimeType(), 'charset'))
-                     && 'utf-8' === \mb_detect_encoding($body)) {
-                    $body = \mb_convert_encoding($body, self::getHeaderOption($this->getMimeType(), 'charset'), 'utf-8');
-                }elseif (    'utf-8' === strtolower(self::getHeaderOption($this->getMimeType(), 'charset'))
-                     && 'utf-8' !== \mb_detect_encoding($body)) {
-                    $body = \mb_convert_encoding($body, 'utf-8', \mb_detect_encoding($body));
+                if (    'utf-8' !== @strtolower(self::getHeaderOption($this->getMimeType(), 'charset'))
+                     && 'utf-8' === @\mb_detect_encoding($body)) {
+                    $body = @\mb_convert_encoding($body, self::getHeaderOption($this->getMimeType(), 'charset'), 'utf-8');
+                }elseif (    'utf-8' === @strtolower(self::getHeaderOption($this->getMimeType(), 'charset'))
+                     && 'utf-8' !== @\mb_detect_encoding($body)) {
+                    $body = @\mb_convert_encoding($body, 'utf-8', \mb_detect_encoding($body));
                 }
             }   		 	
 		 }	
@@ -4916,20 +4916,24 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		 */
 
 
-                $stubContainerId = 'stub';		        
+		$stubContainerId = 'stub';		        
 		$stubContainer = $this->getAsContainer('stub');
 		$this['Container']->addContainer($stubContainer, $stubContainerId);	
 
                		
 		$configVersion = $this->configVersion();
 		$stubContainerIdconfigVersion = 'config.stub.config.version';
-                $stubContainerVersion = new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter($configVersion);
+                $stubContainerVersion = new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter(
+					(new class($configVersion) extends \ArrayAccess {})
+				);
 		$this['Container']->addContainer($stubContainerVersion, $stubContainerIdconfigVersion);
 
 		
 		$config = $this->config();
 		$stubContainerIdconfig = 'config.stub.config.init';
-		$stubContainerConfig =  new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter($config);
+		$stubContainerConfig =  new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter(
+			(new class($config) extends \ArrayAccess{})
+		);
 		$this['Container']->addContainer($stubContainerConfig, $stubContainerIdconfig);
 		
 	  return $this['Container'];	

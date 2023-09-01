@@ -4996,8 +4996,8 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 <?php 
 return (static function ($Stub,bool $isCliRequest)   {	
  $container = $Stub->getRunner()->getAsContainer(null);	 
-  $Stub->getRunner()->withFacades('', '*');		 
-	$container->get('inc.common.bootstrap.php');
+	 
+ $container->get('inc.common.bootstrap.php');
  $response = $container->has('config.stub.config.init.bootscript')
       ? $container->get('config.stub.config.init.bootscript')
       : $container->get('script@setup.php')

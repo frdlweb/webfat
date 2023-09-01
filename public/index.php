@@ -2434,7 +2434,7 @@ public function generateBundary($opts = array()) {
    } 
    //else
    
-    	
+    	/*
         // Note: value of $name is case sensitive.
          $trace = debug_backtrace();
          trigger_error(
@@ -2443,7 +2443,7 @@ public function generateBundary($opts = array()) {
             ' on line ' . $trace[0]['line'],
             \E_USER_NOTICE);
             
-            
+            */
          return null;
     }
 
@@ -5019,14 +5019,13 @@ Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 <?php 
-(static function ($Stub,bool $isCliRequest)   {	
+return (static function ($Stub,bool $isCliRequest)   {	
  $container = $Stub->getRunner()->getAsContainer(null);	 
  		 
- $response =$container->get(
-     $container->has('config.stub.config.init.bootscript')
+ $response = $container->has('config.stub.config.init.bootscript')
       ? $container->get('config.stub.config.init.bootscript')
       : $container->get('script@setup.php')
- );
+ ;
 
 if(!$isCliRequest){	
  if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){ 		

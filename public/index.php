@@ -5451,11 +5451,14 @@ Content-Type: application/x-httpd-php
 	}),	
 		  
 'facades.events' =>( function(\Psr\Container\ContainerInterface $container){
-	      \Webfan\App\EventModule::setBaseDir(
-		      $container->get('config.params.dirs.runtime')
+     $dir =  $container->get('config.params.dirs.runtime')
 		      .\DIRECTORY_SEPARATOR.'events'
-		      .\DIRECTORY_SEPARATOR.'compiled-registered'
-	      );
+		      .\DIRECTORY_SEPARATOR.'compiled-registered';
+       if(!is_dir($dir)){
+        mkdir($dir, 0775, true);
+       }
+	
+	      \Webfan\App\EventModule::setBaseDir($dir);
 	      return \Webfan\FacadeProxiesMap::createProxy([
 		       \Webfan\App\EventModule::action('*'),				   
 		     ],

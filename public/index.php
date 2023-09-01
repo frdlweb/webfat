@@ -5390,8 +5390,11 @@ Content-Type: application/x-httpd-php
              $classes = $container->get('app.runtime.security.allowed-classes');
 	   }else{
              $classes = [
-		     \Webfan\AppLauncherWebfatInstaller::class,
 		     \Exception::class,
+		     \Webfan\Patches\Start\Timezone::class,
+
+		     //deprecated...:
+		     \Webfan\AppLauncherWebfatInstaller::class,
 	     ];
 	   }
 	   return $classes;	

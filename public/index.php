@@ -4721,7 +4721,9 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	}
 	 	 
 			
- 
+	public function call($controller, ?array $params = []){
+		return $this->getAsContainer(null)->get('invoker')->call($controller, $params);
+	} 
 	
 	
 	protected function _bootMainRootContainer(){                  
@@ -4761,39 +4763,9 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		   ))->setTimeout( 60 ) );
 
 
-		
-	  	
-		       $invoker = $this['Container']->get('invoker');
-			   $call = (static function(array | \callable | \closure $callback, array $params = []) use(&$invoker){	           
-				 	if(is_array($callback)){
-			                  $fn = (\Closure::fromCallable($callback))->bindTo($callback[0], \get_class($callback[0]));
-			                       $callback = $fn;		           
-				 	  }		                                     
-					 
-					return $invoker->call($callback, $params);		           
-				  });			   
-                
-			  $this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, $call);		
-		/*
-		// MEMORY !!! 
-		$this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, 
-			function(\Psr\Container\ContainerInterface $container ) {
-			   $invoker = $container->get('invoker');
-			   $call = (static function(array | \callable | \closure $callback, array $params = []) use(&$invoker){	           
-				 	if(is_array($callback)){
-			                       $fn = (\Closure::fromCallable($callback))->bindTo($callback[0], \get_class($callback[0]));
-			                       $callback = $fn;		           
-				 	  }		                                     
-					 
-					return $invoker->call($callback, $params);		           
-				  });	
-		  return $call;
-		});
-		 */
 
+		 $this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, [$this, 'call']);		
 		
-            
-	
 		$stubContainerId = 'stub';		        
 		$stubContainer = $this->getAsContainer('stub');
 		$this['Container']->addContainer($stubContainer, $stubContainerId);	
@@ -5026,7 +4998,58 @@ return (static function ($Stub,bool $isCliRequest)   {
       ? $container->get('config.stub.config.init.bootscript')
       : $container->get('script@setup.php')
  ;
+//Symfony\Component\HttpFoundation\Request
+	//Frdlweb\WebAppInterface
+//Psr\Http\Server\RequestHandlerInterface
+//Symfony\Component\HttpKernel\HttpKernelInterface
+	// handleCliRequest()
+	//\GuzzleHttp\Psr7\ServerRequest::fromGlobals()
+switch(true){
+	case true === $isCliRequest
+	     && is_object($response)
+	     && !is_null($response)
+	     && is_callable([$response, 'handleCliRequest']) :              
+              $response = $response->handleCliRequest(
+		      [$response, 'handle']
+	      );
+	  break;
+	case is_object($response)
+	     && !is_null($response)
+	     && in_array(\Symfony\Component\HttpKernel\HttpKernelInterface::class, class_implements($response)) :
+              $response = $response->handle(\Symfony\Component\HttpFoundation\Request::createFromGlobals());
+	 break;
+	case is_object($response)
+	     && !is_null($response)
+	     && (
+		     in_array(\Psr\Http\Server\RequestHandlerInterface::class, class_implements($response))
+		    || in_array(\Frdlweb\WebAppInterface::class, class_implements($response)) 
+		):
+              $response = $response->handle(\GuzzleHttp\Psr7\ServerRequest::fromGlobals());
+	 break;
+	case is_object($response)
+	     && !is_null($response)
+	     && is_callable([$response, 'handle']) :
+              $response = $Stub->getRunner()->call(
+		      [$response, 'handle']
+	      );
+	  break;
+	case is_object($response)
+	     && !is_null($response)
+	     && is_callable($response) :
+              $response = $Stub->getRunner()->call(
+		     $response
+	      );
+	  break;
+	case is_object($response) && $response instanceof \Exception :
+            throw $response;
+	break;
+        default: 
+           //what? noop...
+	
+	break;
+}
 
+	
 if(!$isCliRequest){	
  if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){ 		
 	(new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);		 

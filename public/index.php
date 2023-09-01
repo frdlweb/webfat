@@ -5626,7 +5626,7 @@ Content-Type: application/x-httpd-php
 		  }), 'factory'],	  
 			
 	          'invoker' =>[(function(\Psr\Container\ContainerInterface $container){			  		
-			return $container->createInvoker( );
+			return $container->getInvoker( );
 		     }), 'factory'],
 				   
  \Webfan\InstallerClient::class => (function(\Psr\Container\ContainerInterface $container){

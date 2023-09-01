@@ -5324,7 +5324,9 @@ Content-Type: application/x-httpd-php
 <?php
  //@ToDo: Compose from https://github.com/frdlweb/webfat and modules...
     return [
-		 
+	'app.runtime.dir'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
+			return $container->get('config.params.app.dir');			
+		  }, 'factory'],			 
 	'config.params.app.dir'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
 			return $container->get('app.runtime.stubrunner')->getApplicationsDirectory();			
 		  }, 'factory'],							   
@@ -5347,7 +5349,21 @@ Content-Type: application/x-httpd-php
 			];
 	 }, 'factory'],	
 
-	
+'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container) {
+     return new \Desarrolla2\Cache\File($container->get('config.params.dirs.runtime.cache'));
+}),   
+			
+	'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getStub();			
+	}, 'factory'],   
+		
+	'app.runtime.codebase'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getCodebase();	
+	 }, 'factory'],    
+		
+	'app.runtime.autoloader.remote'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner')->getRemoteAutoloader();	
+	}, 'factory'],   		
 	'config.sandbox.runtime.security.allowed-classes'=>  (function(\Psr\Container\ContainerInterface $container){		   
 	   if($container->has('config.stub.config.init.app.runtime.security.allowed-classes')){
              $classes = $container->get('config.stub.config.init.app.runtime.security.allowed-classes');
@@ -5407,21 +5423,7 @@ Content-Type: application/x-httpd-php
 	   return $FacadesImport;	
 	}),	
 		  
-'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container) {
-     return new \Desarrolla2\Cache\File($container->get('config.params.dirs.runtime.cache'));
-}),   
-			
-	'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-			return $container->get('app.runtime.stubrunner')->getStub();			
-	}, 'factory'],   
-		
-	'app.runtime.codebase'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-			return $container->get('app.runtime.stubrunner')->getCodebase();	
-	 }, 'factory'],    
-		
-	'app.runtime.autoloader.remote'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-			return $container->get('app.runtime.stubrunner')->getRemoteAutoloader();	
-	}, 'factory'],   	
+
 	
 'facades.fs' =>( function(\Psr\Container\ContainerInterface $container){
 	      return \Webfan\FacadeProxiesMap::createProxy([

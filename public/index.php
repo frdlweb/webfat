@@ -1534,130 +1534,6 @@ class Php
 
 
 
-
-namespace Webfan\Sandbox{
-
-use Webfan\Sandbox\EmptyWhitelistSecurityManager;
-
-// 'to-classmap/frdl/implementation/vendor/psx/sandbox/src/WebfanRuntime.php',
-use PSX\Sandbox\WebfanRuntime as BaseRuntime;
-// use PSX\Sandbox\Runtime as BaseRuntime;
-use PhpParser\Error;
-use PhpParser\ParserFactory;
-
-use PSX\Sandbox\Parser;
-use PSX\Sandbox\SecurityManager;
- 
-class Runtime //extends BaseRuntime
-{
-    protected   $token;
-   // protected Parser $parser;
-    protected $cachePath;
-    protected  $context = [];
-	protected $SecurityManager;
-
-	public static function create(string $token, 
-								?string $cachePath = null,
-								 ?SecurityManager $SecurityManager = null //new EmptyWhitelistSecurityManager
-								 ){ 
-        $Runtime = new self($token,
-							$cachePath,
-							$SecurityManager);	
-		
-		return $Runtime;
-	}
-	
-    public function __construct(string $token, ?string $cachePath = null, ?SecurityManager $SecurityManager = null )
-    {
-		
-		
-				
-		if(!is_string($cachePath)){
-			$cachePath = rtrim((is_callable('\Container::has') && \Container::has('app.runtime.dir')
-								 ? \Container::get('app.runtime.dir') 
-								 : getenv('FRDL_WORKSPACE') ) )
-						              .\DIRECTORY_SEPARATOR. 'runtime' .\DIRECTORY_SEPARATOR
-				                       . 'cache' .\DIRECTORY_SEPARATOR. 'sbxp-parsed-php-vm-scripts' .\DIRECTORY_SEPARATOR;	
-		}
-		
-        $this->token     = $token;
-        $this->SecurityManager    = $SecurityManager ?? new EmptyWhitelistSecurityManager;
-      //  $this->parser    = $parser ?? new Parser($SecurityManager);
-        $this->cachePath = $cachePath === null ? \sys_get_temp_dir() : $cachePath;
-        $this->context   = [];
-    }
-	
-    public function setSecurityManager(SecurityManager $SecurityManager)
-    {
-		$this->SecurityManager = $SecurityManager;
-		return $this;
-	}	
-    public function getSecurityManager()
-    {
-		return $this->SecurityManager;
-	}
-	
-    public function secman()
-    {
-		return $this->getSecurityManager();
-	}
-	
-    public function run($code, ?array $context = null)
-    {
-        $file = rtrim($this->cachePath, '//\ ').\DIRECTORY_SEPARATOR
-			. 'runtime_'
-		.substr(preg_replace("/([^A-Za-z0-9])/", '', $this->token), 0, 12)
-		.strlen($this->token).'_' . sha1($this->token). '.php';
-
-		$parser = new Parser($this->getSecurityManager());
-		$parsedCode = $parser->parse($code);
-		
-		
-        // write file if it does not exist or the code has changed
-        if (!file_exists($file) || !is_file($file) || sha1_file($file) != sha1($parsedCode)) {
-			if(!is_dir(dirname($file))){
-			  mkdir(dirname($file), 0755, true);	
-			}
-            file_put_contents($file, $parsedCode);
-        }
- 
-		if(is_array($context)){
-			$this->set($context);
-		}
-        return self::runIsolate($file, $this->context);
-    }	
-	
-    public static function runIsolate($file, array $context, ?bool $doRequire = true)
-    {
-        return (static function ($context, $file, $doRequire) {
-              extract($context);
-              return false === $doRequire
-				     ? include $file
-				     : require $file;
-        })($context, $file, $doRequire);
-    }
-	
-	
-	public function set($name, $value = null)
-    {
-		if(is_array($name)){					
-		  foreach( $name as $k => $v){
-			  $this->set($k, $v);
-		  }
-		}else{
-			$this->context[$name] = $value;
-		}        
-    }
- 
-}//class runtime
-}//ns
-
-
-
-
-
-
-
 namespace Env{
 
 use \ErrorException;
@@ -4917,33 +4793,12 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
 		
             
-		foreach($this->configVersion() as $k=>$v){
-                  $this['Container']->set('config.stub.config.version.'.$k, $v);
-		}
-		foreach($this->config() as $k=>$v){
-                  $this['Container']->set('config.stub.config.init.'.$k, $v);
-		}		
-
+	
 		$stubContainerId = 'stub';		        
 		$stubContainer = $this->getAsContainer('stub');
 		$this['Container']->addContainer($stubContainer, $stubContainerId);	
 
-               /* move to configula...		
-		
-		$stubContainerIdconfigVersion = 'config.stub.config.version';
-                $stubContainerVersion = new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter(
-					(new class($configVersion) extends \ArrayAccess {})
-				);
-		$this['Container']->addContainer($stubContainerVersion, $stubContainerIdconfigVersion);
 
-		
-		
-		$stubContainerIdconfig = 'config.stub.config.init';
-		$stubContainerConfig =  new \Acclimate\Container\Adapter\ArrayAccessContainerAdapter(
-			(new class($config) extends \ArrayAccess{})
-		);
-		$this['Container']->addContainer($stubContainerConfig, $stubContainerIdconfig);
-		*/
 	  return $this['Container'];	
 	}
 
@@ -5164,24 +5019,34 @@ Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 <?php 
- $container = $this->getRunner()->getAsContainer(null);	 
+(static function ($Stub,bool $isCliRequest)   {	
+ $container = $Stub->getRunner()->getAsContainer(null);	 
  		 
  $response =$container->get(
      $container->has('config.stub.config.init.bootscript')
       ? $container->get('config.stub.config.init.bootscript')
       : $container->get('script@setup.php')
  );
-		  
+
+if(!$isCliRequest){	
  if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){ 		
 	(new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);		 
  }elseif(is_string($response)){
 	echo $response;
  }elseif(is_object($response) && $response instanceof \Exception){ 		
 	throw $response;		 
- }else{
-	 return $response;
+ }elseif(is_object($response) || is_array($response) ){ 
+	 header('Content-Type: application/json');
+	echo json_encode($response);		 
+ }else{		
+	header('Content-Type: application/json');
+	echo json_encode($response);	
  }
- 
+}else{
+  return $response;
+}
+	
+})($this, 'cli' === strtolower(substr(\php_sapi_name(), 0, 3)));
 
 --4444EVGuDPPT--
 --EVGuDPPT--
@@ -5518,6 +5383,7 @@ Content-Type: application/x-httpd-php
              $FacadesMap = $container->get('app.core.config.code.facades.$map.defaults');
 	   }else{
              $FacadesMap = [
+                    'Config' =>  'facades.config',
                     'App' =>  'app.core.io4',
                     'fs' =>  'facades.fs',
                     'Module' =>  'facades.modules',
@@ -5597,6 +5463,32 @@ Content-Type: application/x-httpd-php
 		'call' => \IO4\Container\ContainerCollectionInterface::CALL_ID,									 
 	    ],
 	$container->has('container') ? $container->get('container') : $container);  
+ }),	
+	
+'facades.config' =>( function(\Psr\Container\ContainerInterface $container){
+    		
+	$config = \Configula\ConfigFactory::loadMultiple([
+        @new \Configula\Loader\EnvLoader( ),   
+   //  new \Configula\Loader\EnvLoader('APP', '', false),     
+   // new \Configula\Loader\EnvLoader('WEBFAN', '_', true),       
+   //  new \Configula\Loader\EnvLoader('FRDL', '_', true),      
+   //    \Configula\ConfigFactory::loadEnv('IO4_', '_', true),   
+    //   \Configula\ConfigFactory::loadEnv('APP_', '', false),     
+    //  \Configula\ConfigFactory::loadEnv('WEBFAN_', '_', true),       
+    //   \Configula\ConfigFactory::loadEnv('FRDL_', '_', true),         
+     $this->config(),
+     $this->configVersion(),
+    //['some' => 'values'],                           // Array of config vaules
+   // '/path/to/some/file.yml',                       // Path to file (must exist)
+   // new \SplFileInfo('/path/to/another/file.json')  // SplFileInfo
+]);
+		 
+	return \Webfan\Container\ConfigContainer::ConfigProxyFactory($container->has('container') ? $container->get('container') : $container,
+								      'config', //self container id, should return $this!
+								      'config.', 
+								      '',
+								   $config
+								 );
  }),	
 	
 'app.core.io4'=> [function(\Psr\Container\ContainerInterface $container) {

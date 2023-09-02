@@ -4737,7 +4737,11 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		   array_merge([			
 		 'container'=> [function(ContainerInterface $container, $previous = null) use(&$Stubrunner) {				
 			  return $Stubrunner['Container'];
-		  }, 'default'],	 			 								   
+		  }, 'factory'],
+		  //!important: for autowire first parameter
+		  \Psr\Container\ContainerInterface::class=> [function(ContainerInterface $container, $previous = null) use(&$Stubrunner) {				
+			  return $Stubrunner['Container'];
+		  }, 'factory'],	       
 		  'app.runtime.stubrunner'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) use(&$Stubrunner){
 			return $Stubrunner;			
 		  }, 'factory'],	
@@ -4750,10 +4754,15 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		 ),//array_merge default definitions
 		 [
 			'onFalseGet'=>\IO4\Container\ContainerCollectionInterface::NULL_ONERROR,				   
-			'callId'=>\IO4\Container\ContainerCollectionInterface::CALL_ID,				   
+			'callId'=>false,//\IO4\Container\ContainerCollectionInterface::CALL_ID,				   
 		]);
  
 
+	//Memory?
+	//	$stubContainerId = 'stub';		        
+	//	$stubContainer = $this->getAsContainer('stub');
+	//	$this['Container']->addContainer($stubContainer, $stubContainerId);
+		
      	         $this['Container']->setFinalFallbackContainer((new \IO4FallbackContainerClient (
 		             $this['Container']->get('proxy-object-factory.cache-configuration'),
 			         $this['Container']->get('app.runtime.codebase')
@@ -4766,10 +4775,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		//$this['Container']->setCall([$this, 'call']);
 		//$this['Container']->set(\IO4\Container\ContainerCollectionInterface::CALL_ID, [$this, 'call']);		
 
-		
-		$stubContainerId = 'stub';		        
-		$stubContainer = $this->getAsContainer('stub');
-		$this['Container']->addContainer($stubContainer, $stubContainerId);	
+	
 
 
 	  return $this['Container'];	

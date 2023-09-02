@@ -5391,8 +5391,8 @@ Content-Type: application/x-httpd-php
 	'config.sandbox.runtime.security.allowed-classes'=>  (function(\Psr\Container\ContainerInterface $container){		   
 	   if($container->has('config.stub.config.init.app.runtime.security.allowed-classes')){
              $classes = $container->get('config.stub.config.init.app.runtime.security.allowed-classes');
-	   }elseif($container->has('app.runtime.security.allowed-classes')){
-             $classes = $container->get('app.runtime.security.allowed-classes');
+	 //  }elseif($container->has('app.runtime.security.allowed-classes')){
+           //  $classes = $container->get('app.runtime.security.allowed-classes');
 	   }else{
              $classes = [
 		     \Exception::class,
@@ -5408,8 +5408,8 @@ Content-Type: application/x-httpd-php
 	'config.runtime.security.sandbox.allowed-functions'=>  (function(\Psr\Container\ContainerInterface $container){		   
 	   if($container->has('config.stub.config.init.app.runtime.security.allowed-functions')){
              $functions = $container->get('config.stub.config.init.app.runtime.security.allowed-functions');
-	   }elseif($container->has('app.runtime.security.allowed-functions')){
-             $functions = $container->get('app.runtime.security.allowed-functions');
+	//   }elseif($container->has('app.runtime.security.allowed-functions')){
+        //     $functions = $container->get('app.runtime.security.allowed-functions');
 	   }else{
              $functions = [
 		     
@@ -5421,8 +5421,8 @@ Content-Type: application/x-httpd-php
 	'config.app.core.code.facades.$map'=>  (function(\Psr\Container\ContainerInterface $container){		   
 	   if($container->has('config.stub.config.init.facades.$map')){
              $FacadesMap = $container->get('config.stub.config.init.facades.$map');
-	   }elseif($container->has('app.core.config.code.facades.$map.defaults')){
-             $FacadesMap = $container->get('app.core.config.code.facades.$map.defaults');
+	//   }elseif($container->has('app.core.config.code.facades.$map.defaults')){
+         //    $FacadesMap = $container->get('app.core.config.code.facades.$map.defaults');
 	   }else{
              $FacadesMap = [
                     'Config' =>  'facades.config',
@@ -5440,8 +5440,8 @@ Content-Type: application/x-httpd-php
 	'config.app.core.code.facades.$import'=>  (function(\Psr\Container\ContainerInterface $container){		   
 	   if($container->has('config.stub.config.init.facades.$import')){
              $FacadesImport = $container->get('config.stub.config.init.facades.$import');
-	   }elseif($container->has('app.core.config.code.facades.$import.defaults')){
-             $FacadesImport = $container->get('app.core.config.code.facades.$import.defaults');
+	   //}elseif($container->has('app.core.config.code.facades.$import.defaults')){
+           //  $FacadesImport = $container->get('app.core.config.code.facades.$import.defaults');
 	   }else{
              $FacadesImport = [
                     'baseName' =>  'IO4\\',

@@ -5527,8 +5527,8 @@ Content-Type: application/x-httpd-php
     //   \Configula\ConfigFactory::loadEnv('APP_', '', false),     
     //  \Configula\ConfigFactory::loadEnv('WEBFAN_', '_', true),       
     //   \Configula\ConfigFactory::loadEnv('FRDL_', '_', true),         
-     $this->config(),
-     $this->configVersion(),
+     $container->get('app.runtime.stubrunner')->config(),
+     $container->get('app.runtime.stubrunner')->configVersion(),
     //['some' => 'values'],                           // Array of config vaules
    // '/path/to/some/file.yml',                       // Path to file (must exist)
    // new \SplFileInfo('/path/to/another/file.json')  // SplFileInfo

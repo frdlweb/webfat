@@ -5528,9 +5528,9 @@ Content-Type: application/x-httpd-php
 	   //}elseif($container->has('app.core.config.code.facades.$import.defaults')){
            //  $FacadesImport = $container->get('app.core.config.code.facades.$import.defaults');
 	   }else{
-             $FacadesImport = [
-                    'baseName' =>  'IO4\\',
-		     'namespace' => '*',
+             $FacadesImport = [                 
+		 'baseName' =>  '',
+		 'namespace' => 'IO4',
 		];
 	   }
 	   return $FacadesImport;	

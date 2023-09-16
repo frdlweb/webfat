@@ -5466,15 +5466,13 @@ Content-Type: application/x-httpd-php
 	'config.state-file'=>(function(\Psr\Container\ContainerInterface $container)  {		
 			  $file = rtrim($container->get('app.runtime.dir'), \DIRECTORY_SEPARATOR)
 				.\DIRECTORY_SEPARATOR
-				  .'state;
+				  .'state'
 				.\DIRECTORY_SEPARATOR
-				  .'app.state.sync.dat;
+				  .'app.state.sync.dat';
           return $file;	 
 	 }),	
 	
-	'app.runtime.state'=>[(function(\Psr\Container\ContainerInterface $container
-					//, $previous = null
-				       )  {		
+	'app.runtime.state'=>[function(\Psr\Container\ContainerInterface $container  )  {		
 			  $file = $container->get('config.state-file');
                            $dir = dirname($file); 
 			  if(!is_dir($dir)){	
@@ -5499,14 +5497,19 @@ Content-Type: application/x-httpd-php
 		 $container->get('app.runtime.cache.circuits')
     );
 }), 
-'CircuitBreaker'=> [(function(\Psr\Container\ContainerInterface $container) {
+'CircuitBreaker'=> [function(\Psr\Container\ContainerInterface $container) {
     return $container->get('app.runtime.circuits.main');
 }, 'factory'],   
-	
+	  
 'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container) {
-     return new \Desarrolla2\Cache\File($container->get('config.params.dirs.runtime.cache').\DIRECTORY_SEPARATOR
-				  .'app.runtime.cache');
-}),   
+	$dir = $container->get('config.params.dirs.runtime.cache').\DIRECTORY_SEPARATOR
+				  .'app.runtime.cache';
+				 
+	if(!is_dir($dir)){	
+			    @mkdir($dir, 0755, true);				
+	}	
+     return new \Desarrolla2\Cache\File($dir);
+}),    
 			
 	'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
 			return $container->get('app.runtime.stubrunner')->getStub();			

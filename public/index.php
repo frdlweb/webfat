@@ -5077,9 +5077,13 @@ Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 <?php 
  $this->getRunner()->init();	
 return (static function ($Stub,bool $isCliRequest)   {	
- $container = $Stub->getRunner()->getAsContainer(null);	 
-	 
- $container->get('inc.common.bootstrap.php');
+ $container = $Stub->getRunner()->getAsContainer(null);	 	 
+ 	 
+ $check = $container->get('script@inc.common.bootstrap');
+ if(!is_array($check) || !isset($check['success']) || true !== $check['success']){
+    throw new \Exception('Could not bootestrap! '.print_r($check, true) );
+ }
+	
  $response = $container->has('config.stub.config.init.bootscript')
       ? $container->get('config.stub.config.init.bootscript')
       : $container->get('script@setup.php')

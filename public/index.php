@@ -3767,7 +3767,6 @@ HTACCESSCONTENT);
 	  return $dir;	 
 	}	
 
-
 	public function getRuntimesRootDirectory( ?bool $create = false ) : string {
 	  $dir = 
 	        $this->getFrdlwebWorkspaceDirectory()
@@ -4002,7 +4001,7 @@ HTACCESSCONTENT);
 			   .urlencode($configVersion['appId'])	
 			   .\DIRECTORY_SEPARATOR.'deployments'	
 				   .\DIRECTORY_SEPARATOR.'blue'	
-				   .\DIRECTORY_SEPARATOR.'deploy'	
+				//    .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 			 
 		 }
 		 
@@ -4018,7 +4017,7 @@ HTACCESSCONTENT);
 				   .'app'	 
 				   .\DIRECTORY_SEPARATOR.'deployments'	
 				   .\DIRECTORY_SEPARATOR.'blue'	
-				   .\DIRECTORY_SEPARATOR.'deploy'	
+				 //   .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
 		   } 
 //mkdir(realpath('/volume1/web/~frdl/global/app/deployments/blue/deploy/app/'), 0775, true);
@@ -4035,7 +4034,7 @@ HTACCESSCONTENT);
 				   .'app'	 
 				   .\DIRECTORY_SEPARATOR.'deployments'	
 				   .\DIRECTORY_SEPARATOR.'blue'	
-				   .\DIRECTORY_SEPARATOR.'deploy'	
+				  //  .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
 		   } 
 		  
@@ -4060,7 +4059,7 @@ HTACCESSCONTENT);
 				   .'app'	 
 				   .\DIRECTORY_SEPARATOR.'deployments'	
 				   .\DIRECTORY_SEPARATOR.'blue'	
-				   .\DIRECTORY_SEPARATOR.'deploy'	
+				 //   .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
 				   if(is_dir($ApplicationsDirectory)  || @mkdir($ApplicationsDirectory, 0775, true) ){  
 				     break;
@@ -4089,7 +4088,7 @@ HTACCESSCONTENT);
 				   .'app'	 
 				   .\DIRECTORY_SEPARATOR.'deployments'	
 				   .\DIRECTORY_SEPARATOR.'blue'	
-				   .\DIRECTORY_SEPARATOR.'deploy'	
+				 //   .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
 				   if(is_dir($ApplicationsDirectory)  || @mkdir($ApplicationsDirectory, 0775, true) ){  
 				     break;
@@ -4120,7 +4119,7 @@ HTACCESSCONTENT);
 				   .'app'	 
 				   .\DIRECTORY_SEPARATOR.'deployments'	
 				   .\DIRECTORY_SEPARATOR.'blue'	
-				   .\DIRECTORY_SEPARATOR.'deploy'	
+				 //   .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
 				   if(is_dir($ApplicationsDirectory)  || @mkdir($ApplicationsDirectory, 0775, true) ){  
 				     break;
@@ -4152,7 +4151,7 @@ HTACCESSCONTENT);
 				   .'app'	 
 				   .\DIRECTORY_SEPARATOR.'deployments'	
 				   .\DIRECTORY_SEPARATOR.'blue'	
-				   .\DIRECTORY_SEPARATOR.'deploy'	
+				//    .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR;
 				   if(is_dir($ApplicationsDirectory)  || @mkdir($ApplicationsDirectory, 0775, true) ){  
 				     break;
@@ -4176,7 +4175,7 @@ HTACCESSCONTENT);
 				   .'app'	 
 				   .\DIRECTORY_SEPARATOR.'deployments'	
 				   .\DIRECTORY_SEPARATOR.'blue'	
-				   .\DIRECTORY_SEPARATOR.'deploy'	
+				//    .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
 		   } 
 		
@@ -4194,7 +4193,7 @@ HTACCESSCONTENT);
 				   .'app'	 
 				   .\DIRECTORY_SEPARATOR.'deployments'	
 				   .\DIRECTORY_SEPARATOR.'blue'	
-				   .\DIRECTORY_SEPARATOR.'deploy'	
+				//    .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
 		   } 
 		  
@@ -4215,7 +4214,7 @@ HTACCESSCONTENT);
 				   .'app'	 
 				   .\DIRECTORY_SEPARATOR.'deployments'	
 				   .\DIRECTORY_SEPARATOR.'blue'	
-				   .\DIRECTORY_SEPARATOR.'deploy'	
+				//   .\DIRECTORY_SEPARATOR.'deploy'	
 				   .\DIRECTORY_SEPARATOR.'app'.\DIRECTORY_SEPARATOR; 
 		   } 
 		   	
@@ -4802,6 +4801,30 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		return $this->getAsContainer(null)->get('invoker')->call($controller, $params);
 	} 
 	
+	public function withFacades(?string $baseNamespace = '', ?string $namespace = '*'){	                    
+		 $container  = $this->getAsContainer(null);
+          
+                 $FacadesMap = $container->get('config.app.core.code.facades.$map');
+
+                  foreach($FacadesMap as $aliasClass => $containerId){
+		        $this->getAsFacade($baseNamespace.$aliasClass,
+				   \get_class(new class extends \Statical\BaseProxy{}), 
+				    $containerId,
+				    $namespace,
+				     $container,
+				   true);
+		  }
+			    
+		$this->getAsFacade('io4',
+				   \get_class(new class extends \Statical\BaseProxy{}), 
+				    'app.core.io4',
+				    '*',
+				     $container,
+				   true);
+		
+	   return $this;
+	}	
+
 	
 	protected function _bootMainRootContainer(){                  
 		if(isset($this['Container']) && is_object($this['Container']) && $this['Container'] instanceof \Psr\Container\ContainerInterface){                    
@@ -4848,7 +4871,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 			  'config', 
 			  'config.', 
 			  '',
-			  $this['Container']->get('facades.config')
+			  $this['Container']->get('Config')
 		  );
 		$ConfigurationContainerId = 'config';
 		$this['Container']->addContainer($ConfigurationContainer, $ConfigurationContainerId);
@@ -4856,29 +4879,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 	  return $this['Container'];	
 	}
 
-	public function withFacades(?string $baseNamespace = '', ?string $namespace = '*'){	                    
-		 $container  = $this->getAsContainer(null);
-          
-                 $FacadesMap = $container->get('config.app.core.code.facades.$map');
 
-                  foreach($FacadesMap as $aliasClass => $containerId){
-		        $this->getAsFacade($baseNamespace.$aliasClass,
-				   \get_class(new class extends \Statical\BaseProxy{}), 
-				    $containerId,
-				    $namespace,
-				     $container,
-				   true);
-		  }
-			    
-		$this->getAsFacade('io4',
-				   \get_class(new class extends \Statical\BaseProxy{}), 
-				    'app.core.io4',
-				    '*',
-				     $container,
-				   true);
-		
-	   return $this;
-	}
 	
 	public function getAsContainer(?string $factoryId=null, ?array $definitions = [], ?array $options = []) : \Psr\Container\ContainerInterface {
 		$this->autoloading();
@@ -5081,6 +5082,11 @@ return (static function ($Stub,bool $isCliRequest)   {
  	 
  $check = $container->get('script@inc.common.bootstrap');
  if(!is_array($check) || !isset($check['success']) || true !== $check['success']){
+    if(is_array($check) && isset($check['error']) ){
+      throw new \Exception( basename(__FILE__).' line '.__LINE__.' : '.$check['error'] );
+    }elseif(is_object($check) && !is_null($check) && $check instanceof \Exception){
+        throw $check;
+    }
     throw new \Exception('Could not bootestrap! '.print_r($check, true) );
  }
 	
@@ -5457,9 +5463,49 @@ Content-Type: application/x-httpd-php
 			// NO !?! 'Stubrunner'=>$container->get('app.runtime.stubrunner'),
 			];
 	 }),	
-
+	'config.state-file'=>(function(\Psr\Container\ContainerInterface $container)  {		
+			  $file = rtrim($container->get('app.runtime.dir'), \DIRECTORY_SEPARATOR)
+				.\DIRECTORY_SEPARATOR
+				  .'state;
+				.\DIRECTORY_SEPARATOR
+				  .'app.state.sync.dat;
+          return $file;	 
+	 }),	
+	
+	'app.runtime.state'=>[(function(\Psr\Container\ContainerInterface $container
+					//, $previous = null
+				       )  {		
+			  $file = $container->get('config.state-file');
+                           $dir = dirname($file); 
+			  if(!is_dir($dir)){	
+			    @mkdir($dir, 0755, true);		
+			  }	
+		$storage = new \Fuz\Component\SharedMemory\Storage\StorageFile($file);
+	   return new \Fuz\Component\SharedMemory\SharedMemory($storage);
+	 }, 'default'],	
+	
+'app.runtime.cache.circuits'=>(function(\Psr\Container\ContainerInterface $container) {
+    return new \Doctrine\Common\Cache\FilesystemCache( 
+	     rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR)
+				.\DIRECTORY_SEPARATOR
+				  .'circuits'
+      ); 
+}), 
+	
+'app.runtime.circuits.main'=>(function(\Psr\Container\ContainerInterface $container) {
+    return new \Webfan\Webfat\App\CircuitBreaker('app_main', [
+			     'ignore_exceptions' => false,
+			   ], 
+		 $container->get('app.runtime.cache.circuits')
+    );
+}), 
+'CircuitBreaker'=> [(function(\Psr\Container\ContainerInterface $container) {
+    return $container->get('app.runtime.circuits.main');
+}, 'factory'],   
+	
 'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container) {
-     return new \Desarrolla2\Cache\File($container->get('config.params.dirs.runtime.cache'));
+     return new \Desarrolla2\Cache\File($container->get('config.params.dirs.runtime.cache').\DIRECTORY_SEPARATOR
+				  .'app.runtime.cache');
 }),   
 			
 	'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
@@ -5472,7 +5518,8 @@ Content-Type: application/x-httpd-php
 		
 	'app.runtime.autoloader.remote'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
 			return $container->get('app.runtime.stubrunner')->getRemoteAutoloader();	
-	}, 'factory'],   		
+	}, 'factory'],   
+	
 	'config.sandbox.runtime.security.allowed-classes'=>  (function(\Psr\Container\ContainerInterface $container){		   
 	   if($container->has('config.stub.config.init.app.runtime.security.allowed-classes')){
              $classes = $container->get('config.stub.config.init.app.runtime.security.allowed-classes');
@@ -5510,14 +5557,14 @@ Content-Type: application/x-httpd-php
          //    $FacadesMap = $container->get('app.core.config.code.facades.$map.defaults');
 	   }else{
              $FacadesMap = [
-                    'Config' =>  'facades.config',
-                    'App' =>  'app.core.io4',
-                    'fs' =>  'facades.fs',
+                    'Config' =>  'Config',
+                    'App' =>  'App',
+                    'fs' =>  'fs',
                     'Module' =>  'facades.modules',
-                    'Helper' =>  'facades.helper',
+                    'Helper' =>  'helper',
                     'Container' =>  'facades.container',
                     'Stubrunner' =>  'facades.stubrunner',
-                    'Events' =>  'facades.events',
+                    'Events' =>  'events',
 		];
 	   }
 	   return $FacadesMap;	
@@ -5536,7 +5583,7 @@ Content-Type: application/x-httpd-php
 	   return $FacadesImport;	
 	}),	
 		  
-'facades.events' =>( function(\Psr\Container\ContainerInterface $container){
+'events' =>( function(\Psr\Container\ContainerInterface $container){
      $dir =  $container->get('config.params.dirs.runtime')
 		      .\DIRECTORY_SEPARATOR.'events'
 		      .\DIRECTORY_SEPARATOR.'compiled-registered';
@@ -5554,7 +5601,7 @@ Content-Type: application/x-httpd-php
 	$container->has('container') ? $container->get('container') : $container);  
  }),	
 	
-'facades.fs' =>( function(\Psr\Container\ContainerInterface $container){
+'fs' =>( function(\Psr\Container\ContainerInterface $container){
 	      return \Webfan\FacadeProxiesMap::createProxy([
 		        new \Webfan\Fs\MountManager([
 			   'cache' => new \League\Flysystem\Filesystem(
@@ -5583,19 +5630,19 @@ Content-Type: application/x-httpd-php
 	$container->has('container') ? $container->get('container') : $container);  
  }),
 	
-'facades.helper' =>( function(\Psr\Container\ContainerInterface $container){
+'helper' =>( function(\Psr\Container\ContainerInterface $container){
 	      return \Webfan\FacadeProxiesMap::createProxy([
 		        new \Webfan\Webfat\App\KernelHelper,
 		        new \Webfan\Webfat\App\KernelFunctions,
 			//$container->get('app.core.io4'),				   
 		     ],
 	  	[
-		'call' => \IO4\Container\ContainerCollectionInterface::CALL_ID,									 
+	//	'call' => \IO4\Container\ContainerCollectionInterface::CALL_ID,									 
 	    ],
 	$container->has('container') ? $container->get('container') : $container);  
  }),	
 	
-'facades.config' =>( function(\Psr\Container\ContainerInterface $container){
+'Config' =>( function(\Psr\Container\ContainerInterface $container){
     		
 	$config = \Configula\ConfigFactory::loadMultiple([
         @new \Configula\Loader\EnvLoader( ),   
@@ -5613,15 +5660,10 @@ Content-Type: application/x-httpd-php
    // new \SplFileInfo('/path/to/another/file.json')  // SplFileInfo
 ]);
 		 
-	return \Webfan\Container\ConfigContainer::ConfigProxyFactory($container->has('container') ? $container->get('container') : $container,
-								      'config', //self container id, should return $this!
-								      'config.', 
-								      '',
-								   $config
-								 );
+	return $config;
  }),	
 	
-'app.core.io4'=> [function(\Psr\Container\ContainerInterface $container) {
+'App'=> [function(\Psr\Container\ContainerInterface $container) {
     return (new class($container) extends \Webfan\Node{
 		      use Webfan\withClassCastingTrait; 
 	              protected $container;

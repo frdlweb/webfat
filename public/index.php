@@ -5477,7 +5477,7 @@ Content-Type: application/x-httpd-php
 	   }else{
              $classes = [
 		     \Exception::class,
-		     \Webfan\Patches\Start\Timezone::class,
+		     \Webfan\Patches\Start\Timezone2::class,
                     \GuzzleHttp\Psr7\ServerRequest::class,
 		     //deprecated...:
 		     \Webfan\AppLauncherWebfatInstaller::class,

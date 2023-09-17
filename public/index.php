@@ -4691,7 +4691,8 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
               $Manager = $container->has( 'FacadesAliasManager' ) 
 	          ? $container->get( 'FacadesAliasManager' ) 
 		  :  (function ($container, $throw) {	
-	                $Manager = new \Statical\Manager('enable');
+	              //  $Manager = new \Statical\Manager('enable');
+			  $Manager = new \Statical\Manager('none' );
                             if(is_callable([$container, 'set'])){
 			      try{	    
                                  $container->set('FacadesAliasManager', $Manager);
@@ -4716,7 +4717,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		  $id, //$id																		
 		 $namespace // $namespace								
 	     );		
-		      $Manager->enable();
+		      //$Manager->enable();
 	      }catch(\Exception $e){
                                  if($throw){
                                    throw $e;
@@ -4821,6 +4822,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 				   true);
 		  }
 
+		$container->get( 'FacadesAliasManager' )->enable();
 		
 	   return $this;
 	}	
@@ -5727,7 +5729,8 @@ Content-Type: application/x-httpd-php
 
 
 		  'FacadesAliasManager'=>  [(function(\Psr\Container\ContainerInterface $container){		   
-			  return new \Statical\Manager('enable');
+			 // return new \Statical\Manager('enable');			   
+		    return new \Statical\Manager('none' );
 		  }), 'default'],
 		
 	          \Invoker\InvokerInterface::class =>  [(function(\Psr\Container\ContainerInterface $container){	

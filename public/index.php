@@ -5748,9 +5748,9 @@ Content-Type: application/x-httpd-php
 		  }),	
 
 
-		  'FacadesAliasManager'=>  (function(\Psr\Container\ContainerInterface $container){		   
+		  'FacadesAliasManager'=>  [(function(\Psr\Container\ContainerInterface $container){		   
 			  return new \Statical\Manager('enable');
-		  }),	
+		  }), 'factory'],
 		
 	          \Invoker\InvokerInterface::class =>  [(function(\Psr\Container\ContainerInterface $container){	
 				 return $container->get('invoker');			

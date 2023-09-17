@@ -4869,6 +4869,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 			      $this['Container']
 		   ))->setTimeout( 60 ) );
 
+		/* //MOVE TO: $container->get('script@inc.common.bootstrap')
 		  $ConfigurationContainer =new \Webfan\Container\ConfigContainer(
 			  'config', 
 			  'config.', 
@@ -4877,7 +4878,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		  );
 		$ConfigurationContainerId = 'config';
 		$this['Container']->addContainer($ConfigurationContainer, $ConfigurationContainerId);
-
+          */
 	  return $this['Container'];	
 	}
 

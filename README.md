@@ -15,6 +15,13 @@ There are 2-3 ways to use this framework:
   * [Add or create Frdlweb Software](https://packages.frdl.de/)
   * Use composer and/or the other tools.
 
+# Components
+Although the frameworks cms is work in progress yet and not ready, you can use its **components** now!
+
+#### Examples:
+* [DM-Captcha](https://dm-captcha-sas.weid.info/test-post.php)
+* [More packages...](https://packages.frdl.de/)
+* [Frdlweb Software Group/Blogs/Forums](https://frdl.de/groups/profile/97/frdlweb-software)
 
 ----
 More Infos...

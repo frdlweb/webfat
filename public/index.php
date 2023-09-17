@@ -981,6 +981,7 @@ class ResolvableLogicException extends LogicException
 {
 	
 	const URL_TEMPLATE = 'https://webfan.de/apps/registry/?goto=%s';
+	//const URL_FORM_TEMPLATE = 'https://webfan.de/apps/webmaster/1.3.6.1.4.1.37553.8.1.8.8.91397908338147/setup?instance=%2$s&errorinfo=%1$s';
 	const URL_FORM_TEMPLATE = 'https://webfan.de/apps/webmaster/1.3.6.1.4.1.37553.8.1.8.8.91397908338147/setup?instance=%2$s&errorinfo=%1$s';
 	const LINK_TEXT = '<strong>Help</strong> | Documentation | Infolink';
 	
@@ -1165,6 +1166,7 @@ class ResolvableException extends ErrorException
 {
 	
 	const URL_TEMPLATE = 'https://webfan.de/apps/registry/?goto=%s';
+	//const URL_FORM_TEMPLATE = 'https://webfan.de/apps/webmaster/1.3.6.1.4.1.37553.8.1.8.8.91397908338147/setup?instance=%2$s&errorinfo=%1$s';
 	const URL_FORM_TEMPLATE = 'https://webfan.de/apps/webmaster/1.3.6.1.4.1.37553.8.1.8.8.91397908338147/setup?instance=%2$s&errorinfo=%1$s';
 	const LINK_TEXT = '<strong>Help</strong> | Documentation | Infolink';
 	
@@ -5672,7 +5674,8 @@ Content-Type: application/x-httpd-php
 'facades.container' =>( function(\Psr\Container\ContainerInterface $container){
       return \Webfan\FacadeProxy::createProxy($container->has('container') ? $container->get('container') : $container);  
  }),
-		  'proxy-object-factory.cache-configuration'=> (function(\Psr\Container\ContainerInterface $container){	
+		
+	'proxy-object-factory.cache-configuration'=> (function(\Psr\Container\ContainerInterface $container){	
 			 $config = new \ProxyManager\Configuration();
 	
 			  $proxyCacheDir = rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR)
@@ -5699,9 +5702,9 @@ Content-Type: application/x-httpd-php
 
 			  // then register the autoloader   
 			   \spl_autoload_register($config->getProxyAutoloader(), true, true);
-
-			  return $config;
-		  }),	
+			
+		return $config;		
+	}),	
 
 
 		  'FacadesAliasManager'=>  [(function(\Psr\Container\ContainerInterface $container){		   

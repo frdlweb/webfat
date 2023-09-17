@@ -4641,7 +4641,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
       */
       public function runAsIndex(?bool $showErrorPageReturnBoolean = true) : bool|object{
 		
-	if(true===$this->isIndex(true)){ 
+	if(true===$this->isIndex(true) && $this->isIndexRequest()){ 
 		$this();
 	   return $showErrorPageReturnBoolean ? true : $this;
 	}elseif(true===$showErrorPageReturnBoolean && $this->isIndexRequest()){

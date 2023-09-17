@@ -5706,7 +5706,9 @@ Content-Type: application/x-httpd-php
 
 		  'FacadesAliasManager'=>  [(function(\Psr\Container\ContainerInterface $container){		   
 			 // return new \Statical\Manager('enable');			   
-		    return new \Statical\Manager('none' );
+		    return new \Statical\Manager(
+			   // 'none'
+		    );
 		  }), 'default'],
 		
 	          \Invoker\InvokerInterface::class =>  [(function(\Psr\Container\ContainerInterface $container){	

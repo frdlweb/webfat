@@ -5554,15 +5554,14 @@ Content-Type: application/x-httpd-php
 	//   }elseif($container->has('app.core.config.code.facades.$map.defaults')){
          //    $FacadesMap = $container->get('app.core.config.code.facades.$map.defaults');
 	   }else{
-             $FacadesMap = [
-                    'Config' =>  'Config',
-                    'App' =>  'App',
-                    'fs' =>  'fs',
-                    'Module' =>  'facades.modules',
-                    'Helper' =>  'helper',
-                    'Container' =>  'facades.container',
-                    'Stubrunner' =>  'facades.stubrunner',
-                    'Events' =>  'events',
+             $FacadesMap = [                    
+		     'Config' =>  'Config',
+                     'App' =>  'App',
+                     'fs' =>  'fs',                    
+		     'Helper' =>  'helper',                   
+		     'Container' =>  'facades.container',                  
+		     'Stubrunner' =>  'facades.stubrunner',
+                     'Events' =>  'events',
 		];
 	   }
 	   return $FacadesMap;	
@@ -5587,16 +5586,9 @@ Content-Type: application/x-httpd-php
 		      .\DIRECTORY_SEPARATOR.'compiled-registered';
        if(!is_dir($dir)){
         mkdir($dir, 0775, true);
-       }
-	
-	      \Webfan\App\EventModule::setBaseDir($dir);
-	      return \Webfan\FacadeProxiesMap::createProxy([
-		       \Webfan\App\EventModule::action('*'),				   
-		     ],
-	  	[
-		 								 
-	    ],
-	$container->has('container') ? $container->get('container') : $container);  
+       }	    
+	\Webfan\App\EventModule::setBaseDir($dir);	 
+	return \Webfan\FacadeProxy::createProxy(\Webfan\App\EventModule::action('*'));  
  }),	
 	
 'fs' =>( function(\Psr\Container\ContainerInterface $container){
@@ -5662,7 +5654,7 @@ Content-Type: application/x-httpd-php
  }),	
 	
 'App'=> [function(\Psr\Container\ContainerInterface $container) {
-    return (new class($container) extends \Webfan\Node{
+    return \Webfan\FacadeProxy::createProxy((new class($container) extends \Webfan\Node{
 		      use Webfan\withClassCastingTrait; 
 	              protected $container;
 		      public function __construct(\Psr\Container\ContainerInterface $container ){
@@ -5683,27 +5675,10 @@ Content-Type: application/x-httpd-php
 		      public function make($from, $to){
                          return $this->classCasting($to, $from);
                       }
-		 });				 
-}, 'default'],  
+		 }));				 
+}, 'default'],   
 	
-'facades.module'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
-    return (new class() extends \Webfan\Node{
-		      use Webfan\withClassCastingTrait;
-		      protected static $_currentP;
-		      public function __construct( ){
-                        self::$_currentP=$this;
-                      }
-		      public function import($import){
-                         return $this->castFrom($import);
-                      }
-		      public function export($export){
-                         return $this->castTo($export);
-                      }
-		      public function make($from, $to){
-                         return $this->classCasting($to, $from);
-                      }
-		 });				 
-}, 'factory'],  	
+  	
 	
 'facades.stubrunner' =>( function(\Psr\Container\ContainerInterface $container){
       return \Webfan\FacadeProxy::createProxy($container->get('app.runtime.stubrunner'));  

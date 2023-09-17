@@ -4808,19 +4808,14 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 
                   foreach($FacadesMap as $aliasClass => $containerId){
 		        $this->getAsFacade($baseNamespace.$aliasClass,
-				   \get_class(new class extends \Statical\BaseProxy{}), 
+				  // \get_class(new class extends \Statical\BaseProxy{}), 
+				   \get_class($container->get($containerId)), 
 				    $containerId,
 				    $namespace,
 				     $container,
 				   true);
 		  }
-			    
-		$this->getAsFacade('io4',
-				   \get_class(new class extends \Statical\BaseProxy{}), 
-				    'app.core.io4',
-				    '*',
-				     $container,
-				   true);
+
 		
 	   return $this;
 	}	

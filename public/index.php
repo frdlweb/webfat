@@ -4864,14 +4864,14 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 $url = $this['Container']->get('app.runtime.codebase')
 			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE);
 		
-if(!isset($_SERVER['HTTP_HOST']) || $_SERVER['HTTP_HOST'] !== parse_url($url)['host']){
+//if(!isset($_SERVER['HTTP_HOST']) || $_SERVER['HTTP_HOST'] !== parse_url($url)['host']){
      	         $this['Container']->setFinalFallbackContainer((new \IO4FallbackContainerClient (
 		             $this['Container']->get('proxy-object-factory.cache-configuration'),
 			        $url,
 			      $this['Container']->get('app.runtime.cache'),
 			      $this['Container']
 		   ))->setTimeout( 60 ) );
-}
+//}
 		
 
 

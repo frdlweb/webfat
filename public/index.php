@@ -4860,6 +4860,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		]);
  
 
+/*   //MOVE TO: stub index.php
 
      	         $this['Container']->setFinalFallbackContainer((new \IO4FallbackContainerClient (
 		             $this['Container']->get('proxy-object-factory.cache-configuration'),
@@ -4869,7 +4870,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 			      $this['Container']
 		   ))->setTimeout( 60 ) );
 
-		/* //MOVE TO: $container->get('script@inc.common.bootstrap')
+//MOVE TO: $container->get('script@inc.common.bootstrap')
 		  $ConfigurationContainer =new \Webfan\Container\ConfigContainer(
 			  'config', 
 			  'config.', 
@@ -5079,9 +5080,18 @@ Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 <?php 
- $this->getRunner()->init();	
-return (static function ($Stub,bool $isCliRequest)   {	
- $container = $Stub->getRunner()->getAsContainer(null);	 	 
+$Runner = $this->getRunner();
+$Runner->init();	
+$container = $Runner->getAsContainer(null);	
+     	         $container->setFinalFallbackContainer((new \IO4FallbackContainerClient (
+		             $container->get('proxy-object-factory.cache-configuration'),
+			         $container->get('app.runtime.codebase')
+			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE),
+			      $container->get('app.runtime.cache'),
+			      $container
+		   ))->setTimeout( 60 ) );
+
+return (static function ($Stub, $container, bool $isCliRequest)   {	 	 
  	 
  $check = $container->get('script@inc.common.bootstrap');
  if(!is_array($check) || !isset($check['success']) || true !== $check['success']){
@@ -5162,7 +5172,7 @@ if(!$isCliRequest){
   return $response;
 }
 	
-})($this, 'cli' === strtolower(substr(\php_sapi_name(), 0, 3)));
+})($this, $container, 'cli' === strtolower(substr(\php_sapi_name(), 0, 3)));
 
 
 --4444EVGuDPPT--
@@ -5466,43 +5476,7 @@ Content-Type: application/x-httpd-php
 			// NO !?! 'Stubrunner'=>$container->get('app.runtime.stubrunner'),
 			];
 	 }),	
-	'config.state-file'=>(function(\Psr\Container\ContainerInterface $container)  {		
-			  $file = rtrim($container->get('app.runtime.dir'), \DIRECTORY_SEPARATOR)
-				.\DIRECTORY_SEPARATOR
-				  .'state'
-				.\DIRECTORY_SEPARATOR
-				  .'app.state.sync.dat';
-          return $file;	 
-	 }),	
-	
-	'app.runtime.state'=>[function(\Psr\Container\ContainerInterface $container  )  {		
-			  $file = $container->get('config.state-file');
-                           $dir = dirname($file); 
-			  if(!is_dir($dir)){	
-			    @mkdir($dir, 0755, true);		
-			  }	
-		$storage = new \Fuz\Component\SharedMemory\Storage\StorageFile($file);
-	   return new \Fuz\Component\SharedMemory\SharedMemory($storage);
-	 }, 'default'],	
-	
-'app.runtime.cache.circuits'=>(function(\Psr\Container\ContainerInterface $container) {
-    return new \Doctrine\Common\Cache\FilesystemCache( 
-	     rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR)
-				.\DIRECTORY_SEPARATOR
-				  .'circuits'
-      ); 
-}), 
-	
-'app.runtime.circuits.main'=>(function(\Psr\Container\ContainerInterface $container) {
-    return new \Webfan\Webfat\App\CircuitBreaker('app_main', [
-			     'ignore_exceptions' => false,
-			   ], 
-		 $container->get('app.runtime.cache.circuits')
-    );
-}), 
-'CircuitBreaker'=> [function(\Psr\Container\ContainerInterface $container) {
-    return $container->get('app.runtime.circuits.main');
-}, 'factory'],   
+
 	  
 'app.runtime.cache'=>(function(\Psr\Container\ContainerInterface $container) {
 	$dir = $container->get('config.params.dirs.runtime.cache').\DIRECTORY_SEPARATOR
@@ -5517,7 +5491,9 @@ Content-Type: application/x-httpd-php
 	'app.runtime.stub'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
 			return $container->get('app.runtime.stubrunner')->getStub();			
 	}, 'factory'],   
-		
+	'Stubrunner'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
+			return $container->get('app.runtime.stubrunner');			
+	}, 'factory'],   		
 	'app.runtime.codebase'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
 			return $container->get('app.runtime.stubrunner')->getCodebase();	
 	 }, 'factory'],    
@@ -5753,6 +5729,44 @@ Content-Type: application/x-httpd-php
 	 return $proxy;
   }),	
 
+	'config.state-file'=>(function(\Psr\Container\ContainerInterface $container)  {		
+			  $file = rtrim($container->get('app.runtime.dir'), \DIRECTORY_SEPARATOR)
+				.\DIRECTORY_SEPARATOR
+				  .'state'
+				.\DIRECTORY_SEPARATOR
+				  .'app.state.sync.dat';
+          return $file;	 
+	 }),	
+	
+	'app.runtime.state'=>[function(\Psr\Container\ContainerInterface $container  )  {		
+			  $file = $container->get('config.state-file');
+                           $dir = dirname($file); 
+			  if(!is_dir($dir)){	
+			    @mkdir($dir, 0755, true);		
+			  }	
+		$storage = new \Fuz\Component\SharedMemory\Storage\StorageFile($file);
+	   return new \Fuz\Component\SharedMemory\SharedMemory($storage);
+	 }, 'default'],	
+	
+'app.runtime.cache.circuits'=>(function(\Psr\Container\ContainerInterface $container) {
+    return new \Doctrine\Common\Cache\FilesystemCache( 
+	     rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR)
+				.\DIRECTORY_SEPARATOR
+				  .'circuits'
+      ); 
+}), 
+	
+'app.runtime.circuits.main'=>(function(\Psr\Container\ContainerInterface $container) {
+    return new \Webfan\Webfat\App\CircuitBreaker('app_main', [
+			     'ignore_exceptions' => false,
+			   ], 
+		 $container->get('app.runtime.cache.circuits')
+    );
+}), 
+'CircuitBreaker'=> [function(\Psr\Container\ContainerInterface $container) {
+    return $container->get('app.runtime.circuits.main');
+}, 'factory'],   	
+	
  //'module.loader.CommonJS'=>moved to remote fallback-container!!!
 		  				
 		

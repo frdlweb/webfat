@@ -5562,7 +5562,7 @@ Content-Type: application/x-httpd-php
              $FacadesMap = [                    
 		     'Config' =>  'Config',
                      'App' =>  ['App', \Webfan\FacadeProxy::class],
-                     'fs' =>  ['fs', \Webfan\FacadeProxiesMap::class],                    
+                     'fs' =>  ['fs', \Webfan\Fs\MountManager::class],                    
 		     'Helper' => [ 'helper', \Webfan\FacadeProxiesMap::class],                   
 		     'Container' => ['facades.container', \Webfan\FacadeProxy::class],                  
 		     'Stubrunner' => [ 'facades.stubrunner', \Webfan\FacadeProxy::class],

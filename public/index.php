@@ -4860,17 +4860,22 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		]);
  
 
-/*   //MOVE TO: stub index.php
-
+ //MOVE TO: stub index.php
+$url = $this['Container']->get('app.runtime.codebase')
+			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE);
+		
+if(!isset($_SERVER['HTTP_HOST']) || $_SERVER['HTTP_HOST'] !== parse_url($url)['host']){
      	         $this['Container']->setFinalFallbackContainer((new \IO4FallbackContainerClient (
 		             $this['Container']->get('proxy-object-factory.cache-configuration'),
-			         $this['Container']->get('app.runtime.codebase')
-			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE),
+			        $url,
 			      $this['Container']->get('app.runtime.cache'),
 			      $this['Container']
 		   ))->setTimeout( 60 ) );
+}
+		
 
-//MOVE TO: $container->get('script@inc.common.bootstrap')
+
+     //MOVE TO: $container->get('script@inc.common.bootstrap') ---->overwrite...
 		  $ConfigurationContainer =new \Webfan\Container\ConfigContainer(
 			  'config', 
 			  'config.', 
@@ -4879,7 +4884,7 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
 		  );
 		$ConfigurationContainerId = 'config';
 		$this['Container']->addContainer($ConfigurationContainer, $ConfigurationContainerId);
-          */
+         
 	  return $this['Container'];	
 	}
 
@@ -5080,19 +5085,13 @@ Content-Type: application/x-httpd-php;charset=utf-8
 Content-Disposition: php ;filename="$HOME/index.php";name="stub index.php"
 
 <?php 
-$Runner = $this->getRunner();
-$Runner->init();	
-$container = $Runner->getAsContainer(null);	
-     	         $container->setFinalFallbackContainer((new \IO4FallbackContainerClient (
-		             $container->get('proxy-object-factory.cache-configuration'),
-			         $container->get('app.runtime.codebase')
-			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE),
-			      $container->get('app.runtime.cache'),
-			      $container
-		   ))->setTimeout( 60 ) );
 
-return (static function ($Stub, $container, bool $isCliRequest)   {	 	 
- 	 
+return (static function ($Stub, bool $isCliRequest)   {	 
+	
+ $Runner = $Stub->getRunner();
+ $Runner->init();	
+ $container = $Runner->getAsContainer(null);	
+	
  $check = $container->get('script@inc.common.bootstrap');
  if(!is_array($check) || !isset($check['success']) || true !== $check['success']){
     if(is_array($check) && isset($check['error']) ){
@@ -5172,7 +5171,7 @@ if(!$isCliRequest){
   return $response;
 }
 	
-})($this, $container, 'cli' === strtolower(substr(\php_sapi_name(), 0, 3)));
+})($this, 'cli' === strtolower(substr(\php_sapi_name(), 0, 3)));
 
 
 --4444EVGuDPPT--

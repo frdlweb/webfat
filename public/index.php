@@ -5560,7 +5560,7 @@ Content-Type: application/x-httpd-php
          //    $FacadesMap = $container->get('app.core.config.code.facades.$map.defaults');
 	   }else{
              $FacadesMap = [                    
-		     'Config' =>  ['Config', \Webfan\Container\ConfigContainer::class],
+		     'Config' =>  ['facades.config', \Webfan\Container\ConfigContainer::class],
                    //   'App' =>  'App',
                      'fs' =>  ['fs', \Webfan\Fs\MountManager::class],                    
 		     'Helper' =>'helper',                   
@@ -5637,6 +5637,9 @@ Content-Type: application/x-httpd-php
 	$container->has('container') ? $container->get('container') : $container);  
  }),	
 	
+'facades.config' =>( function(\Psr\Container\ContainerInterface $container){
+      return \Webfan\FacadeProxy::createProxy($container->get('Config'));  
+ }),		
 'Config' =>( function(\Psr\Container\ContainerInterface $container){
     		
 	$config = \Configula\ConfigFactory::loadMultiple([

@@ -5561,12 +5561,12 @@ Content-Type: application/x-httpd-php
 	   }else{
              $FacadesMap = [                    
 		     'Config' =>  'Config',
-                     'App' =>  ['App', \Webfan\FacadeProxy::class],
+                     'App' =>  'App',
                      'fs' =>  ['fs', \Webfan\Fs\MountManager::class],                    
-		     'Helper' => [ 'helper', \Webfan\FacadeProxiesMap::class],                   
-		     'Container' => ['facades.container', \Webfan\FacadeProxy::class],                  
-		     'Stubrunner' => [ 'facades.stubrunner', \Webfan\FacadeProxy::class],
-                     'Events' =>  ['events', \Webfan\FacadeProxy::class],
+		     'Helper' =>'helper',                   
+		   //  'Container' => ['facades.container', \Webfan\FacadeProxy::class],                  
+		  //   'Stubrunner' =>'facades.stubrunner',
+                     'Events' =>  ['events', \Webfan\App\EventModule::class],
 		];
 	   }
 	   return $FacadesMap;	

@@ -4807,9 +4807,14 @@ putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
                  $FacadesMap = $container->get('config.app.core.code.facades.$map');
 
                   foreach($FacadesMap as $aliasClass => $containerId){
+			  if(is_array($containerId)){
+			      $class=$containerId[1];
+                              $containerId = $containerId[0];
+			  }else{
+                              $class = \get_class($container->get($containerId));
+			  }
 		        $this->getAsFacade($baseNamespace.$aliasClass,
-				  // \get_class(new class extends \Statical\BaseProxy{}), 
-				   \get_class($container->get($containerId)), 
+				    $class, 
 				    $containerId,
 				    $namespace,
 				     $container,
@@ -5556,12 +5561,12 @@ Content-Type: application/x-httpd-php
 	   }else{
              $FacadesMap = [                    
 		     'Config' =>  'Config',
-                     'App' =>  'App',
-                     'fs' =>  'fs',                    
-		     'Helper' =>  'helper',                   
-		     'Container' =>  'facades.container',                  
-		     'Stubrunner' =>  'facades.stubrunner',
-                     'Events' =>  'events',
+                     'App' =>  ['App', \Webfan\FacadeProxy::class],
+                     'fs' =>  ['fs', \Webfan\FacadeProxiesMap::class],                    
+		     'Helper' => [ 'helper', \Webfan\FacadeProxiesMap::class],                   
+		     'Container' => ['facades.container', \Webfan\FacadeProxy::class],                  
+		     'Stubrunner' => [ 'facades.stubrunner', \Webfan\FacadeProxy::class],
+                     'Events' =>  ['events', \Webfan\FacadeProxy::class],
 		];
 	   }
 	   return $FacadesMap;	

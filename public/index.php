@@ -5564,7 +5564,7 @@ Content-Type: application/x-httpd-php
                    //   'App' =>  'App',
                      'fs' =>  ['fs', \Webfan\Fs\MountManager::class],                    
 		     'Helper' =>'helper',                   
-		    'Container' => ['facades.container', \IO4\Container\Collection::class],                  
+		//     'Container' => ['facades.container', \IO4\Container\Collection::class],                  
 		  //   'Stubrunner' =>'facades.stubrunner',
                      'Events' =>  ['events', \Webfan\App\EventModule::class],
 		];

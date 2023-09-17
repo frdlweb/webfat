@@ -5561,7 +5561,7 @@ Content-Type: application/x-httpd-php
 	   }else{
              $FacadesMap = [                    
 		     'Config' =>  'Config',
-                     'App' =>  'App',
+                   //   'App' =>  'App',
                      'fs' =>  ['fs', \Webfan\Fs\MountManager::class],                    
 		     'Helper' =>'helper',                   
 		   //  'Container' => ['facades.container', \Webfan\FacadeProxy::class],                  

@@ -17,6 +17,7 @@ There are 2-3 ways to use this framework:
 
 # Components
 Although the frameworks cms is work in progress yet and not ready, you can use its **components** now!
+Register Compontents-(remote)-Autoloader: [autoloader.php](https://github.com/frdlweb/webfat/blob/main/autoloader.php)
 
 #### Examples:
 * [DM-Captcha](https://dm-captcha-sas.weid.info/test-post.php)

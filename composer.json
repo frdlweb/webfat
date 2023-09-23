@@ -1,14 +1,47 @@
 {
   "name" : "frdlweb/webfat",
-  "description": "Starting point for Webfat Initial Apps: DefaultPage, IO4, Docu, Demo, ...Wayne Insane initial files...",	  
+  "description": "Starting point for Webfat Initial Apps: DefaultPage, IO4, Docu, Demo, ...Wayne Insane initial files...",	
+  "type" : "project",
   "license": ["MIT"],	  
-  "version" : "v0.0.2-next",
-  "require" : {
-	    "php": ">=8.1"
-  },
-   "repositories": [
+  "homepage": "https://repo.pkg.frdl.de/organization/webfat/overview",	
+  "repositories": [
+	{"type": "composer", "url": "https://webfat.repo.pkg.frdl.de"},
 	{"type": "composer", "url": "https://frdl.repo.pkg.frdl.de"},
-        {"type": "composer", "url": "https://repo.pkg.frdl.de"},
-        {"packagist": false}
-    ]	
+	{"type": "composer", "url": "https://oidplus-plugins.repo.pkg.frdl.de"},	  
+	{"type": "composer", "url": "https://weid.repo.pkg.frdl.de"},
+        {"type": "composer", "url": "https://repo.pkg.frdl.de"}
+    ],
+ "authors": [{
+		"name": "Till Wehowski",
+		"email": "software@frdl.de",
+		"homepage": "https://frdl.de"
+  }],
+  "require" : {
+	"php": ">=7.0 || >=8.0",
+	"frdlweb/frdlweb-composer-plugin": "*"
+  },
+  "require-dev": {
+	"roave/security-advisories": "dev-latest",	
+        "composer/composer": "*",
+	"comcast/php-legal-licenses": "*",
+	"yosymfony/resource-watcher": "*"
+  },	
+  "autoload": {		
+     "files": ["autoloader.php"]	
+  },
+  "minimum-stability": "dev",
+  "config": {		
+	  "preferred-install": "auto",		
+	  "prepend-autoloader": true,		
+	  "allow-plugins": {
+			"airmad/*": true,
+			"civicrm/*": true,
+			"composer/*": true,
+			"frdl/*": true,
+			"webfan3/*": true,
+			"vendor-patch/*": true,
+			"kylekatarnls/update-helper": true,
+			"danielmarschall/*" : true		
+	  }	
+  }
 }

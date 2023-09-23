@@ -532,7 +532,7 @@ if (!\interface_exists(StubHelperInterface::class, false)) {
  }
 } 
 
-/*
+
 //Move to lazxer loader...
 if (!\interface_exists(StubContextDirectoriesInterface::class, false)) {	
  interface StubContextDirectoriesInterface
@@ -551,8 +551,6 @@ if (!\interface_exists(StubContextDirectoriesInterface::class, false)) {
    public function getConfigsRootDirectory( ?bool $create = false ) : string;
  }
 } 
-*/
-
 	
 }//namespace frdlweb
 
@@ -560,17 +558,18 @@ if (!\interface_exists(StubContextDirectoriesInterface::class, false)) {
 
 
 
-
-
-
 namespace PSX\Sandbox{
 	if(!function_exists('\PSX\Sandbox\runIsolate')){
-		function runIsolate($file, array $context){   
+		function runIsolate($file, $context, ?bool $doRequire = true){   
 			if(\class_exists(\Webfan\Sandbox\Runtime::class)){
-                           return \Webfan\Sandbox\Runtime::runIsolate($file, $context, true);
+                           return \Webfan\Sandbox\Runtime::runIsolate($file, $context, $doRequire);
 			}else{
-                           extract($context);    
-			   return include $file;
+			 return (static function ($context, $file, $doRequire) {	
+                            extract($context);    
+			    return false === $doRequire                     
+				   ? include $file                  
+				   : require $file; 				
+			  })($context, $file, $doRequire);
 			}
 		}		
 	}
@@ -3256,7 +3255,7 @@ class MimeStubIndex extends MimeStub5 {
 
 	
 
-class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModuleInterface, StubAsFactoryInterface//, StubContextDirectoriesInterface
+class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModuleInterface, StubAsFactoryInterface, StubContextDirectoriesInterface
 {
 	
 	const DEF_SOURCE = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php';
@@ -3741,10 +3740,6 @@ HTACCESSCONTENT);
 	
 	
 
-
-
-
-/*
 	public function getDataStoresDirectory( ?bool $create = false ) : string {
 	  $dir = 
 	        $this->getFrdlwebWorkspaceDirectory()
@@ -3843,11 +3838,15 @@ HTACCESSCONTENT);
 	  $dir = 
 	        $this->getDomainsRootDirectory($create)	
 			.\DIRECTORY_SEPARATOR	
+			.ucfirst($apex)	
+			.\DIRECTORY_SEPARATOR	
 			.substr($hash, 0, 2)	
 			.\DIRECTORY_SEPARATOR	
-			.substr($hash, 2, 2)	
+			.substr($hash, 3, 2)	
 			.\DIRECTORY_SEPARATOR	
 			.$domain	
+			.\DIRECTORY_SEPARATOR	
+			.'subdomains.dns
 			.\DIRECTORY_SEPARATOR	
 			.implode(\DIRECTORY_SEPARATOR, $dns);
 
@@ -3944,10 +3943,6 @@ HTACCESSCONTENT);
 	  return $dir;	
 	}	
 
-*/
-
-	
-	
 	public function getFrdlwebWorkspaceDirectory() : string {
 		if(!empty(getenv('FRDL_WORKSPACE'))){
 		  return getenv('FRDL_WORKSPACE');	

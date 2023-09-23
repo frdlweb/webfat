@@ -3846,7 +3846,7 @@ HTACCESSCONTENT);
 			.\DIRECTORY_SEPARATOR	
 			.$domain	
 			.\DIRECTORY_SEPARATOR	
-			.'subdomains.dns
+			.'subdomains.dns'
 			.\DIRECTORY_SEPARATOR	
 			.implode(\DIRECTORY_SEPARATOR, $dns);
 

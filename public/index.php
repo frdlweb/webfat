@@ -5113,9 +5113,17 @@ switch(true){
 	case true === $isCliRequest
 	     && is_object($response)
 	     && !is_null($response)
-	     && is_callable([$response, 'handleCliRequest']) :              
+	     && method_exists($response, 'handleCliRequest') :              
               $response = $response->handleCliRequest(  );
 	  break;
+	case is_object($response)
+	     && !is_null($response)
+	     && (
+		    $response instanceof \Relay\Relay
+		):
+		      $request = \Laminas\Diactoros\ServerRequestFactory::fromGlobals();
+              $response = $response->handle($request);
+	 break;
 	case is_object($response)
 	     && !is_null($response)
 	     && in_array(\Symfony\Component\HttpKernel\HttpKernelInterface::class, class_implements($response)) :
@@ -5133,7 +5141,7 @@ switch(true){
 	 break;
 	case is_object($response)
 	     && !is_null($response)
-	     && is_callable([$response, 'handle']) :
+	     && method_exists($response, 'handle') :
               $response = $Stub->getRunner()->call(
 		      [$response, 'handle']
 	      );
@@ -5158,6 +5166,8 @@ switch(true){
 if(!$isCliRequest){	
  if(is_object($response) && $response instanceof \Psr\Http\Message\ResponseInterface){ 		
 	(new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);		 
+ }elseif(is_object($response) && $response instanceof \Sabre\HTTP\Response){ 		
+	\Sabre\HTTP\Sapi::sendResponse($response);		 
  }elseif(is_string($response)){
 	echo $response;
  }elseif(is_object($response) && $response instanceof \Exception){ 		

@@ -193,144 +193,16 @@ namespace Psr\Container{
 namespace Psr\Container{
 
 /**
- * Describes the interface of a container that exposes methods to read its entries.
+ * see \frdl\patch\PsrContainerMeta::getVersion() for negotiate version !
  */
 if (!\interface_exists(ContainerInterface::class, false)) {	
 interface ContainerInterface
 {
-	/**
-	 * Finds an entry of the container by its identifier and returns it.
-	 *
-	 * @param string $id Identifier of the entry to look for.
-	 *
-	 * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
-	 * @throws ContainerExceptionInterface Error while retrieving the entry.
-	 *
-	 * @return mixed Entry.
-	 */
 	public function get($id);
-
-
-	/**
-	 * Returns true if the container can return an entry for the given identifier.
-	 * Returns false otherwise.
-	 *
-	 * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
-	 * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
-	 *
-	 * @param string $id Identifier of the entry to look for.
-	 *
-	 * @return bool
-	 */
 	public function has($id);
 }
 }
 }
-
-
-namespace Webfan\Container{
-
-use Psr\Container\ContainerInterface;
-
-use Configula\ConfigFactory as Config;
-use Configula\ConfigValues as Configuration;
-use Configula\Loader;
- 
-class ConfigContainer implements ContainerInterface
-{
-	protected $config; 
-	protected $container_id;
-	protected $basPath;
-	protected $prependPath;
-	
-	public function __construct(string $container_id = 'config', //self container id, should return $this!
-								string $basPath = 'config.', 
-								string $prependPath = '',
-								Configuration $config = null){
-		
-		$this->container_id=$container_id;
-		$this->basPath=$basPath;
-		$this->prependPath=$prependPath;
-		
-		$this->config = $config ?? new Configuration([]);	
-	}
-	
-	public function getConfiguration( )    
-	{
-		return $this->config;
-	}	
-	
-	public function getContainer( ) 
-	{
-		return $this;
-	}		
-		
-	public function getIterator( )
-	{
-		return $this->config->getIterator( );
-	}	
-	
-	public function __call($name, $params){
-	  return \call_user_func_array([$this->config, $name], $params);	
-	}
-	
-	public static function __callStatic($name, $params){
-	  return \call_user_func_array([Config::class, $name], $params);	
-	}
-	
-  
-	public function get(  $id){
-		if($id === $this->container_id){
-		  return $this;	
-		}
-		$id = $this->_id($id);
-		if(!$this->has($id)){
-		  return null;	
-		}
-		return $this->config->get($id);
-	}
-
-   protected function _id(  $id){
-          if (strlen($id) > strlen($this->basPath) && str_starts_with($id, $this->basPath)) {
-             $id=substr($id, strlen($this->basPath), strlen($id));
-          }	  
-	   
-	      $id.= $this->prependPath;
-	   return $id;
-   }
- 
-	public function has(   $id)   {
-		if(strlen($id) < strlen($this->basPath))return false;
-	  return $id === $this->container_id || $this->config->has($this->_id($id));	
-	}
-} 
-	
-}//ns
-
-namespace Webfan {
- if (!interface_exists(Wayneable::class)) {	
-	 interface Wayneable {				
-		 
-	}	
-  }	  
-}
-
-namespace Webfan\Wayne {
- if (!interface_exists(Unsaneable::class)) {	
-	 interface Unsaneable extends \Webfan\Wayneable {				
-		 
-	}	
-  }	  
-}
-namespace Webfan\Wayne {
- if (!interface_exists(Insaneable::class)) {	
-	 interface Insaneable  extends \Webfan\Wayneable {				
-		 
-	}	
-  }	  
-}
-
-
 
 
 namespace Frdlweb\Contract\Autoload{
@@ -532,7 +404,7 @@ if (!\interface_exists(StubHelperInterface::class, false)) {
  }
 } 
 
-
+/*
 //Move to lazxer loader...
 if (!\interface_exists(StubContextDirectoriesInterface::class, false)) {	
  interface StubContextDirectoriesInterface
@@ -541,6 +413,7 @@ if (!\interface_exists(StubContextDirectoriesInterface::class, false)) {
    public function getUserDirectory(string $userHandle, ?bool $create = false) : string;
    public function getSitesRootDirectory( ?bool $create = false ) : string;
    public function getDomainsRootDirectory( ?bool $create = false ) : string;
+	 
    public function getSiteDirectory(string $host, ?bool $create = false) : string;
    public function getDomainDirectory(string $domain, ?bool $create = false) : string;
    public function getSiteConfigDirectory(string $host = null, ?bool $create = false) : string;
@@ -551,7 +424,7 @@ if (!\interface_exists(StubContextDirectoriesInterface::class, false)) {
    public function getConfigsRootDirectory( ?bool $create = false ) : string;
  }
 } 
-	
+	*/
 }//namespace frdlweb
 
 
@@ -3255,7 +3128,7 @@ class MimeStubIndex extends MimeStub5 {
 
 	
 
-class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModuleInterface, StubAsFactoryInterface, StubContextDirectoriesInterface
+class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModuleInterface, StubAsFactoryInterface//, StubContextDirectoriesInterface
 {
 	
 	const DEF_SOURCE = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php';
@@ -3740,6 +3613,8 @@ HTACCESSCONTENT);
 	
 	
 
+
+	/*
 	public function getDataStoresDirectory( ?bool $create = false ) : string {
 	  $dir = 
 	        $this->getFrdlwebWorkspaceDirectory()
@@ -3805,7 +3680,8 @@ HTACCESSCONTENT);
 		}
 	  return $dir;	 
 	}		
-	public function getSiteDirectory(string $host, ?bool $create = false) : string {
+	public function getSiteDirectory(string $id, ?bool $create = false) : string {
+		$host = $id;
 		$dns = array_reverse(explode('.', $host));
 		$tld = array_shift($dns);
 		$apex = array_shift($dns);
@@ -3820,7 +3696,9 @@ HTACCESSCONTENT);
 			.\DIRECTORY_SEPARATOR	
 			.$domain	
 			.\DIRECTORY_SEPARATOR	
-			.implode(\DIRECTORY_SEPARATOR, $dns);
+			//.implode(\DIRECTORY_SEPARATOR, $dns)
+		         $host
+		  ;
 
               $dir =  rtrim($dir, '\\/ ').\DIRECTORY_SEPARATOR;
 		
@@ -3846,7 +3724,7 @@ HTACCESSCONTENT);
 			.\DIRECTORY_SEPARATOR	
 			.$domain	
 			.\DIRECTORY_SEPARATOR	
-			.'subdomains.dns'
+			.'sub-domains.dns'
 			.\DIRECTORY_SEPARATOR	
 			.implode(\DIRECTORY_SEPARATOR, $dns);
 
@@ -3942,6 +3820,11 @@ HTACCESSCONTENT);
 		}
 	  return $dir;	
 	}	
+*/
+
+
+
+
 
 	public function getFrdlwebWorkspaceDirectory() : string {
 		if(!empty(getenv('FRDL_WORKSPACE'))){

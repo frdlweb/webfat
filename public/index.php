@@ -5521,7 +5521,7 @@ use Symfony\Component\EventDispatcher\Event;
 				    return null;
 				 break;
 				 default :
-                                   return null;
+                                   return isset($this->services[$pointer]) ? $this->services[$pointer] : null;
 				 break;
 			 }
 		      }
@@ -5547,7 +5547,7 @@ use Symfony\Component\EventDispatcher\Event;
 			    \frdl\Http\Helper::class,			   
 		     ],
 	  	[
-	//	'call' => \IO4\Container\ContainerCollectionInterface::CALL_ID,									 
+							   
 	    ],
 	$container->has('container') ? $container->get('container') : $container);  
  }),	
@@ -5568,15 +5568,13 @@ use Symfony\Component\EventDispatcher\Event;
 	'config.sandbox.runtime.security.allowed-classes'=>  (function(\Psr\Container\ContainerInterface $container){		   
 	   if($container->has('config.stub.config.init.app.runtime.security.allowed-classes')){
              $classes = $container->get('config.stub.config.init.app.runtime.security.allowed-classes');
-	 //  }elseif($container->has('app.runtime.security.allowed-classes')){
-           //  $classes = $container->get('app.runtime.security.allowed-classes');
 	   }else{
              $classes = [
 		     \Exception::class,
 		     \Webfan\Patches\Start\Timezone2::class,
                      \GuzzleHttp\Psr7\ServerRequest::class,
 		     //deprecated...:
-		     \Webfan\AppLauncherWebfatInstaller::class,
+		    // \Webfan\AppLauncherWebfatInstaller::class,
 	     ];
 	   }
 	   return $classes;	
@@ -5585,8 +5583,6 @@ use Symfony\Component\EventDispatcher\Event;
 	'config.runtime.security.sandbox.allowed-functions'=>  (function(\Psr\Container\ContainerInterface $container){		   
 	   if($container->has('config.stub.config.init.app.runtime.security.allowed-functions')){
              $functions = $container->get('config.stub.config.init.app.runtime.security.allowed-functions');
-	//   }elseif($container->has('app.runtime.security.allowed-functions')){
-        //     $functions = $container->get('app.runtime.security.allowed-functions');
 	   }else{
              $functions = [
 		     
@@ -5598,11 +5594,8 @@ use Symfony\Component\EventDispatcher\Event;
 	'config.app.core.code.facades.$map'=>  (function(\Psr\Container\ContainerInterface $container){		   
 	   if($container->has('config.stub.config.init.facades.$map')){
              $FacadesMap = $container->get('config.stub.config.init.facades.$map');
-	//   }elseif($container->has('app.core.config.code.facades.$map.defaults')){
-         //    $FacadesMap = $container->get('app.core.config.code.facades.$map.defaults');
 	   }else{
-             $FacadesMap = [                                   
-		 //    'Config' => ['facades.config', \Configula\ConfigValues::class],      
+             $FacadesMap = [           
 		     'Config' =>'facades.config',
                      'Events' =>  ['events', \Webfan\App\EventModule::class],            
 		     'Helper' =>'helper',             
@@ -5614,8 +5607,6 @@ use Symfony\Component\EventDispatcher\Event;
 	'config.app.core.code.facades.$import'=>  (function(\Psr\Container\ContainerInterface $container){		   
 	   if($container->has('config.stub.config.init.facades.$import')){
              $FacadesImport = $container->get('config.stub.config.init.facades.$import');
-	   //}elseif($container->has('app.core.config.code.facades.$import.defaults')){
-           //  $FacadesImport = $container->get('app.core.config.code.facades.$import.defaults');
 	   }else{
              $FacadesImport = [                 
 		 'baseName' =>  '',

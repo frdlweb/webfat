@@ -5339,6 +5339,12 @@ Content-Disposition: "php" ; filename="$HOME/container_default_definitions.php" 
 Content-Type: application/x-httpd-php
 
 <?php
+use Doctrine\Common\Cache\FilesystemCache;
+use Eljam\CircuitBreaker\Breaker;
+use Eljam\CircuitBreaker\Event\CircuitEvents;
+use Symfony\Component\EventDispatcher\Event;
+
+	
  //@ToDo: Compose from https://github.com/frdlweb/webfat and modules...
     return [
 	'app.runtime.dir'=> [function(\Psr\Container\ContainerInterface $container, $previous = null)  {
@@ -5390,7 +5396,156 @@ Content-Type: application/x-httpd-php
 	'app.runtime.autoloader.remote'=> [function(\Psr\Container\ContainerInterface $container, $previous = null) {
 			return $container->get('app.runtime.stubrunner')->getRemoteAutoloader();	
 	}, 'factory'],   
+
+'facades.config' =>( function(\Psr\Container\ContainerInterface $container){
+      return \Webfan\FacadeProxy::createProxy($container->get('Config'));  
+ }),		
+'Config' =>( function(\Psr\Container\ContainerInterface $container){
+    		
+	$config = \Configula\ConfigFactory::loadMultiple([
+        @new \Configula\Loader\EnvLoader( ),   
+   //  new \Configula\Loader\EnvLoader('APP', '', false),     
+   // new \Configula\Loader\EnvLoader('WEBFAN', '_', true),       
+   //  new \Configula\Loader\EnvLoader('FRDL', '_', true),      
+   //    \Configula\ConfigFactory::loadEnv('IO4_', '_', true),   
+    //   \Configula\ConfigFactory::loadEnv('APP_', '', false),     
+    //  \Configula\ConfigFactory::loadEnv('WEBFAN_', '_', true),       
+    //   \Configula\ConfigFactory::loadEnv('FRDL_', '_', true),         
+     $container->get('app.runtime.stubrunner')->config(),
+     [
+	'DOCUMENT_ROOT' =>$_SERVER['DOCUMENT_ROOT'],
+	'mount' => [
+             'local' => [
+                  'app' => 'config.params.app.dir',
+		  'well-known' => $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'.well-known'.\DIRECTORY_SEPARATOR,
+		  'web' => $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR,
+		  'cache'=>'config.params.dirs.runtime.cache',
+	      ],
+							 
+         ],
+     ],
+     $container->get('app.runtime.stubrunner')->configVersion(),
+    //['some' => 'values'],                           // Array of config vaules
+   // '/path/to/some/file.yml',                       // Path to file (must exist)
+   // new \SplFileInfo('/path/to/another/file.json')  // SplFileInfo
+]);
+		 
+	return $config;
+ }),		
 	
+'io4' =>( function(\Psr\Container\ContainerInterface $container){
+      return (new class($container) { 
+	              protected $container;
+	              protected $services = [
+	      
+		      ];
+	              protected $shields = [
+	      
+		      ];
+	              protected $Shield=null;
+		      public function __construct(\Psr\Container\ContainerInterface $container ){
+                        $this->container = $container;
+                      }
+	              public function getServiceShieldCache($pointer){
+                          return new FilesystemCache( $this->container->get('services.shield.cache.dir')  
+				.\DIRECTORY_SEPARATOR.'breaker-store-'
+						     .strlen((string)$pointer)
+						     .'-'.sha1((string)$pointer), 'io4.shield.main.cache.txt');
+		      }
+
+	              public function mountLocalFilesystems(){
+                         foreach($this->container->get('Config')->get('mount.local') as $protocol => $directory){
+				yield $protocol => \M2MTech\FlysystemStreamWrapper\FlysystemStreamWrapper::register($protocol, new \League\Flysystem\Filesystem( new League\Flysystem\Local\LocalFilesystemAdapter($directory)  )  );
+			 }
+		      }	     
+	      
+	              public function &service($name, ?array $options = []){
+			      //ToDo: Add Log Listeners to Circuit Breaker
+			      &$shield = isset($this->shields[$name]) ? &$this->shields[$name] : new Breaker($name, array_merge([
+								     'ignore_exceptions' => false,
+								     ], $options), $this->getServiceShieldCache($name));
+			      &$service = isset($this->services[$name]) ? &$this->services[$name] : null;
+			      
+                       switch(true){
+			       case $service && $shield :
+                                    return ((object)[
+                                           'shield' =>  &$this->shields[$name]  = &$shield,
+					   'service' => &$this->services[$name] = &$service, 
+					]);
+			         break;
+				 case  'fs' === $name :
+                                     &$me = $this;
+			             &$this->services[$name] = $this->shields[$name]->protect(function () use($me){
+                                             // throw( $result = new \Exception("An error as occured") );
+                                               $result =[];
+	                                    foreach($this->mountLocalFilesystems() as $protocol => $success){
+						    $result[$protocol] = $success;
+					    }
+				         return $result; 
+				     });	
+				 break;
+				 default :
+                                   return null;
+				 break;
+			 }
+                                    return ((object)[
+                                           'shield' =>  &$this->shields[$name],
+					   'service' => &$this->services[$name], 
+					]);			      
+		      }
+
+
+	      
+	              public function &__get($pointer){
+                         switch(true){
+				 case  $pointer === 'Shield' :
+				    return null;
+				 break;
+				 default :
+                                   return null;
+				 break;
+			 }
+		      }
+		 });  
+ }),	
+'services.shield.cache.dir'=>(function(\Psr\Container\ContainerInterface $container) {
+			  $dir = rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR)
+				.\DIRECTORY_SEPARATOR
+				  .'services'
+				  .\DIRECTORY_SEPARATOR
+				  .'shield';
+	
+			  if(!is_dir($proxyCacheDir)){	
+			    @mkdir($proxyCacheDir, 0755, true);		
+			  }	
+	return $dir;
+}), 
+	
+'helper' =>( function(\Psr\Container\ContainerInterface $container){
+	      return \Webfan\FacadeProxiesMap::createProxy([
+		        new \Webfan\Webfat\App\KernelHelper,
+		        new \Webfan\Webfat\App\KernelFunctions,
+			    \frdl\Http\Helper::class,			   
+		     ],
+	  	[
+	//	'call' => \IO4\Container\ContainerCollectionInterface::CALL_ID,									 
+	    ],
+	$container->has('container') ? $container->get('container') : $container);  
+ }),	
+'events' =>( function(\Psr\Container\ContainerInterface $container){
+     $dir =  $container->get('config.params.dirs.runtime')
+		      .\DIRECTORY_SEPARATOR.'events'
+		      .\DIRECTORY_SEPARATOR.'compiled-registered';
+       if(!is_dir($dir)){
+        mkdir($dir, 0775, true);
+       }	    
+	\Webfan\App\EventModule::setBaseDir($dir);	 
+	return \Webfan\FacadeProxy::createProxy(\Webfan\App\EventModule::action('*'));  
+ }),	
+
+	
+		
+
 	'config.sandbox.runtime.security.allowed-classes'=>  (function(\Psr\Container\ContainerInterface $container){		   
 	   if($container->has('config.stub.config.init.app.runtime.security.allowed-classes')){
              $classes = $container->get('config.stub.config.init.app.runtime.security.allowed-classes');
@@ -5400,7 +5555,7 @@ Content-Type: application/x-httpd-php
              $classes = [
 		     \Exception::class,
 		     \Webfan\Patches\Start\Timezone2::class,
-                    \GuzzleHttp\Psr7\ServerRequest::class,
+                     \GuzzleHttp\Psr7\ServerRequest::class,
 		     //deprecated...:
 		     \Webfan\AppLauncherWebfatInstaller::class,
 	     ];
@@ -5428,13 +5583,10 @@ Content-Type: application/x-httpd-php
          //    $FacadesMap = $container->get('app.core.config.code.facades.$map.defaults');
 	   }else{
              $FacadesMap = [                    
-		     'Config' => 'facades.config',
-                   //   'App' =>  'App',
-                     'fs' =>  ['fs', \Webfan\Fs\MountManager::class],                    
+		     'io4' =>'io4',                            
+		     'Config' => 'facades.config',     
+                     'Events' =>  ['events', \Webfan\App\EventModule::class],            
 		     'Helper' =>'helper',                   
-		//     'Container' => ['facades.container', \IO4\Container\Collection::class],                  
-		  //   'Stubrunner' =>'facades.stubrunner',
-                     'Events' =>  ['events', \Webfan\App\EventModule::class],
 		];
 	   }
 	   return $FacadesMap;	
@@ -5452,109 +5604,7 @@ Content-Type: application/x-httpd-php
 	   }
 	   return $FacadesImport;	
 	}),	
-		  
-'events' =>( function(\Psr\Container\ContainerInterface $container){
-     $dir =  $container->get('config.params.dirs.runtime')
-		      .\DIRECTORY_SEPARATOR.'events'
-		      .\DIRECTORY_SEPARATOR.'compiled-registered';
-       if(!is_dir($dir)){
-        mkdir($dir, 0775, true);
-       }	    
-	\Webfan\App\EventModule::setBaseDir($dir);	 
-	return \Webfan\FacadeProxy::createProxy(\Webfan\App\EventModule::action('*'));  
- }),	
 	
-'fs' =>( function(\Psr\Container\ContainerInterface $container){
-	      return \Webfan\FacadeProxiesMap::createProxy([
-		        new \Webfan\Fs\MountManager([
-			   'cache' => new \League\Flysystem\Filesystem(
-			     new \League\Flysystem\Local\LocalFilesystemAdapter(rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR)
-			   ),			    
-			   'app' => new \League\Flysystem\Filesystem(
-			     new \League\Flysystem\Local\LocalFilesystemAdapter(rtrim($container->get('config.params.app.dir'), \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR)
-			   ),		
-			   'well-known' => new \League\Flysystem\Filesystem(
-			     new \League\Flysystem\Local\LocalFilesystemAdapter($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'.well-known'.\DIRECTORY_SEPARATOR)
-			   ),		
-			   'web+public' => new \League\Flysystem\Filesystem(
-			     new \League\Flysystem\Local\LocalFilesystemAdapter($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR)
-			   ),		
-			   'web+www' => new \League\Flysystem\Filesystem(
-			     new \League\Flysystem\Local\LocalFilesystemAdapter($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR)
-			   ),		
-			   'www' => new \League\Flysystem\Filesystem(
-			     new \League\Flysystem\Local\LocalFilesystemAdapter($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR)
-			   ),			    
-			], true), 
-		     ],
-	  	[
-											 
-	    ],
-	$container->has('container') ? $container->get('container') : $container);  
- }),
-	
-'helper' =>( function(\Psr\Container\ContainerInterface $container){
-	      return \Webfan\FacadeProxiesMap::createProxy([
-		        new \Webfan\Webfat\App\KernelHelper,
-		        new \Webfan\Webfat\App\KernelFunctions,
-			    \frdl\Http\Helper::class,			   
-		     ],
-	  	[
-	//	'call' => \IO4\Container\ContainerCollectionInterface::CALL_ID,									 
-	    ],
-	$container->has('container') ? $container->get('container') : $container);  
- }),	
-	
-'facades.config' =>( function(\Psr\Container\ContainerInterface $container){
-      return \Webfan\FacadeProxy::createProxy($container->get('Config'));  
- }),		
-'Config' =>( function(\Psr\Container\ContainerInterface $container){
-    		
-	$config = \Configula\ConfigFactory::loadMultiple([
-        @new \Configula\Loader\EnvLoader( ),   
-   //  new \Configula\Loader\EnvLoader('APP', '', false),     
-   // new \Configula\Loader\EnvLoader('WEBFAN', '_', true),       
-   //  new \Configula\Loader\EnvLoader('FRDL', '_', true),      
-   //    \Configula\ConfigFactory::loadEnv('IO4_', '_', true),   
-    //   \Configula\ConfigFactory::loadEnv('APP_', '', false),     
-    //  \Configula\ConfigFactory::loadEnv('WEBFAN_', '_', true),       
-    //   \Configula\ConfigFactory::loadEnv('FRDL_', '_', true),         
-     $container->get('app.runtime.stubrunner')->config(),
-     $container->get('app.runtime.stubrunner')->configVersion(),
-    //['some' => 'values'],                           // Array of config vaules
-   // '/path/to/some/file.yml',                       // Path to file (must exist)
-   // new \SplFileInfo('/path/to/another/file.json')  // SplFileInfo
-]);
-		 
-	return $config;
- }),	
-	
-'App'=> [function(\Psr\Container\ContainerInterface $container) {
-    return \Webfan\FacadeProxy::createProxy((new class($container) extends \Webfan\Node{
-		      use Webfan\withClassCastingTrait; 
-	              protected $container;
-		      public function __construct(\Psr\Container\ContainerInterface $container ){
-                        $this->container = $container;
-                      }
-	              public function __get($n){
-                          $FacadesMap = $container->get('config.app.core.code.facades.$map');
-			  if(isset($FacadesMap[$n]) && $container->has($FacadesMap[$n])){
-                            return $container->get($FacadesMap[$n]);
-			  }
-		      }
-		      public function import($import){
-                         return $this->castFrom($import);
-                      }
-		      public function export($export){
-                         return $this->castTo($export);
-                      }
-		      public function make($from, $to){
-                         return $this->classCasting($to, $from);
-                      }
-		 }));				 
-}, 'default'],   
-	
-  	
 	
 'facades.stubrunner' =>( function(\Psr\Container\ContainerInterface $container){
       return \Webfan\FacadeProxy::createProxy($container->get('app.runtime.stubrunner'));  

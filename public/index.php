@@ -5543,7 +5543,7 @@ use Symfony\Component\EventDispatcher\Event;
 				 break;
 				 default :
                                    return isset($this->services[$name]) || isset($this->shields[$name]) 
-					?  return ((object)[
+					?  ((object)[
                                              'shield' =>  &$this->shields[$name],
 					     'service' => &$this->services[$name], 
 					  ])	

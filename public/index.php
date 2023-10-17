@@ -5589,7 +5589,7 @@ use Symfony\Component\EventDispatcher\Event;
 	   }else{
              $FacadesMap = [                    
 		     'io4' =>'io4',                            
-		     'Config' => 'facades.config',     
+		     'Config' => ['facades.config', \Configula\ConfigValues::class],      
                      'Events' =>  ['events', \Webfan\App\EventModule::class],            
 		     'Helper' =>'helper',                   
 		];

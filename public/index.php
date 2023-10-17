@@ -5455,7 +5455,12 @@ use Symfony\Component\EventDispatcher\Event;
 
 	              public function mountLocalFilesystems(){
                          foreach($this->container->get('Config')->get('mount.local') as $protocol => $directory){
-				yield $protocol => \M2MTech\FlysystemStreamWrapper\FlysystemStreamWrapper::register($protocol, new \League\Flysystem\Filesystem( new League\Flysystem\Local\LocalFilesystemAdapter($directory)  )  );
+				yield $protocol => \M2MTech\FlysystemStreamWrapper\FlysystemStreamWrapper::register($protocol, new \League\Flysystem\Filesystem( 
+				  new League\Flysystem\Local\LocalFilesystemAdapter(
+					$this->container->has($directory) 
+					 ? $this->container->get($directory) 
+					 : $directory
+				)  )  );
 			 }
 		      }	     
 	      

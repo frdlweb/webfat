@@ -5466,14 +5466,16 @@ use Symfony\Component\EventDispatcher\Event;
 	      
 	              public function &service($name, ?array $options = []){
 			      //ToDo: Add Log Listeners to Circuit Breaker
-			      $shield = isset($this->shields[$name]) ? $this->shields[$name] :new \Webfan\Webfat\App\CircuitBreaker($name, array_merge([      //new Breaker($name, array_merge([								  
+			      $shield = $this->shields[$name] = isset($this->shields[$name]) 
+				      ? $this->shields[$name] : 
+				      new \Webfan\Webfat\App\CircuitBreaker($name, array_merge([      //new Breaker 						  
             'max_failure' => 5,
             'reset_timeout' => 8,
             'exclude_exceptions' => [],
             'ignore_exceptions' => false,
             'allowed_exceptions' => [],
 								     ], $options), $this->getServiceShieldCache($name));
-			       $service = isset($this->services[$name]) ?  $this->services[$name] : null;
+			       $service = $this->services[$name] = isset($this->services[$name]) ?  $this->services[$name] : null;
 			      
                        switch(true){
 			       case $service && $shield :
@@ -5484,7 +5486,7 @@ use Symfony\Component\EventDispatcher\Event;
 			         break;
 				 case  'fs' === $name :
                                       $me = $this;
-			              $this->services[$name] = $this->shields[$name]->protect(function () use($me){
+			             $service =  $this->services[$name] = $this->shields[$name]->protect(function () use($me){
                                              // throw( $result = new \Exception("An error as occured") );
                                                $result =[];
 	                                    foreach($this->mountLocalFilesystems() as $protocol => $success){

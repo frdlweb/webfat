@@ -5526,8 +5526,8 @@ use Symfony\Component\EventDispatcher\Event;
 				  .\DIRECTORY_SEPARATOR
 				  .'shield';
 	
-			  if(!is_dir($proxyCacheDir)){	
-			    @mkdir($proxyCacheDir, 0755, true);		
+			  if(!is_dir($dir)){	
+			    @mkdir($dir, 0755, true);		
 			  }	
 	return $dir;
 }), 

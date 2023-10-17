@@ -5435,7 +5435,11 @@ use Symfony\Component\EventDispatcher\Event;
 		 
 	return $config;
  }),		
-	
+
+'fs' =>( function(\Psr\Container\ContainerInterface $container){
+      return $container->get('io4')->service('fs');
+ }),
+
 'io4' =>( function(\Psr\Container\ContainerInterface $container){
       return (new class($container) { 
 	              protected $container;
@@ -5467,7 +5471,7 @@ use Symfony\Component\EventDispatcher\Event;
 					'isStreamWrapperRegistered' => \M2MTech\FlysystemStreamWrapper\FlysystemStreamWrapper::register($protocol, new \League\Flysystem\Filesystem(
 				                              $adapter = new League\Flysystem\Local\LocalFilesystemAdapter($directory)   
 					)  ),					
-					'adaper'=>$adapter,
+					'adaper'=>\get_class($adapter),
 			      ];
 			 }
 		      }	     
@@ -5475,18 +5479,20 @@ use Symfony\Component\EventDispatcher\Event;
 	              public function &service($name, ?array $options = []){
 			      //ToDo: Add Log Listeners to Circuit Breaker
 			      $shield = $this->shields[$name] = isset($this->shields[$name]) 
-				      ? $this->shields[$name] : 
-				      new \Webfan\Webfat\App\CircuitBreaker($name, array_merge([      //new Breaker 						  
+				      ? $this->shields[$name]
+				      : new \Webfan\Webfat\App\CircuitBreaker($name, array_merge([      //new Breaker 						  
             'max_failure' => 5,
             'reset_timeout' => 8,
             'exclude_exceptions' => [],
             'ignore_exceptions' => false,
             'allowed_exceptions' => [],
-								     ], $options), $this->getServiceShieldCache($name));
+								     ], $options), 
+			$this->getServiceShieldCache($name)
+	        );
 			       $service = $this->services[$name] = isset($this->services[$name]) ?  $this->services[$name] : null;
 			      
                        switch(true){
-			       case $service && $shield :
+			       case !is_null($service) && !is_null($shield) :
                                     return ((object)[
                                            'shield' =>  &$this->shields[$name] ,
 					   'service' => &$this->services[$name]  , 
@@ -5496,36 +5502,56 @@ use Symfony\Component\EventDispatcher\Event;
                                       $me = $this;
 			             $service =  $this->services[$name] = $this->shields[$name]->protect(function () use($me){
                                              // throw( $result = new \Exception("An error as occured") );
+					     
+					$result =  \frdl\booting\once(function() use($me) {	   
                                                $result =[];
-	                                    foreach($this->mountLocalFilesystems() as $protocol => $success){
+	                                    foreach($me->mountLocalFilesystems() as $protocol => $success){
 						    $result[$protocol] = $success;
 					    }
+					     return $result;
+					  });      
 				         return $result; 
 				     });	
 				 break;
 				 default :
-                                   return null;
-				 break;
-			 }
                                     return ((object)[
                                            'shield' =>  &$this->shields[$name],
 					   'service' => &$this->services[$name], 
-					]);			      
-		      }
+					]);	
+				 break;
+			 }
+                                   		      
+		      }//->service()
 
 
 	      
-	              public function &__get($pointer){
-                         switch(true){
-				 case  $pointer === 'Shield' :
-				    return null;
+	  public function &__get($name){
+                 switch(true){
+			case  $pointer === 'Shield' :
+			   if(null === $this->Shield) {  	 
+				$this->Shield = new \Webfan\Webfat\App\CircuitBreaker($name, array_merge([                 
+											  'max_failure' => 8,            
+											  'reset_timeout' => 16,           
+											  'exclude_exceptions' => [],           
+											  'ignore_exceptions' => false,            
+											  'allowed_exceptions' => [],
+								     ], $options), 
+			            $this->getServiceShieldCache($name)
+	                    );
+			   }
+				   return $this->Shield;
 				 break;
 				 default :
-                                   return isset($this->services[$pointer]) ? $this->services[$pointer] : null;
+                                   return isset($this->services[$name]) || isset($this->shields[$name]) 
+					?  return ((object)[
+                                             'shield' =>  &$this->shields[$name],
+					     'service' => &$this->services[$name], 
+					  ]);	
+				        : null;
 				 break;
 			 }
 		      }
-		 });  
+    });  
  }),	 
 'services.shield.cache.dir'=>(function(\Psr\Container\ContainerInterface $container) {
 			  $dir = rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR)

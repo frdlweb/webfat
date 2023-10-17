@@ -5466,8 +5466,12 @@ use Symfony\Component\EventDispatcher\Event;
 	      
 	              public function &service($name, ?array $options = []){
 			      //ToDo: Add Log Listeners to Circuit Breaker
-			      $shield = isset($this->shields[$name]) ? $this->shields[$name] : new Breaker($name, array_merge([
-								     'ignore_exceptions' => false,
+			      $shield = isset($this->shields[$name]) ? $this->shields[$name] :new \Webfan\Webfat\App\CircuitBreaker($name, array_merge([      //new Breaker($name, array_merge([								  
+            'max_failure' => 5,
+            'reset_timeout' => 8,
+            'exclude_exceptions' => [],
+            'ignore_exceptions' => false,
+            'allowed_exceptions' => [],
 								     ], $options), $this->getServiceShieldCache($name));
 			       $service = isset($this->services[$name]) ?  $this->services[$name] : null;
 			      
@@ -5587,11 +5591,12 @@ use Symfony\Component\EventDispatcher\Event;
 	//   }elseif($container->has('app.core.config.code.facades.$map.defaults')){
          //    $FacadesMap = $container->get('app.core.config.code.facades.$map.defaults');
 	   }else{
-             $FacadesMap = [                    
-		     'io4' =>'io4',                            
-		     'Config' => ['facades.config', \Configula\ConfigValues::class],      
+             $FacadesMap = [                                   
+		 //    'Config' => ['facades.config', \Configula\ConfigValues::class],      
+		     'Config' =>'facades.config',
                      'Events' =>  ['events', \Webfan\App\EventModule::class],            
-		     'Helper' =>'helper',                   
+		     'Helper' =>'helper',             
+		   //Not works since class is anonymous and no static method yet  'io4' =>'io4',                   
 		];
 	   }
 	   return $FacadesMap;	

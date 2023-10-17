@@ -5461,21 +5461,21 @@ use Symfony\Component\EventDispatcher\Event;
 	      
 	              public function &service($name, ?array $options = []){
 			      //ToDo: Add Log Listeners to Circuit Breaker
-			      &$shield = isset($this->shields[$name]) ? &$this->shields[$name] : new Breaker($name, array_merge([
+			      $shield = isset($this->shields[$name]) ? $this->shields[$name] : new Breaker($name, array_merge([
 								     'ignore_exceptions' => false,
 								     ], $options), $this->getServiceShieldCache($name));
-			      &$service = isset($this->services[$name]) ? &$this->services[$name] : null;
+			       $service = isset($this->services[$name]) ?  $this->services[$name] : null;
 			      
                        switch(true){
 			       case $service && $shield :
                                     return ((object)[
-                                           'shield' =>  &$this->shields[$name]  = &$shield,
-					   'service' => &$this->services[$name] = &$service, 
+                                           'shield' =>  &$this->shields[$name] ,
+					   'service' => &$this->services[$name]  , 
 					]);
 			         break;
 				 case  'fs' === $name :
-                                     &$me = $this;
-			             &$this->services[$name] = $this->shields[$name]->protect(function () use($me){
+                                      $me = $this;
+			              $this->services[$name] = $this->shields[$name]->protect(function () use($me){
                                              // throw( $result = new \Exception("An error as occured") );
                                                $result =[];
 	                                    foreach($this->mountLocalFilesystems() as $protocol => $success){
@@ -5507,7 +5507,7 @@ use Symfony\Component\EventDispatcher\Event;
 			 }
 		      }
 		 });  
- }),	
+ }),	 
 'services.shield.cache.dir'=>(function(\Psr\Container\ContainerInterface $container) {
 			  $dir = rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR)
 				.\DIRECTORY_SEPARATOR

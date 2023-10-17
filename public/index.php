@@ -5546,7 +5546,7 @@ use Symfony\Component\EventDispatcher\Event;
 					?  return ((object)[
                                              'shield' =>  &$this->shields[$name],
 					     'service' => &$this->services[$name], 
-					  ]);	
+					  ])	
 				        : null;
 				 break;
 			 }

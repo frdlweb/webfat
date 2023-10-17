@@ -4986,7 +4986,10 @@ return (static function ($Stub, bool $isCliRequest)   {
       ? $container->get('config.stub.config.init.bootscript')
       : $container->get('script@setup.php')
  ;
- 
+	
+  //load filesystems and mount streamwrappers to app schemes:
+	//var_dump($container->get('io4')->service('fs'));
+	
 switch(true){
 	case true === $isCliRequest
 	     && is_object($response)

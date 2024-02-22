@@ -5244,92 +5244,10 @@ use Symfony\Component\EventDispatcher\Event;
  }),
 
 'io4' =>( function(\Psr\Container\ContainerInterface $container){
-      return (new class($container) { 
-	              protected $container;
-	              protected $services = [
-	      
-		      ];
-		  
-	              protected $shields = [
-	      
-		      ];
-	            
-		  protected $Shield=null;
-		    
-		  public function __construct(\Psr\Container\ContainerInterface $container ){
-                        $this->container = $container;                     
-		  }
-	              
-	      public function getServiceShieldCache($pointer){
-                          return new FilesystemCache( $this->container->get('services.shield.cache.dir')  
-				.\DIRECTORY_SEPARATOR.'breaker-store-'
-						     .strlen((string)$pointer)
-						     .'-'.sha1((string)$pointer), 'io4.shield.main.cache.txt');
-		   
-	      }      
-	           
-		  public function &service($name, array $options = [], \callable | \Closure | string $initFunction = null){
-			      //ToDo: Add Log Listeners to Circuit Breaker
-			        $this->shields[$name] = isset($this->shields[$name]) 
-				      ? $this->shields[$name]
-				      : new \Webfan\Webfat\App\CircuitBreaker($name, array_merge([      //new Breaker 						  
-            'max_failure' => 5,
-            'reset_timeout' => 8,
-            'exclude_exceptions' => [],
-            'ignore_exceptions' => false,
-            'allowed_exceptions' => [],
-								     ], $options), 
-			$this->getServiceShieldCache($name)
-	        );
-			      $this->services[$name] = isset($this->services[$name]) ?  $this->services[$name] : null;
-			      
-					if(is_string($initFunction)){
-						$initFunction =  $this->container->has($initFunction) 
-					       ? $this->container->get($initFunction) 
-					       : $initFunction;
-					}				
-					  
-					  if(\is_callable($initFunction)){
-		                  $this->services[$name] = $this->shields[$name]->protect($initFunction);   						 				  
-					  }
-					  
-				return ((object)[                                          
-					'shield' =>  &$this->shields[$name],					   
-					'service' => &$this->services[$name], 					
-				]);	
-                                   		      
-		      }//->service()
-
-
-	      
-	  public function &__get($name){                
-		  switch(true){
-			case  $name === 'Shield' :
-			   if(null === $this->Shield) {  	 
-				$this->Shield = new \Webfan\Webfat\App\CircuitBreaker('io4-main-circuit-breaker', array_merge([                 
-											  'max_failure' => 8,            
-											  'reset_timeout' => 16,           
-											  'exclude_exceptions' => [],           
-											  'ignore_exceptions' => false,            
-											  'allowed_exceptions' => [],
-								     ], $options), 
-			            $this->getServiceShieldCache($name)
-	                    );
-			   }
-				   return $this->Shield;
-				 break;
-				 default :
-                  return isset($this->services[$name]) || isset($this->shields[$name]) 
-					?  ((object)[                                         
-						 'shield' =>  &$this->shields[$name],
-					     'service' => &$this->services[$name], 
-					  ])	
-				        : null;
-				 break;
-			 }		      
-	  }
-    });  
- }),	 
+     $factory = $container->get('factory@io4');
+	 return $factory($container, [], []);
+ }),
+	    
 'services.shield.cache.dir'=>(function(\Psr\Container\ContainerInterface $container) {
 			  $dir = rtrim($container->get('config.params.dirs.runtime.cache'), \DIRECTORY_SEPARATOR)
 				.\DIRECTORY_SEPARATOR

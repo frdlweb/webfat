@@ -4825,6 +4825,15 @@ $check = $CircuitBreaker->protect(function() use($container){
   }
 	
 switch(true){
+	case is_object($response)
+	     && !is_null($response)
+	     && (
+		    $response instanceof \League\Pipeline\Pipeline
+		) :
+                   $response = $response->process(
+	                 !$isCliRequest ? \Laminas\Diactoros\ServerRequestFactory::fromGlobals() : $argv
+                   );
+	 break;
 	case true === $isCliRequest
 	     && is_object($response)
 	     && !is_null($response)

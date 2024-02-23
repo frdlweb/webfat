@@ -4814,11 +4814,11 @@ $check = $CircuitBreaker->protect(function() use($container){
   //load filesystems and mount streamwrappers to app schemes:
 	//var_dump($container->get('io4')->service('fs'));
 
-  if(is_object($response) && && !is_null($response) $response instanceof \League\Pipeline\PipelineBuilder){
+  if(is_object($response) && !is_null($response) $response instanceof \League\Pipeline\PipelineBuilder){
      $response = $response->build();
   }
 	
-  if(is_object($response) && && !is_null($response) $response instanceof \League\Pipeline\Pipeline){
+  if(is_object($response) && !is_null($response) $response instanceof \League\Pipeline\Pipeline){
      $response = $response->process(
 	     !$isCliRequest ? \Laminas\Diactoros\ServerRequestFactory::fromGlobals() : $argv
      );

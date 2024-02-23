@@ -101,8 +101,18 @@ namespace{
 	$fileparts = explode('.', basename(__FILE__));
 	define('___BLOCK_WEBFAN_MIME_VM_RUNNING_STUB___', !in_array(basename(__FILE__), [
 		  'index.php',
+		  'init.php',
+		  'io4.php',
+		  'in.php',
+		  'out.php',
+		  'console.php',
+		  'progress.php',
+		  'poll.php',
+		  'webhook.php',
+		  'cron.php',
 		  'ajax.php',
 		  'api.php',
+		  'public.php',
 		  'test.php',
 		  'install.php',
 		  'setup.php',
@@ -4775,7 +4785,9 @@ return (static function ($Stub, bool $isCliRequest)   {
  $Runner = $Stub->getRunner();
  $Runner->init();	
  $container = $Runner->getAsContainer(null);	
-	
+ $CircuitBreaker = $container->get('CircuitBreaker');	
+
+$check = $CircuitBreaker->protect(function() use($container){	
  $check = $container->get('script@inc.common.bootstrap');
  if(!is_array($check) || !isset($check['success']) || true !== $check['success']){
     if(is_array($check) && isset($check['error']) ){
@@ -4785,14 +4797,32 @@ return (static function ($Stub, bool $isCliRequest)   {
     }
     throw new \Exception('Could not bootestrap! '.print_r($check, true) );
  }
+	return $check;
+});
 	
+ $included_files = \get_included_files();  
+ $indexfile = basename($included_files[0]);
  $response = $container->has('config.stub.config.init.bootscript')
       ? $container->get('config.stub.config.init.bootscript')
-      : $container->get('script@setup.php')
+      : (
+	     $container->has('script@'.basename($indexfile)) 
+	 ?   $container->get('script@'.basename($indexfile))
+         :    $container->get('script@setup.php')
+	)
  ;
 	
   //load filesystems and mount streamwrappers to app schemes:
 	//var_dump($container->get('io4')->service('fs'));
+
+  if(is_object($response) && && !is_null($response) $response instanceof \League\Pipeline\PipelineBuilder){
+     $response = $response->build();
+  }
+	
+  if(is_object($response) && && !is_null($response) $response instanceof \League\Pipeline\Pipeline){
+     $response = $response->process(
+	     !$isCliRequest ? \Laminas\Diactoros\ServerRequestFactory::fromGlobals() : $argv
+     );
+  }
 	
 switch(true){
 	case true === $isCliRequest
@@ -5232,6 +5262,10 @@ use Symfony\Component\EventDispatcher\Event;
          ],
      ],
      $container->get('app.runtime.stubrunner')->configVersion(),
+     [
+	'@scope' => \frdl\patch\scope(),
+							 
+     ],  							 
     //['some' => 'values'],                           // Array of config vaules
    // '/path/to/some/file.yml',                       // Path to file (must exist)
    // new \SplFileInfo('/path/to/another/file.json')  // SplFileInfo

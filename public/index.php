@@ -464,6 +464,91 @@ interface ContainerInterface
 }
 
 
+
+namespace Webfan\Container{
+
+use Psr\Container\ContainerInterface;
+
+use Configula\ConfigFactory as Config;
+use Configula\ConfigValues as Configuration;
+use Configula\Loader;
+ 
+class ConfigContainer implements ContainerInterface
+{
+	protected $config; 
+	protected $container_id;
+	protected $basPath;
+	protected $prependPath;
+	
+	public function __construct(string $container_id = 'config', //self container id, should return $this!
+								string $basPath = 'config.', 
+								string $prependPath = '',
+								Configuration $config = null){
+		
+		$this->container_id=$container_id;
+		$this->basPath=$basPath;
+		$this->prependPath=$prependPath;
+		
+		$this->config = $config ?? new Configuration([]);	
+	}
+	
+	public function getConfiguration( )    
+	{
+		return $this->config;
+	}	
+	
+	public function getContainer( ) 
+	{
+		return $this;
+	}		
+		
+	public function getIterator( )
+	{
+		return $this->config->getIterator( );
+	}	
+	
+	public function __call($name, $params){
+	  return \call_user_func_array([$this->config, $name], $params);	
+	}
+	
+	public static function __callStatic($name, $params){
+	  return \call_user_func_array([Config::class, $name], $params);	
+	}
+	
+  
+	public function get(  $id){
+		if($id === $this->container_id){
+		  return $this;	
+		}
+		$id = $this->_id($id);
+		if(!$this->has($id)){
+		  return null;	
+		}
+		return $this->config->get($id);
+	}
+
+   protected function _id(  $id){
+          if (strlen($id) > strlen($this->basPath) && str_starts_with($id, $this->basPath)) {
+             $id=substr($id, strlen($this->basPath), strlen($id));
+          }	  
+	   
+	      $id.= $this->prependPath;
+	   return $id;
+   }
+ 
+	public function has(   $id)   {
+		if(strlen($id) < strlen($this->basPath))return false;
+	  return $id === $this->container_id || $this->config->has($this->_id($id));	
+	}
+} 
+	
+}//ns
+
+
+
+
+
+
 namespace Frdlweb\Contract\Autoload{
 	
 

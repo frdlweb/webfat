@@ -43,5 +43,8 @@
 			"kylekatarnls/update-helper": true,
 			"danielmarschall/*" : true		
 	  }	
-  }
+  },	
+ "provides": {
+  "frdl-io4/webfat": "*"
+ }
 }

@@ -175,254 +175,6 @@ namespace{
 
 
 
-
-namespace frdl\patch{
- if(!function_exists('\frdl\patch\scope')){
- function scope(?string $scope = null) : ?string {
-	
-$scope = \frdl\booting\once(function() use($scope) {
- $getRootDir;	
- $getRootDir = (function($path = null) use(&$getRootDir){
-	if(null===$path){
-		$path = $_SERVER['DOCUMENT_ROOT'];
-	}
-
-		
- if(''!==dirname($path) && '/'!==dirname($path) //&& @chmod(dirname($path), 0755) 
-    &&  true===@is_writable(dirname($path)) && true===@is_readable(dirname($path))
-    ){
- 	return $getRootDir(dirname($path));
- }else{
- 	return $path;
- }
-
- });		
-
-$scope = call_user_func(function()use($getRootDir, $scope) {
-	
-$drush_server_home = (function() use($getRootDir, $scope) {
-	
-	if(function_exists('\posix_getpwuid') && function_exists('\posix_getui') ){		
-		$user = \posix_getpwuid(\posix_getuid());		
-		return $user['dir'];
-	}
-	
-	
-
-	
-  // Cannot use $_SERVER superglobal since that's empty during UnitUnishTestCase
-  // getenv('HOME') isn't set on Windows and generates a Notice.
-  $home = getenv('HOME');
-  if (!empty($home)) {
-    // home should never end with a trailing slash.
-    $home = rtrim($home, '/');
-  }elseif (isset($_SERVER['HOME']) && !empty($_SERVER['HOME'])) {
-    // home on windows
-    $home = $_SERVER['HOME'];
-    // If HOMEPATH is a root directory the path can end with a slash. Make sure
-    // that doesn't happen.
-    $home = rtrim($home, '\\/');
-  }elseif (!empty($_SERVER['HOMEDRIVE']) && !empty($_SERVER['HOMEPATH'])) {
-    // home on windows
-    $home = $_SERVER['HOMEDRIVE'] . $_SERVER['HOMEPATH'];
-    // If HOMEPATH is a root directory the path can end with a slash. Make sure
-    // that doesn't happen.
-    $home = rtrim($home, '\\/');
-  }elseif (isset($_ENV['HOME']) && !empty($_ENV['HOME'])) {
-    // home on windows
-    $home = $_ENV['HOME'];
-    // If HOMEPATH is a root directory the path can end with a slash. Make sure
-    // that doesn't happen.
-    $home = rtrim($home, '\\/');
-  }
-	
-  return empty($home) ? $getRootDir($_SERVER['DOCUMENT_ROOT']) : $home;
-});
-	
-$HOME_DEFAULT = $drush_server_home();
-	
-$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'] = (isset($_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'])) ? intval($_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']) : time() - filemtime(__FILE__);
-putenv('FRDL_HPS_PSR4_CACHE_LIMIT='.$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT']);
-
-
-if(null === $scope){
-  $envFile = false;
-  if(@file_exists(getcwd().\DIRECTORY_SEPARATOR.'.env')){
-       $envFile = getcwd().\DIRECTORY_SEPARATOR.'.env';
-  }elseif(@file_exists($_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'.env')){
-       $envFile = $_SERVER['DOCUMENT_ROOT'].\DIRECTORY_SEPARATOR.'.env';
-  }elseif(@file_exists(__DIR__.\DIRECTORY_SEPARATOR.'.env')){
-       $envFile = __DIR__.\DIRECTORY_SEPARATOR.'.env';
-  }elseif(@file_exists($HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.env')){
-       $envFile = $HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.env';
-  }elseif(@file_exists($HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.frdl'.\DIRECTORY_SEPARATOR.'.env')){
-       $envFile = $HOME_DEFAULT.\DIRECTORY_SEPARATOR.'.frdl'.\DIRECTORY_SEPARATOR.'.env';
-  }
-
-   if(false !== $envFile 
-    //  && file_exists($envFile)
-     ){
-     $env = \Env\Dotenv::toArray($envFile, false, false);
-     if(isset($env['IO4_WORKSPACE_SCOPE'])){
-         $_ENV['IO4_WORKSPACE_SCOPE'] = $env['IO4_WORKSPACE_SCOPE'];	
-         putenv('IO4_WORKSPACE_SCOPE='. $env['IO4_WORKSPACE_SCOPE']);
-     }
-   }
-	
-  $scope = !empty(getenv('IO4_WORKSPACE_SCOPE')) ? getenv('IO4_WORKSPACE_SCOPE') : null;
-}
-	
-switch($scope){
-	case '@cwd' :
-            $__home =  getcwd();
-	 break;		
-	case '@www' :
-            $__home =  $_SERVER['DOCUMENT_ROOT'];
-	 break;	
-	case '@www@root' :
-            $__home =  $getRootDir($_SERVER['DOCUMENT_ROOT']);
-	 break;	
-	case '@www@parent' :
-            $__home =  dirname($_SERVER['DOCUMENT_ROOT']);
-	 break;	
-	case '@global' :
-	case null :
-            $__home = $HOME_DEFAULT;
-	  break;
-	default :
-           $__home = is_dir(getenv('IO4_WORKSPACE_SCOPE')) ? getenv('IO4_WORKSPACE_SCOPE') : $HOME_DEFAULT;
-	 break;
-}
-
-$__home = @is_readable($__home) && @is_writable($__home) ? $__home : $getRootDir($_SERVER['DOCUMENT_ROOT']);
-
-$_ENV['FRDL_HOME'] = $__home;	
-putenv('FRDL_HOME='.$_ENV['FRDL_HOME']);
-
-$_homeg = str_replace(\DIRECTORY_SEPARATOR, '/', getenv('FRDL_HOME'));
-	
-	
-$_cwd = getcwd(); 	
-
-//chdir(getenv('FRDL_HOME'));
-	
-	
-$workspaces = false;
-
-$_dir = getenv('FRDL_HOME') . \DIRECTORY_SEPARATOR . '.frdl';
-//if(!is_dir($_dir)){
- $g = (file_exists("frdl.workspaces.php")) ? [realpath("frdl.workspaces.php")] : glob("frdl.workspaces.php");	
- if(0===count($g)){
-	 $g = array_merge(glob(str_replace(\DIRECTORY_SEPARATOR, '/', getcwd())."/frdl.workspaces.php"),
-					  glob($_homeg."/frdl.workspaces.php"), glob($_homeg."/*/frdl.workspaces.php") 
-					  //,glob($_homeg."/*/*/frdl.workspaces.php")
-			 );
- }
-  if(0<count($g)){
-	//	$_dir = dirname($g[0]);	
-	 
-	  $workspaces = require $g[0];
-	  if(isset($workspaces['Frdlweb'])){
-		$_dir = $workspaces['Frdlweb']['DIR'];		   
-	  }else{
-		 foreach($workspaces as $name => $w){
-			if(isset($w['DIR']) && is_dir($w['DIR'])){
-				$_dir = $w['DIR'];
-			  break;	  
-			}
-		 }
-	  }
-	  
-  }
-//}
-	
-	 if(!@is_dir($_dir)){
-		@mkdir($_dir, 0775, true); 
-	 }	 
-  if(@!is_dir($_dir) || !is_writable($_dir)   || !is_readable($_dir)  ){  
-
-      $possibleFiles = glob(getenv('FRDL_HOME').'/*/');
-      $dirs = array_filter(is_array($possibleFiles) ? $possibleFiles : [], 'is_dir');
-      
-      foreach ($dirs as $dir) {
-      		
-        if (false===strpos($dir, '@') && false!==strpos($dir, 'frdl') &&  is_writable($dir) && is_readable($dir)) {
-            //echo realpath($dir).' is writable.<br>';
-            $_dir = $dir 
-			   .\DIRECTORY_SEPARATOR
-			   .'.frdl';
-				   if(is_dir($_dir)  || @mkdir($_dir, 0775, true) ){  
-				     break;
-			       }				   
-        } else {
-           //    echo $dir.' is not writable. Permissions may have to be adjusted.<br>';
-        } 
-      }
-	}		
-	
-	$_dir= class_exists(\frdl\patch\RelativePath::class)
-		   ? \frdl\patch\RelativePath::getRelativePath($_dir)
-		   : $_dir;
-	  
-	$_ENV['FRDL_WORKSPACE']= rtrim($_dir, '\\/');
-	putenv('FRDL_WORKSPACE='.$_ENV['FRDL_WORKSPACE']);	
-	
-	 
- $_f = $_ENV['FRDL_WORKSPACE']. \DIRECTORY_SEPARATOR.'frdl.workspaces.php';
- if(is_array($workspaces) 
-	&& (!file_exists("frdl.workspaces.php") || time()-$_ENV['FRDL_HPS_PSR4_CACHE_LIMIT'] > filemtime("frdl.workspaces.php")) 
-	&& @is_dir($_ENV['FRDL_WORKSPACE']) && @is_file($_f) ){
-	 
-	// $exports = var_export($workspaces, true);
-$code = <<<PHPCODE
-<?php
-	return require '$_f';		   
-PHPCODE;
-
- file_put_contents("frdl.workspaces.php", $code);	 
- }
-	  
-	 if(!@is_dir($_ENV['FRDL_WORKSPACE'])){
-		@mkdir($_ENV['FRDL_WORKSPACE'], 0775, true); 
-	 }	
-	
- 
-//$_ENV['FRDL_HPS_CACHE_DIR'] = $_dir . \DIRECTORY_SEPARATOR .\get_current_user() . \DIRECTORY_SEPARATOR. 'cache'. \DIRECTORY_SEPARATOR;
-$_ENV['FRDL_HPS_CACHE_DIR'] = \sys_get_temp_dir() 
-                   . \DIRECTORY_SEPARATOR .\get_current_user() . \DIRECTORY_SEPARATOR. 'cache'. \DIRECTORY_SEPARATOR;	
-putenv('FRDL_HPS_CACHE_DIR='.$_ENV['FRDL_HPS_CACHE_DIR']);
-//putenv('TMP='.$_ENV['FRDL_HPS_CACHE_DIR']);
-//ini_set('sys_temp_dir', realpath($_ENV['FRDL_HPS_CACHE_DIR']));	
-	 if(!@is_dir($_ENV['FRDL_HPS_CACHE_DIR'])){
-		@mkdir($_ENV['FRDL_HPS_CACHE_DIR'], 0775, true); 
-	 }
-
-
-$_ENV['FRDL_HPS_PSR4_CACHE_DIR'] = rtrim($_ENV['FRDL_HPS_CACHE_DIR'], \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR.'psr4'.\DIRECTORY_SEPARATOR;
-putenv('FRDL_HPS_PSR4_CACHE_DIR='.$_ENV['FRDL_HPS_PSR4_CACHE_DIR']);
-
-	 if(!@is_dir($_ENV['FRDL_HPS_PSR4_CACHE_DIR'])){
-		@mkdir($_ENV['FRDL_HPS_PSR4_CACHE_DIR'], 0775, true); 
-	 }
-
-	
-
-
-//chdir($_cwd);
- return $scope;
-});
-      return $scope;
-	});//\frdl\booting\once(function(){
-    return $scope;
-  }//scope function		
-	}// !scope function	exists
-}//ns frdl\patch
-
-
-
-
-
-
 namespace frdl\patch{
  if (!\interface_exists(IContainer::class, false)) {		
    interface IContainer {
@@ -4263,9 +4015,20 @@ HTACCESSCONTENT);
 	}		
 	
 	
-public function init (?string $scope = null) : ?string {
-	return \frdl\patch\scope($scope); 
-}
+     public function init (?string $scope = null) : ?string {
+	  if(!function_exists('\frdl\patch\scope')){ 		
+		  if(!$this->getStubVM()->get_file($this->getStub(), '$HOME/init.php', 'stub stub.php') ){
+		    $this->getStubVM()->addPhpStub(file_get_contents('https://packages.frdl.de/raw/frdl/webfan-website/lib/functions/init.php'),
+															 '$HOME/init.php');
+		  }
+		  
+		  
+		$this->getStubVM()->_run_php_1(
+			$this->getStubVM()->get_file($this->getStub(), '$HOME/init.php', 'stub stub.php')
+		); 
+	  }
+	     return \frdl\patch\scope($scope); 
+     }
 
 
 	

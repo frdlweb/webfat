@@ -45,6 +45,7 @@
 	  }	
   },	
  "provides": {
-  "frdl-io4/webfat": "*"
+  "frdl-io4/webfat": "*",
+  "frdl/remote-psr4" : "*"
  }
 }

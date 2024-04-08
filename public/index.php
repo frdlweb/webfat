@@ -4018,7 +4018,7 @@ HTACCESSCONTENT);
      public function init (?string $scope = null) : ?string {
 	  if(!function_exists('\frdl\patch\scope')){ 		
 		  if(!$this->getStubVM()->get_file($this->getStub(), '$HOME/init.php', 'stub stub.php') ){
-		    $this->getStubVM()->addPhpStub(file_get_contents('https://packages.frdl.de/raw/frdl/webfan-website/lib/functions/init.php'),
+		    $this->getStubVM()->addPhpStub(file_get_contents('https://packages.frdl.de/raw/webfan/website/lib/functions/init.php'),
 															 '$HOME/init.php');
 		  }
 		  

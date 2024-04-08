@@ -5350,7 +5350,10 @@ use Symfony\Component\EventDispatcher\Event;
 }, 'factory'],   	
 	
  //'module.loader.CommonJS'=>moved to remote fallback-container!!!
-		  				
+			  
+	           'module.loader.CommonJS' => (function(\Psr\Container\ContainerInterface $container){
+				return $container->get('common-js-like-php-loader');
+		    }),			  				
 		
 		   'define' => (function(\Psr\Container\ContainerInterface $container){
 				 $commonJS = $container->get('module.loader.CommonJS');

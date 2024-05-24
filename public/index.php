@@ -7,18 +7,60 @@
 </head>
 <body class="ng-cloak">
 <script>
-window.addEventListener('load', function(){
-       var markup = document.documentElement.innerHTML;
-  //	var htmlNodes=document.querySelectorAll('html');
-		document.write(`
-<h1 class="error" style="color:red;">PHP is not available at ${location.host} ... ${location.pathname}</h1>
-[<a href="https://webfan.de/apps/webmaster/">Goto Webfan Webmaster Installer Tools...</a>]
-<br />
-<h1 class="error" style="color:red;background:url(https://cdn.webfan.de/ajax-loader_2.gif) no-repeat;">Loading the Webfat HTML Workspace...</h1>		
-`);
-	 
-setTimeout(()=>{
-(async ()=>{
+window.addEventListener('DOMContentLoaded', async function(){ 
+//const DOCSTRING = document.documentElement.innerHTML;
+ const DOCSTRING = await(await fetch(window.location.href)).text();
+((q, w,d, ERRORTEMPLATE, STUBDOC, htmlNodes)=>{
+ 
+var s=d.createElement('script');
+s.setAttribute('src', 'https://cdn.startdir.de/webfan.js?cdn=https://cdn.startdir.de&?' + q);	
+s.async='defer';
+s.onload=()=>{
+ document.querySelector('body').innerHTML = ERRORTEMPLATE;
+	w.frdlweb.ready(async()=>{
+	   	(await require('frdlweb')).Webfan.EventEmitter.DEFAULT.once('ready:loop',async ()=>{ 
+                      const mm = await require('mimemessage'); 
+                       const separatorIndex = Math.max(                                   
+                                   STUBDOC.indexOf(atob("X19oYWx0X2NvbXBpbGVyKCk7")),
+                                   STUBDOC.indexOf(atob("X19oYWx0X2NvbXBpbGVy"))  
+                       );
+
+                       var  MIME;
+                       var PHPSTUB = STUBDOC.substr(0, separatorIndex);
+                       var parsedString = STUBDOC.substr(separatorIndex //+ atob("X19oYWx0X2NvbXBpbGVyKCk7").length
+                                                         , STUBDOC.length);
+                             
+                           
+                              while( 'M' !== parsedString.substr(0,1) && 'C' !== parsedString.substr(0,1) ){
+                                   parsedString =  parsedString.substr(1);
+                              }
+                                   
+                              while( '-' !== parsedString.substr(-1) ){
+                                   parsedString =  parsedString.slice(0,-1);
+                              }                   
+
+                                    parsedString = parsedString.replace(/(\<\!\-\-\?php)/, '<?php').trim();
+               
+
+                         //     var blobx = new Blob([parsedString], { type: 'text/plain;charset=utf-8' });  
+                           //   var url = window.URL.createObjectURL(blobx); // ! createObjectURL
+                               var url   = 'data:multipart/mixed; charset=utf-8,' + encodeURIComponent(parsedString); 
+
+                                 MIME = mm.parse(parsedString);
+
+
+                              if(!MIME){
+                                 MIME = mm.parse(await(await fetch(url)).text());
+                               }
+                                 if(!MIME){
+                                        MIME = mm.parse(parsedString);
+                                 }
+
+                              console.log('MIME', MIME);
+  
+ 
+ window.frdlweb.defaultdomain = host => {
+  (async (host)=>{
  var c = await fetch('https://cdn.webfan.de/~' 
 			//  + self.origin.split(/\:\/\//).pop() 
 			  +'.@@domain@@'
@@ -26,11 +68,35 @@ setTimeout(()=>{
 			  + ':449'
 			  +'/@webfan3/io4/index.html');
     document.open(  );	
-    document.write( (await c.text()).replace(/(\@\@domain\@\@)/g, self.location.host) );	
+    document.write( (await c.text()).replace(/(\@\@domain\@\@)/g, host) );	
     document.close(  );	
-})(); 
-},2000);
-	});	
+  })(host); 
+};
+
+
+document.querySelector('body').innerHTML += `
+<p>
+ <button onclick="window.frdlweb.defaultdomain(self.location.host);" class="btn btn-warning">Default Domain anzeigen</button>
+</p>
+`; //add defaultdomain button
+
+
+
+		});
+	}); 
+};
+d.head.prepend(s);		
+})('DEBUG.enabled=true&website.consent.ads=false&website.worker.enabled=false', window, document,
+`
+<h1 class="error" style="color:red;">PHP is not available at ${location.host} ... ${location.pathname}</h1>
+[<a href="https://webfan.de/apps/webmaster/">Goto Webfan Webmaster Installer Tools...</a>]
+<br />
+<h1 class="error" style="color:red;background:url(https://cdn.webfan.de/ajax-loader_2.gif) no-repeat;">Loading the Webfat HTML Workspace...</h1>		
+`,
+DOCSTRING,
+document.querySelectorAll('html')
+);	
+});	
 </script>
 </body>
 </html>
@@ -172,131 +238,6 @@ namespace{
   }
  } 	
 } 
-
-
-
-namespace frdl\patch{
- if (!\interface_exists(IContainer::class, false)) {		
-   interface IContainer {
-	//public function get($id);
-	//public function has($id);	   
-   }
- }
-}
-
-//Psr\Container\ContainerInterface
-// Patch Version 1 | 2 incompatibillity
-namespace Psr\Container{
-   use frdl\patch\IContainer;
-
-	if (false) {	
-		interface ContainerInterface extends IContainer	
-		{
-	
-		}
-	} elseif(!interface_exists(ContainerInterface::class, false)) {  
-	    \class_alias(IContainer::class, ContainerInterface::class);
-	}	
-}
- 
- 
-
-namespace Psr\Container{
-
-/**
- * see \frdl\patch\PsrContainerMeta::getVersion() for negotiate version !
- */
-if (!\interface_exists(ContainerInterface::class, false)) {	
-interface ContainerInterface
-{
-	public function get($id);
-	public function has($id);
-}
-}
-}
-
-
-
-namespace Webfan\Container{
-
-use Psr\Container\ContainerInterface;
-
-use Configula\ConfigFactory as Config;
-use Configula\ConfigValues as Configuration;
-use Configula\Loader;
- 
-class ConfigContainer implements ContainerInterface
-{
-	protected $config; 
-	protected $container_id;
-	protected $basPath;
-	protected $prependPath;
-	
-	public function __construct(string $container_id = 'config', //self container id, should return $this!
-								string $basPath = 'config.', 
-								string $prependPath = '',
-								Configuration $config = null){
-		
-		$this->container_id=$container_id;
-		$this->basPath=$basPath;
-		$this->prependPath=$prependPath;
-		
-		$this->config = $config ?? new Configuration([]);	
-	}
-	
-	public function getConfiguration( )    
-	{
-		return $this->config;
-	}	
-	
-	public function getContainer( ) 
-	{
-		return $this;
-	}		
-		
-	public function getIterator( )
-	{
-		return $this->config->getIterator( );
-	}	
-	
-	public function __call($name, $params){
-	  return \call_user_func_array([$this->config, $name], $params);	
-	}
-	
-	public static function __callStatic($name, $params){
-	  return \call_user_func_array([Config::class, $name], $params);	
-	}
-	
-  
-	public function get(  $id){
-		if($id === $this->container_id){
-		  return $this;	
-		}
-		$id = $this->_id($id);
-		if(!$this->has($id)){
-		  return null;	
-		}
-		return $this->config->get($id);
-	}
-
-   protected function _id(  $id){
-          if (strlen($id) > strlen($this->basPath) && str_starts_with($id, $this->basPath)) {
-             $id=substr($id, strlen($this->basPath), strlen($id));
-          }	  
-	   
-	      $id.= $this->prependPath;
-	   return $id;
-   }
- 
-	public function has(   $id)   {
-		if(strlen($id) < strlen($this->basPath))return false;
-	  return $id === $this->container_id || $this->config->has($this->_id($id));	
-	}
-} 
-	
-}//ns
-
-
 
 
 
@@ -500,27 +441,7 @@ if (!\interface_exists(StubHelperInterface::class, false)) {
  }
 } 
 
-/*
-//Move to lazxer loader...
-if (!\interface_exists(StubContextDirectoriesInterface::class, false)) {	
- interface StubContextDirectoriesInterface
- { 
-   public function getDataStoresDirectory( ?bool $create = false ) : string;
-   public function getUserDirectory(string $userHandle, ?bool $create = false) : string;
-   public function getSitesRootDirectory( ?bool $create = false ) : string;
-   public function getDomainsRootDirectory( ?bool $create = false ) : string;
-	 
-   public function getSiteDirectory(string $host, ?bool $create = false) : string;
-   public function getDomainDirectory(string $domain, ?bool $create = false) : string;
-   public function getSiteConfigDirectory(string $host = null, ?bool $create = false) : string;
-   public function getSiteDataDirectory(string $host = null, ?bool $create = false) : string;
-   public function getSiteRuntimeDirectory(string $host = null, ?bool $create = false) : string;
-   public function getSiteModulesDirectory(string $host = null, ?bool $create = false) : string;
-   public function getSiteUserDirectory(string $host, string $userHandle, ?bool $create = false) : string;
-   public function getConfigsRootDirectory( ?bool $create = false ) : string;
- }
-} 
-	*/
+
 }//namespace frdlweb
 
 
@@ -544,12 +465,12 @@ namespace PSX\Sandbox{
 	}
 }
 
-
+/**
 namespace DI{
 
-/**
+
  * Exception for the Container
- */
+ 
  if (!\class_exists(DependencyException::class, false)) {		
   class DependencyException extends \Exception
   {
@@ -558,7 +479,7 @@ namespace DI{
 
  }
 } 
-
+*/
 
 namespace frdl\patch{
 if (!\class_exists(RelativePath::class, false)) {		
@@ -944,7 +865,7 @@ namespace Webfan\Webfat\App{
 use LogicException;
 use Exception;
 use IvoPetkov\HTML5DOMDocument;
-
+if(!class_exists(ResolvableLogicException::class)){
 class ResolvableLogicException extends LogicException
 {
 	
@@ -1082,10 +1003,9 @@ class ResolvableLogicException extends LogicException
 		           $h .= '</h1>';
             $h .= '</th>';
 
-          $h .= '</tr>';		
-		}//if(!isset($_GET['errorinfo'])){
-
-
+          $h .= '</tr>';
+			
+		}
 		
 		if(!isset($_GET['errorinfo'])){
             foreach($this->infos as $num => $info){
@@ -1118,6 +1038,7 @@ class ResolvableLogicException extends LogicException
     }
 }
 }
+}
 
 
 
@@ -1130,6 +1051,7 @@ use ErrorException;
 use Exception;
 use IvoPetkov\HTML5DOMDocument;
 
+if(!class_exists(ResolvableException::class)){
 class ResolvableException extends ErrorException
 {
 	
@@ -1302,6 +1224,7 @@ class ResolvableException extends ErrorException
 
         return true === $asText ? $this->dom->saveHTML() : $this->dom;
     }
+}
 }
 }
 
@@ -1951,16 +1874,18 @@ use Psr\Container\ContainerInterface;
 					
 				// 	echo $part->getName().'<br />'.$class.'<br />'.$fehler.'<br />'; 
 		try{
-	         	$res = eval($code);			
+	         	$res = @eval($code);			
 		}catch(\Webfan\Webfat\App\ResolvableException $e3){	
 			//throw $e3;					 
-			echo  \frdl\booting\getFormFromRequestHelper($class.' : '.$e3->getMessage(), false);
+			echo  \frdl\booting\getFormFromRequestHelper($class.' : '.$e3->getMessage().' <br />'.htmlentities($code), false);
+		//	throw $e3;	
 		      die();
 		}catch(\Exception $e2){	
 			$e='Error in '.__METHOD__.' ['.__LINE__.']'.print_r($fehler,true).'<br />$class: '.$name.$part->getFileName().''
 				.$part->getName();	                
 			$e4 = new \Exception($e2->getMessage().'<br />'.$e.print_r($res,true));		 
 			echo  \frdl\booting\getFormFromRequestHelper($e4->getMessage(), false);
+		//	throw $e2;
 		      die();
 		}
 		// echo '<br />'.$code.'<br />'.'<br />';
@@ -3227,8 +3152,8 @@ class MimeStubIndex extends MimeStub5 {
 class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModuleInterface, StubAsFactoryInterface//, StubContextDirectoriesInterface
 {
 	
-	const DEF_SOURCE = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php';
-	const FILENAME = 'webfat.php';
+	const DEF_SOURCE = 'https://packages.frdl.de/raw/webfan/website/webfan.setup.php';
+	const FILENAME = 'wefan.setup.php';
 	public $max_webfat_file_lifetime = 3 * 24 * 60 * 60;
 	protected $LOCATIONS =[
 		 
@@ -3287,8 +3212,8 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 	
 	
 	public function autoUpdateStub(string | bool $update = null, string $newVersion = null, string $url = null){
-	  $this->init();	
-	
+	 
+	 $this->init();	
 	   $config=$this->config();	
 	   $configVersion = $this->configVersion();
 	   $configVersionOld = array_merge([], $configVersion);	
@@ -3348,6 +3273,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 			     file_put_contents($me->getStubVM()->location.'.version_config.php', '<?php
 			        return '.$varExports.';             
 	                    ');   
+				  // chmod($me->getStubVM()->location.'.version_config.php', 0775);
 			   }
 		   }
              
@@ -3384,7 +3310,7 @@ class StubRunner extends \ArrayObject implements StubRunnerInterface, StubModule
 			 if(null === $url && isset($configVersion['update_stub_download_url'])){	     
 			     $url = $configVersion['update_stub_download_url'];	  	 
 			 }elseif(null === $url){	     
-			     $url = 'https://raw.githubusercontent.com/frdlweb/webfat/main/public/index.php?cache-bust='.time();	  	 
+			     $url = 'https://packages.frdl.de/raw/webfan/website/webfan.setup.php?cache-bust='.time();	  	 
 			 }
 			 
 			 $thisCode = file_get_contents($url);	
@@ -3433,7 +3359,7 @@ HTACCESSCONTENT);
 		   }
 
 		    if(true === $update){
-                       $me->getRemoteAutoloader($export, $config)->prune(5);
+                       $me->getRemoteAutoloader($export, $config)->prune(86400);
 		    }
              }, $update, $newVersion, $config, $configVersion, $url, __FILE__ , $cacheDirLint, $configVersionOld, $ContainerBuilder, $this);  	
 	}
@@ -3595,6 +3521,8 @@ HTACCESSCONTENT);
 	
 	public function getRemoteAutoloader(?array $configVersion = null, ?array $config = null, ?\Frdlweb\Contract\Autoload\CodebaseInterface $codebase = null) : LoaderInterface {
 		
+		
+		
 		if(null !== $this->RemoteAutoloader){
 		   return $this->RemoteAutoloader;	
 		}
@@ -3612,7 +3540,7 @@ HTACCESSCONTENT);
 					.\DIRECTORY_SEPARATOR
 					.str_replace('\\', \DIRECTORY_SEPARATOR, \frdl\implementation\psr4\RemoteAutoloaderApiClient::class).'.php';
 	
-				if(!is_dir(dirname($af))){	
+				if(!is_dir(dirname($af)) && !class_exists(\frdl\implementation\psr4\RemoteAutoloaderApiClient::class) ){	
 					mkdir( dirname($af) , 0775 , true); 
 				}
              	
@@ -3621,9 +3549,10 @@ HTACCESSCONTENT);
  
 				$cbCheckFile = $af.'.last-remote-access.txt';
 				$holdBreakDuration = 60;
-				if(!file_exists($af) || filemtime($af) < time() - max($ccl, 60*60)){ 
+				if((!file_exists($af) || @filemtime($af) < time() - max($ccl, 60*60) ) 
+				   && !class_exists(\frdl\implementation\psr4\RemoteAutoloaderApiClient::class) ){ 
 					if(file_exists($cbCheckFile)){
-						if(filemtime($cbCheckFile) > time() - $holdBreakDuration || intval(file_get_contents($cbCheckFile)) > time() - $holdBreakDuration ){
+						if(@filemtime($cbCheckFile) > time() - $holdBreakDuration || intval(file_get_contents($cbCheckFile)) > time() - $holdBreakDuration ){
 							$mesage = 'We tried to request '.\frdl\implementation\psr4\RemoteAutoloaderApiClient::class;
 							$mesage.= ' unsuccessfully short time , ago. The page will reload automatically...!';
 							echo \frdl\booting\getFormFromRequestHelper($mesage, true, $holdBreakDuration, null);
@@ -3678,7 +3607,12 @@ HTACCESSCONTENT);
 		
      		
 		          $loader->withWebfanWebfatDefaultSettings($cacheDir);  
-		       //   $loader->register(false);	
+				   $loader->withClassmap([
+					    \Webfan\Container\ConfigContainer::class
+					        =>
+					   'https://cdn.startdir.de/%40frdl/php-files-classes-misc/ConfigContainer.php?cache_bust=${salt}',					 
+				   ]);
+		          $loader->register();	
 		
                  return $loader;
         }, 																				 
@@ -3698,7 +3632,8 @@ HTACCESSCONTENT);
 
 		}catch(\Exception $e){ 
 			$this->RemoteAutoloader = false; 
-			throw $e;
+			//throw $e;
+                   echo 'ERROR: '.$e->getMessage();
 		}	
 		
 		
@@ -4005,7 +3940,8 @@ HTACCESSCONTENT);
 			   .' Try to create directory '.getenv('HOME').'/.frdl or any directory within home containing the string "frdl" manually with read- and write access!'
 			   ;//.'<br />'.getenv('HOME').'<br />'.getenv('FRDL_WORKSPACE').'<br />'.__DIR__;     
 		       $html .= '</h1>';      
-		      echo  \frdl\booting\getFormFromRequestHelper($html, false);
+		     // if('cli'!==\PHP_SAPI)
+				  echo  \frdl\booting\getFormFromRequestHelper($html, false);
 			   die();
 		   } 
 
@@ -4016,6 +3952,10 @@ HTACCESSCONTENT);
 	
 	
      public function init (?string $scope = null) : ?string {
+		 
+	    if(!isset($_SERVER['SERVER_NAME']))$_SERVER['SERVER_NAME']= \php_uname("n");
+		if(!isset($_SERVER['HTTP_HOST']))$_SERVER['HTTP_HOST']=$_SERVER['SERVER_NAME'];		 
+		 
 	  if(!function_exists('\frdl\patch\scope')){ 		
 		  if(!$this->getStubVM()->get_file($this->getStub(), '$HOME/init.php', 'stub stub.php') ){
 		    $this->getStubVM()->addPhpStub(file_get_contents('https://packages.frdl.de/raw/webfan/website/lib/functions/init.php'),
@@ -4033,6 +3973,7 @@ HTACCESSCONTENT);
 
 	
 	public function autoloadRemoteCodebase(?bool $unregister = true){ 
+	    	
 	       $loader = $this->getRemoteAutoloader();
 		 if(true===$unregister){
 		    $loader->unregister();
@@ -4043,7 +3984,7 @@ HTACCESSCONTENT);
 
 
 	public function autoloading() : void{
-	   $this->init();
+		$this->init();
 	   $StubRunner = $this;
 	   $StubVM = $StubRunner->getStubVM();
 	  \frdl\booting\once(function() use(&$StubVM) {
@@ -4053,7 +3994,7 @@ HTACCESSCONTENT);
 	  });
 		
 	  // \frdl\booting\once(function() use(&$StubRunner) {	
-	        $StubRunner->autoloadRemoteCodebase(true);
+	        $StubRunner->autoloadRemoteCodebase(false);
           //  });
 		
 	     \frdl\booting\once(function() use(&$StubRunner) {	
@@ -4116,7 +4057,7 @@ HTACCESSCONTENT);
 		
 		 
 			if(!file_exists($webfatFile) 
-			   || (is_int($this->max_webfat_file_lifetime) && filemtime($webfatFile) < time() - $this->max_webfat_file_lifetime)){			
+			   || (file_exists($webfatFile) && is_int($this->max_webfat_file_lifetime) && @filemtime($webfatFile) < time() - $this->max_webfat_file_lifetime)){			
 				file_put_contents( $webfatFile, trim(file_get_contents($source)));		
 			}					   
 	
@@ -4193,7 +4134,8 @@ HTACCESSCONTENT);
 			   ;
 		       $html .= '</h1>';      		      	
 		          
-		echo  \frdl\booting\getFormFromRequestHelper( (new \Webfan\Webfat\App\ResolvableException(
+		//if('cli'!==\PHP_SAPI)
+			echo  \frdl\booting\getFormFromRequestHelper( (new \Webfan\Webfat\App\ResolvableException(
                       'circuit:1.3.6.1.4.1.37553.8.1.8.8.1958965301.3.1=Invalid index file'
 					 
 				   	 .'@'.$html
@@ -4416,17 +4358,28 @@ $url = $this['Container']->get('app.runtime.codebase')
 //}
 		
 
-
+/*
+        $class = new \ReflectionClass(\Psr\Container\ContainerInterface::class);
+		$method = $class->getMethod('has');
+		$params = $method->getParameters();		
+		$returnType = $method->getReturnType();
+		$ConfigContainerClass =  'bool' === $returnType || 'string' === (string) $params[0]->getType()
+			 ? \Webfan\Container\ConfigContainerV2::class
+			 :  \Webfan\Container\ConfigContainer::class;
+		
      //MOVE TO: $container->get('script@inc.common.bootstrap') ---->overwrite...
-		  $ConfigurationContainer =new \Webfan\Container\ConfigContainer(
+		  $ConfigurationContainer =\Webfan\Container\ConfigContainer::createConfigContainer(
 			  'config', 
 			  'config.', 
 			  '',
 			  $this['Container']->get('Config')
 		  );
 		$ConfigurationContainerId = 'config';
-		$this['Container']->addContainer($ConfigurationContainer, $ConfigurationContainerId);
-         
+		$this['Container']->addContainer($ConfigurationContainer, $ConfigurationContainerId);	
+
+
+  */		
+		
 	  return $this['Container'];	
 	}
 
@@ -4458,7 +4411,7 @@ $url = $this['Container']->get('app.runtime.codebase')
 		    default :
                         if(!isset($this['Container'])){
                            $this['Container'] = $this->_bootMainRootContainer();
-			}
+		            	}
 		     return $this['Container'];
 		    break;
 	    }		
@@ -4481,11 +4434,10 @@ namespace{
 
 
 
-	if(!isset($_SERVER['HTTP_HOST'])){ 		
-		$_SERVER['HTTP_HOST'] = null;			
-	}	
+if(!isset($_SERVER['SERVER_NAME']))$_SERVER['SERVER_NAME']= \php_uname("n");
+if(!isset($_SERVER['HTTP_HOST']))$_SERVER['HTTP_HOST']=$_SERVER['SERVER_NAME'];
 	if(!isset($_SERVER['REQUEST_URI'])){		
-		$_SERVER['REQUEST_URI']=null;			
+		$_SERVER['REQUEST_URI']='/';			
 	}	
 /**
 * 
@@ -4647,6 +4599,12 @@ $check = $CircuitBreaker->protect(function() use($container){
  }
 	return $check;
 });
+	
+	//service.html.bootstrap.php
+	//if(!$isCliRequest){
+	//	 $container->get('script@service.html.bootstrap');
+	//}
+	
 	
  $included_files = \get_included_files();  
  $indexfile = basename($included_files[0]);
@@ -4847,7 +4805,9 @@ class Codebase extends \frdl\Codebase implements CodebaseInterface
 		
 		$this->setUpdateChannel($configVersion['channel'] ?? 'latest');	        
 		$this->setServiceEndpoint(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE,
-					   'https://website.webfan3.de/container/?channel='.urlencode($configVersion['channel'])
+								 $StubRunner->getAsContainer(null)->get('app.runtime.codebase')
+			      ->getRemoteApiBaseUrl(\Frdlweb\Contract\Autoload\CodebaseInterface::ENDPOINT_CONTAINER_REMOTE)
+					  . '?channel='.urlencode($configVersion['channel'])
 					   .'&app='.urlencode($configVersion['appId'])
 					   .'&version='.urlencode($configVersion['version']),
 					  \Frdlweb\Contract\Autoload\CodebaseInterface::ALL_CHANNELS);  
@@ -4932,13 +4892,39 @@ abstract class Codebase
 	  //   $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/container/?id=StubModuleBuilder', CodebaseInterface::ALL_CHANNELS);  
 	//    $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/api/proxy-object/class/?id=\frdlweb\StubModuleBuilder', CodebaseInterface::CHANNEL_FALLBACK);  
 	 //     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', CodebaseInterface::CHANNEL_TEST);
+	   
+	   /*
 	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/installer/webfan.endpoint.webfat-installer.php', CodebaseInterface::ALL_CHANNELS);
 	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', CodebaseInterface::CHANNEL_TEST);
-
-
+*/
+	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 
+							isset($_SERVER['SERVER_NAME']) && ('registry.frdl.de'===$_SERVER['SERVER_NAME'] 
+															   || 'webfan.de'===$_SERVER['SERVER_NAME'])
+							  ? 'https://weid.info/plus/api/v1/io4/remote-installer/weid.info'
+								 :  'https://registry.frdl.de/api/v1/io4/remote-installer/1.3.6.1.4.1.37553'						   
+								   , CodebaseInterface::ALL_CHANNELS);
+	   
+	     $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_INSTALLER_REMOTE, 'https://website.webfan3.de/webfan.endpoint.webfat-installer.php', CodebaseInterface::CHANNEL_TEST);
+	   
+	   
+	/*   
+	   
             //ENDPOINT_CONTAINER_REMOTE
 	    $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_CONTAINER_REMOTE, 'https://website.webfan3.de/container/', CodebaseInterface::ALL_CHANNELS);  
-
+ */
+         //ENDPOINT_CONTAINER_REMOTE
+	    $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_CONTAINER_REMOTE, 
+								 		isset($_SERVER['SERVER_NAME']) && ('registry.frdl.de'===$_SERVER['SERVER_NAME'] 
+															   || 'webfan.de'===$_SERVER['SERVER_NAME'])
+							  ? 'https://weid.info/plus/api/v1/io4/remote-container/weid.info'
+								 :   'https://registry.frdl.de/api/v1/io4/remote-container/1.3.6.1.4.1.37553', 
+								  CodebaseInterface::ALL_CHANNELS);  	   
+	   
+		    $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_CONTAINER_REMOTE, 
+								  'https://website.webfan3.de/container/', 
+								  CodebaseInterface::CHANNEL_TEST); 
+	   
+	   
 
             //ENDPOINT_CONFIG_REMOTE
 	   $this->setServiceEndpoint(CodebaseInterface::ENDPOINT_CONFIG_REMOTE, 'https://website.webfan3.de/webfan.endpoint.config-remote.php', CodebaseInterface::ALL_CHANNELS);  
@@ -5168,7 +5154,15 @@ use Symfony\Component\EventDispatcher\Event;
 			  }	
 	return $dir;
 }), 
-	
+'accessor' =>( function(\Psr\Container\ContainerInterface $container){
+	      return \Webfan\FacadeProxiesMap::createProxy([
+		        new \Webfan\Accessor($container), 		   
+		     ],
+	  	[
+							   
+	    ],
+	$container->has('container') ? $container->get('container') : $container);  
+ }),	
 'helper' =>( function(\Psr\Container\ContainerInterface $container){
 	      return \Webfan\FacadeProxiesMap::createProxy([
 		        new \Webfan\Webfat\App\KernelHelper,
@@ -5225,9 +5219,10 @@ use Symfony\Component\EventDispatcher\Event;
              $FacadesMap = $container->get('config.stub.config.init.facades.$map');
 	   }else{
              $FacadesMap = [           
-		     'Config' =>'facades.config',
-                     'Events' =>  ['events', \Webfan\App\EventModule::class],            
-		     'Helper' =>'helper',             
+		     'Config' =>'facades.config',                     
+			 'Events' =>  ['events', \Webfan\App\EventModule::class],            
+		     'Helper' =>'helper',   
+			 'Webfan'=> 'accessor',
 		   //Not works since class is anonymous and no static method yet  'io4' =>'io4',                   
 		];
 	   }
@@ -5350,8 +5345,8 @@ use Symfony\Component\EventDispatcher\Event;
 }, 'factory'],   	
 	
  //'module.loader.CommonJS'=>moved to remote fallback-container!!!
-			  
-	           'module.loader.CommonJS' => (function(\Psr\Container\ContainerInterface $container){
+			   
+		'module.loader.CommonJS' => (function(\Psr\Container\ContainerInterface $container){
 				return $container->get('common-js-like-php-loader');
 		    }),			  				
 		

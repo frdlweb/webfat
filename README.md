@@ -1,3 +1,6 @@
+# Project Moved (deprecation and successor)
+The project has moved to the [webfan/website](https://pkg.dev.frdl.de/organization/frdl/package/9a14aa35-7ac3-4b61-8f5a-5dc022a8e30b/details) project!
+
 # Webfat - Frdlweb CMS made easy!
 [Webfat](https://webf.at/) is build on top of the Frdlweb Framework, made by [Webfan Homepagesystem](https://webfan.de/index.html).
 
